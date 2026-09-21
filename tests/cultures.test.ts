@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { cultures, getCultureById } from '../src/data/cultures';
+import type { LoreEntity, AnglicizationOverlay } from '../src/types/domain';
 
 describe('Culture Seed Data', () => {
   it('loads all 5 distinct culture profiles', () => {
@@ -39,5 +40,37 @@ describe('Culture Seed Data', () => {
 
     const nonExistent = getCultureById('non_existent');
     expect(nonExistent).toBeUndefined();
+  });
+
+  it('enforces LoreEntity and AnglicizationOverlay schema conformance', () => {
+    const overlay: AnglicizationOverlay = {
+      enabled: true,
+      mode: 'phonetic',
+      anglicizedName: 'Branimir',
+      anglicizedRoot: 'Bran',
+      anglicizedTitle: 'Prince',
+      exonymDualDisplay: true,
+    };
+
+    const entity: LoreEntity = {
+      id: 'entity-1',
+      name: 'Branimir',
+      category: 'character',
+      cultureId: 'danubian_slavic',
+      originalName: 'Branimir',
+      originalRoot: 'Bran',
+      originalTitle: 'Knyaz',
+      anglicization: overlay,
+      epithet: 'the Brave',
+      meaning: 'Defender of Peace',
+    };
+
+    expect(entity.anglicization?.enabled).toBe(true);
+    expect(entity.anglicization?.mode).toBe('phonetic');
+    expect(entity.anglicization?.anglicizedName).toBe('Branimir');
+    expect(entity.anglicization?.anglicizedRoot).toBe('Bran');
+    expect(entity.anglicization?.anglicizedTitle).toBe('Prince');
+    expect(entity.anglicization?.exonymDualDisplay).toBe(true);
+    expect(entity.originalTitle).toBe('Knyaz');
   });
 });

@@ -11,8 +11,12 @@ export type GeographicFeatureType = 'orogeny' | 'hydrology' | 'wilds';
  * authentic historical orthography and accessible phonetically anglicized variants.
  */
 export interface AnglicizationOverlay {
+  enabled: boolean;
+  mode: 'phonetic' | 'suffix' | 'full';
   anglicizedName: string;
+  anglicizedRoot: string;
   anglicizedTitle?: string;
+  exonymDualDisplay: boolean;
   phoneticApproximation?: string;
   notes?: string;
 }
