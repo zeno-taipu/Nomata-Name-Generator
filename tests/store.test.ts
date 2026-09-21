@@ -217,6 +217,45 @@ describe('useNominaStore', () => {
       const batchEntity = useNominaStore.getState().generatedBatch.find((e) => e.id === original.id);
       expect(batchEntity?.id).toBe(original.id);
     });
+
+    it('re-rolls a branched child entity without corrupting the parent entity', () => {
+      useNominaStore.getState().setActiveCategory('settlements');
+      useNominaStore.getState().setBatchCount(1);
+      const [parent] = useNominaStore.getState().generateBatch();
+
+      const [child] = useNominaStore.getState().branchEntity(parent.id, 'City Ward', 1);
+      expect(child).toBeDefined();
+      expect(child.parentId).toBe(parent.id);
+
+      const rerolledChild = useNominaStore.getState().reRollEntity(child.id);
+      expect(rerolledChild).toBeDefined();
+      expect(rerolledChild?.id).toBe(child.id);
+      expect(rerolledChild?.parentId).toBe(parent.id);
+
+      const updatedParent = useNominaStore.getState().generatedBatch.find((e) => e.id === parent.id);
+      expect(updatedParent?.children?.length).toBe(1);
+      expect(updatedParent?.children?.[0].id).toBe(child.id);
+    });
+
+    it('re-rolls factions and artifacts preserving appropriate templates', () => {
+      useNominaStore.getState().setActiveCategory('factions');
+      useNominaStore.getState().setBatchCount(1);
+      const [faction] = useNominaStore.getState().generateBatch();
+
+      const rerolledFaction = useNominaStore.getState().reRollEntity(faction.id);
+      expect(rerolledFaction).toBeDefined();
+      expect(rerolledFaction?.id).toBe(faction.id);
+      expect(rerolledFaction?.name.length).toBeGreaterThan(3);
+
+      useNominaStore.getState().setActiveCategory('artifacts');
+      useNominaStore.getState().setBatchCount(1);
+      const [artifact] = useNominaStore.getState().generateBatch();
+
+      const rerolledArtifact = useNominaStore.getState().reRollEntity(artifact.id);
+      expect(rerolledArtifact).toBeDefined();
+      expect(rerolledArtifact?.id).toBe(artifact.id);
+      expect(rerolledArtifact?.name.length).toBeGreaterThan(3);
+    });
   });
 
   describe('toggleAnglicizeEntity', () => {

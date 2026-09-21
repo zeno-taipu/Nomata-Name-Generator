@@ -6,6 +6,7 @@ import type {
   LoreEntity,
   NominaProjectBible,
   CustomSeedOverrides,
+  CultureProfile,
 } from '../types/domain';
 import { normalizeEntityCategory } from '../types/domain';
 import { cultures, getCultureById } from '../data/cultures';
@@ -170,26 +171,40 @@ function unpinAllInTree(entities: LoreEntity[]): LoreEntity[] {
   }));
 }
 
-// In-memory storage fallback for Node / SSR test runners
+// In-memory storage fallback for Node / SSR test runners or localStorage-restricted environments
 const memoryStorage = new Map<string, string>();
 const safeStorage = {
   getItem: (key: string) => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      return window.localStorage.getItem(key);
+      try {
+        return window.localStorage.getItem(key);
+      } catch {
+        return memoryStorage.get(key) ?? null;
+      }
     }
     return memoryStorage.get(key) ?? null;
   },
   setItem: (key: string, val: string) => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(key, val);
-      return;
+      try {
+        window.localStorage.setItem(key, val);
+        return;
+      } catch {
+        memoryStorage.set(key, val);
+        return;
+      }
     }
     memoryStorage.set(key, val);
   },
   removeItem: (key: string) => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.removeItem(key);
-      return;
+      try {
+        window.localStorage.removeItem(key);
+        return;
+      } catch {
+        memoryStorage.delete(key);
+        return;
+      }
     }
     memoryStorage.delete(key);
   },
@@ -262,14 +277,16 @@ export const useNominaStore = create<NominaState>()(
             ? state.activeCultureIds
             : ['danubian_slavic'];
 
-        const cultureProfiles = activeCultureIds
-          .map((id) => getCultureById(id) ?? cultures[id])
-          .filter(Boolean);
+        const cultureProfiles = state.activeCultureIds
+          .map((id) => getCultureById(id))
+          .filter((c): c is CultureProfile => c !== undefined);
 
-        const primaryCulture = cultureProfiles[0] || cultures['danubian_slavic'];
+        const safeProfiles = cultureProfiles.length > 0 ? cultureProfiles : [cultures['danubian_slavic']];
+        const primaryCulture = safeProfiles[0];
 
-        // Build weighted seed groups for Markov blending
-        const weightedSeeds: WeightedSeeds[] = cultureProfiles.map((cp) => {
+        // Gather seed dictionaries with weights
+        const weightedSeeds: WeightedSeeds[] = [];
+        for (const cp of safeProfiles) {
           const weight = state.cultureWeights[cp.id] ?? 1.0;
           let seeds: string[] = [];
 
@@ -293,8 +310,8 @@ export const useNominaStore = create<NominaState>()(
               ...(cp.geographic_lexicon?.orogeny?.stems || []),
             ];
           }
-          return { seeds, weight };
-        });
+          weightedSeeds.push({ seeds, weight });
+        }
 
         if (state.customVocabulary?.customSeeds) {
           const cs = state.customVocabulary.customSeeds;
@@ -432,17 +449,30 @@ export const useNominaStore = create<NominaState>()(
           temperature: state.temperature,
         });
 
-        const newChildren = branchingEngine.branchChildren(parent, childSubtype, count, {
+        // Use isolated clone of parent so branchChildren does not mutate live store objects in-place
+        const detachedParent: LoreEntity = {
+          ...parent,
+          children: [...(parent.children || [])],
+        };
+
+        const newChildren = branchingEngine.branchChildren(detachedParent, childSubtype, count, {
           markovOrder: state.markovOrder,
           temperature: state.temperature,
           anglicize: state.anglicize,
           anglicizeMode: state.anglicizeMode,
         });
 
-        // Trigger immutable clone update so subscribers re-render
+        const updater = (p: LoreEntity): LoreEntity => ({
+          ...p,
+          children: [...(p.children || []), ...newChildren],
+        });
+
+        const batchRes = updateEntityInTree(state.generatedBatch, parentId, updater);
+        const pinnedRes = updateEntityInTree(state.pinnedEntities, parentId, updater);
+
         set({
-          generatedBatch: state.generatedBatch.map(cloneEntityTree),
-          pinnedEntities: state.pinnedEntities.map(cloneEntityTree),
+          generatedBatch: batchRes.list,
+          pinnedEntities: pinnedRes.list,
         });
 
         return newChildren;
@@ -470,17 +500,18 @@ export const useNominaStore = create<NominaState>()(
               temperature: state.temperature,
             });
 
-            const [tempChild] = branchingEngine.branchChildren(parent, target.subtype ?? 'auto', 1, {
+            // Use detached clone of parent so branchChildren does not mutate parent.children in store
+            const detachedParent: LoreEntity = {
+              ...parent,
+              children: [],
+            };
+
+            const [tempChild] = branchingEngine.branchChildren(detachedParent, target.subtype ?? 'auto', 1, {
               markovOrder: state.markovOrder,
               temperature: state.temperature,
               anglicize: target.anglicization?.enabled ?? state.anglicize,
               anglicizeMode: target.anglicization?.mode ?? state.anglicizeMode,
             });
-
-            // Pop temporary child from parent
-            if (parent.children && parent.children.length > 0) {
-              parent.children.pop();
-            }
 
             if (tempChild) {
               const updater = (ent: LoreEntity): LoreEntity => ({
@@ -526,6 +557,10 @@ export const useNominaStore = create<NominaState>()(
           template = culture.grammar_templates.settlement_name[0];
         } else if (normCat === 'geography' && target.featureSubtype) {
           template = culture.grammar_templates?.[`${target.featureSubtype}_name`]?.[0] ?? '{stem}';
+        } else if (normCat === 'faction') {
+          template = FACTION_TEMPLATES[Math.floor(Math.random() * FACTION_TEMPLATES.length)];
+        } else if (normCat === 'artifact') {
+          template = ARTIFACT_TEMPLATES[Math.floor(Math.random() * ARTIFACT_TEMPLATES.length)];
         }
 
         let newName = grammarEngine.resolve(template, { culture, markov });

@@ -128,7 +128,8 @@ function renderEntityMarkdown(
   // Nested child hierarchy summary
   if (entity.children && entity.children.length > 0) {
     lines.push('');
-    lines.push('### Lineage Hierarchy');
+    const subHeaderLevel = Math.min(headerLevel + 1, 6);
+    lines.push(`${'#'.repeat(subHeaderLevel)} Lineage Hierarchy`);
     lines.push(...renderHierarchyBullets(entity.children, 0, includeWikilinks));
   }
 
@@ -159,7 +160,7 @@ export function exportToMarkdown(
   const lines: string[] = [
     '---',
     'title: Nomina World Bible Export',
-    `entity_count: ${entities.length}`,
+    `entity_count: ${idMap.size}`,
     `exported_at: ${new Date().toISOString()}`,
     '---',
     '',
@@ -179,9 +180,21 @@ export function exportToMarkdown(
 
 /**
  * Exports LoreEntity collection to JSON, preserving complete nested tree structures.
+ * Uses cycle protection to prevent circular reference serialization errors.
  */
 export function exportToJSON(entities: LoreEntity[], pretty = true): string {
-  return JSON.stringify(entities, null, pretty ? 2 : undefined);
+  const seen = new WeakSet();
+  return JSON.stringify(
+    entities,
+    (_key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) return undefined;
+        seen.add(value);
+      }
+      return value;
+    },
+    pretty ? 2 : undefined
+  );
 }
 
 /**
