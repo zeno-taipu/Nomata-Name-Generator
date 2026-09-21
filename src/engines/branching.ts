@@ -14,11 +14,12 @@ import { RecursiveGrammarEngine } from './grammar';
 import { MarkovNameGenerator, type MarkovSampleOptions } from './markov';
 import { AnglicizationEngine } from './anglicize';
 import { getCultureById, cultures } from '../data/cultures';
-import type {
+import {
   LoreEntity,
   EntityCategory,
   GeographicFeatureType,
   CultureProfile,
+  normalizeEntityCategory,
 } from '../types/domain';
 
 class TemperatureMarkovGenerator extends MarkovNameGenerator {
@@ -632,27 +633,28 @@ export class LineageBranchingEngine {
       return 'geography_tier4';
     }
 
+    const normCat = normalizeEntityCategory(parent.category);
+
     // Settlement checks
-    if (parent.category === 'settlement' || /(settlement|metropolis|city|fortress|town|village|haven|stronghold|keep|outpost|bastion)/.test(rawSubtype)) {
+    if (normCat === 'settlement' || /(settlement|metropolis|city|fortress|town|village|haven|stronghold|keep|outpost|bastion)/.test(rawSubtype)) {
       return 'settlement';
     }
 
     // Character checks
-    if (parent.category === 'character' || /(noble|officer|king|queen|prince|lord|lady|warrior|knight|voivode|knyaz|general|commander)/.test(rawSubtype)) {
+    if (normCat === 'character' || /(noble|officer|king|queen|prince|lord|lady|warrior|knight|voivode|knyaz|general|commander)/.test(rawSubtype)) {
       return 'character';
     }
 
     // Geography fallback
-    if (parent.category === 'geography') {
+    if (normCat === 'geography') {
       if (parent.featureSubtype === 'orogeny') return 'geography_tier2';
       if (parent.featureSubtype === 'hydrology') return 'geography_tier3';
       if (parent.featureSubtype === 'wilds') return 'geography_tier4';
       return 'geography_tier1';
     }
 
-    // Default category fallback
-    if (parent.category === 'settlement') return 'settlement';
-    if (parent.category === 'character') return 'character';
+    if (normCat === 'faction') return 'faction';
+    if (normCat === 'artifact') return 'artifact';
     return 'settlement';
   }
 

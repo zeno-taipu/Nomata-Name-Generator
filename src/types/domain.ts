@@ -2,7 +2,31 @@
  * Core Domain Types for Historical & Speculative Name/Lore Generator
  */
 
-export type EntityCategory = 'character' | 'settlement' | 'geography';
+export type EntityCategory =
+  | 'character'
+  | 'settlement'
+  | 'geography'
+  | 'faction'
+  | 'artifact'
+  | 'people'
+  | 'settlements'
+  | 'factions'
+  | 'artifacts';
+
+/**
+ * Normalizes any singular or plural entity category to standard singular form
+ */
+export function normalizeEntityCategory(
+  category: string
+): 'character' | 'settlement' | 'geography' | 'faction' | 'artifact' {
+  const lower = category.toLowerCase().trim();
+  if (lower === 'people' || lower === 'character') return 'character';
+  if (lower === 'settlements' || lower === 'settlement') return 'settlement';
+  if (lower === 'factions' || lower === 'faction') return 'faction';
+  if (lower === 'artifacts' || lower === 'artifact') return 'artifact';
+  return 'geography';
+}
+
 export type Gender = 'masculine' | 'feminine' | 'any';
 export type GeographicFeatureType = 'orogeny' | 'hydrology' | 'wilds';
 
@@ -30,6 +54,7 @@ export interface LoreEntity {
   name: string;
   category: EntityCategory;
   cultureId: string;
+  cultureIds?: string[];
   originalName: string;
   originalRoot: string;
   rootName?: string;
@@ -40,6 +65,8 @@ export interface LoreEntity {
   anglicization?: AnglicizationOverlay;
   epithet?: string;
   meaning?: string;
+  description?: string;
+  pinned?: boolean;
   featureSubtype?: GeographicFeatureType;
   tags?: string[];
   metadata?: Record<string, unknown>;
@@ -122,6 +149,10 @@ export interface CustomSeedOverrides {
   orogeny_stems?: string[];
   hydrology_stems?: string[];
   wilds_stems?: string[];
+  honorific_titles?: string[];
+  prefixes?: string[];
+  suffixes?: string[];
+  epithets?: string[];
 }
 
 /**
@@ -136,4 +167,30 @@ export interface GenerationConfig {
   anglicize?: boolean;
   customSeeds?: CustomSeedOverrides;
   seed?: number;
+}
+
+/**
+ * Nomina Project Bible export/import document format (.nomina.json)
+ */
+export interface NominaProjectBible {
+  version: string;
+  name: string;
+  entities: LoreEntity[];
+  pinnedEntityIds: string[];
+  customVocabulary: {
+    honorifics?: string[];
+    customSeeds?: CustomSeedOverrides;
+    customPrefixes?: string[];
+    customSuffixes?: string[];
+  };
+  settings: {
+    activeCultureIds: string[];
+    cultureWeights?: Record<string, number>;
+    anglicize: boolean;
+    anglicizeMode: 'phonetic' | 'suffix' | 'full';
+    exonymDualDisplay: boolean;
+    temperature: number;
+    markovOrder: number;
+  };
+  savedAt: number;
 }
