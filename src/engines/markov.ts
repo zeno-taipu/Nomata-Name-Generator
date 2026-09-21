@@ -12,7 +12,9 @@ export interface MarkovOptions {
 
 export interface MarkovSampleOptions {
   minLength?: number;
+  min_length?: number;
   maxLength?: number;
+  max_length?: number;
   temperature?: number;
   maxAttempts?: number;
 }
@@ -211,8 +213,8 @@ export class MarkovNameGenerator {
       throw new Error('Markov chain model has not been trained with any seeds');
     }
 
-    const minLength = options?.minLength ?? 4;
-    const maxLength = options?.maxLength ?? 12;
+    const minLength = options?.minLength ?? options?.min_length ?? 4;
+    const maxLength = options?.maxLength ?? options?.max_length ?? 12;
     const temperature = options?.temperature ?? 0.7;
     const maxAttempts = options?.maxAttempts ?? 100;
 

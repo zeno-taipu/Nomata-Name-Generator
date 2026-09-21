@@ -54,6 +54,14 @@ describe('MarkovNameGenerator', () => {
     expect(generator.validatePhonotactics('Bstrgklm')).toBe(false);
   });
 
+  it('supports snake_case options (min_length and max_length)', () => {
+    const generator = new MarkovNameGenerator(seeds, { order: 2 });
+    const name = generator.generate({ min_length: 5, max_length: 10, temperature: 0.5 });
+    expect(name.length).toBeGreaterThanOrEqual(5);
+    expect(name.length).toBeLessThanOrEqual(10);
+    expect(name[0]).toBe(name[0].toUpperCase());
+  });
+
   it('throws error when generating without training data', () => {
     const generator = new MarkovNameGenerator([]);
     expect(() => generator.generate()).toThrow();
