@@ -1,0 +1,108 @@
+{
+  "id": "levantine_semitic",
+  "name": "Levantine Semitic",
+  "historical_era": "Late Bronze Age to Classical Antiquity (12th c. BCE–4th c. CE)",
+  "region": "Levant, Syrian Coast & Fertile Crescent",
+  "description": "Northwest Semitic onomastic tradition spanning Phoenician, Canaanite, and Aramaic idioms, rich with theophoric tributes (El, Baal), patronymics (Ben, Bar), fortified tells, and desert springs.",
+  "phonetic_rules": {
+    "vowels": ["a", "e", "i", "o", "u", "aa", "ee", "oo"],
+    "consonants": ["b", "d", "dh", "g", "h", "k", "kh", "l", "m", "n", "q", "r", "s", "sh", "t", "th", "y", "z"],
+    "forbidden_clusters": ["p", "v", "x", "jj", "ww"]
+  },
+  "seeds": {
+    "given_names_masculine": [
+      "Abdemon", "Abibaal", "Adoniram", "Ahiram", "Azibal",
+      "Aziru", "Baalanur", "Baruch", "Bodashtart", "Danel",
+      "Elyakim", "Eshmunazar", "Ethan", "Haggai", "Hannibal",
+      "Hanno", "Hasdrubal", "Hiram", "Malkiel", "Malkiram",
+      "Mattan", "Melqartpilles", "Milkpilles", "Nabopolassar", "Obadiah",
+      "Ozni", "Padi", "Rib-Hadda", "Samsi", "Sargon",
+      "Shamash", "Shimshon", "Tabnit", "Uriah", "Yehumilk",
+      "Yonatan", "Yoram", "Zadok", "Zakir", "Zimredda"
+    ],
+    "given_names_feminine": [
+      "Abigail", "Adah", "Ahinoam", "Anat", "Arisat",
+      "Asenath", "Athaliah", "Basemath", "Batnoam", "Bilhah",
+      "Dinah", "Elisheba", "Hadassah", "Hannah", "Huldah",
+      "Jezebel", "Keturah", "Leah", "Mehetabel", "Milcah",
+      "Miriam", "Na'amah", "Naomi", "Noa", "Orpah",
+      "Peninah", "Puah", "Rahab", "Rebecca", "Sarah",
+      "Sarai", "Shelomit", "Shifra", "Tamar", "Tirzah",
+      "Ummashtart", "Yael", "Yehudit", "Zillah", "Zipporah"
+    ],
+    "surnames": [
+      "Al-Khoury", "Antar", "Bar-Aba", "Bar-Kochba", "Bar-Lev",
+      "Bar-Zakkai", "Bazzi", "Ben-Ami", "Ben-David", "Ben-Porat",
+      "Ben-Zvi", "Canaanite", "Dajani", "Fattal", "Ghattas",
+      "Habibi", "Hadad", "Hourani", "Jabara", "Kanaan",
+      "Kassir", "Maalouf", "Masri", "Melki", "Moghrabi",
+      "Murr", "Najjar", "Nassar", "Qudsi", "Rahal",
+      "Sabbagh", "Safar", "Saliba", "Sayegh", "Sayigh",
+      "Shami", "Shamir", "Tabari", "Tahan", "Tarazi",
+      "Touma", "Ward", "Yaari", "Zahrani", "Zarour"
+    ],
+    "settlement_roots": [
+      "Akko", "Aleppo", "Arwad", "Ashkelon", "Baalbek",
+      "Batroun", "Berytus", "Byblos", "Damascus", "Dor",
+      "Ebla", "Ekron", "En-Gedi", "Gaza", "Gezer",
+      "Hamath", "Hazor", "Jaffa", "Jericho", "Jerusalem",
+      "Kadesh", "Lachish", "Megiddo", "Palmyra", "Samaria",
+      "Sarepta", "Shechem", "Sidon", "Tadmor", "Tarsus",
+      "Tell-el-Farah", "Tripolis", "Tyre", "Ugarit", "Yarmouk",
+      "Zarephath"
+    ],
+    "prefixes": ["Tell", "Ain", "Kfar", "Beth", "Beer", "Kir"],
+    "suffixes": ["iyya", "an", "oth", "im", "on", "el", "at"],
+    "honorific_titles": ["Melekh", "Shophet", "Rabban", "Kohen", "Emir", "Adon"],
+    "epithets": ["the Righteous", "the Great", "the Builder", "the Prophet", "the Splendid", "the Merciful", "the Vigilant"]
+  },
+  "geographic_lexicon": {
+    "orogeny": {
+      "stems": ["Jabal", "Har", "Tell", "Senir", "Hermon", "Karmel", "Sur", "Sakhra"],
+      "suffixes": ["iyya", "an", "im", "on", "oth", "el"]
+    },
+    "hydrology": {
+      "stems": ["Ain", "Nahr", "Wadi", "Bir", "Bahr", "Yam", "Mayim", "Mikhmas"],
+      "suffixes": ["at", "un", "iyya", "a", "ot", "in"]
+    },
+    "wilds": {
+      "stems": ["Badiya", "Midbar", "Waha", "Ghab", "Kfar", "Rawda", "Araba", "Emeq"],
+      "suffixes": ["a", "iyeh", "at", "iyya", "im"]
+    }
+  },
+  "grammar_templates": {
+    "character_full_name": [
+      "{given} {surname}",
+      "{given} ben {surname}",
+      "{given} bar {surname}",
+      "{title} {given} of {settlement}"
+    ],
+    "settlement_name": [
+      "{root}",
+      "Tell {root}",
+      "Kfar {root}",
+      "Ain {root}",
+      "Kir {root}",
+      "{root}{suffix}"
+    ],
+    "orogeny_name": [
+      "Jabal {stem}",
+      "Har {stem}",
+      "{stem} {suffix}",
+      "Ras {stem}"
+    ],
+    "hydrology_name": [
+      "Nahr {stem}",
+      "Wadi {stem}",
+      "Ain {stem}",
+      "{stem} {suffix}"
+    ],
+    "wilds_name": [
+      "Midbar {stem}",
+      "Waha {stem}",
+      "Emeq {stem}",
+      "{stem} {suffix}"
+    ],
+    "honorific_patterns": ["{title} {given}", "{given}, {title} of {settlement}"]
+  }
+}

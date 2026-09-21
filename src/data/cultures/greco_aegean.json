@@ -1,0 +1,107 @@
+{
+  "id": "greco_aegean",
+  "name": "Greco Aegean",
+  "historical_era": "Classical to Hellenistic Antiquity (5th–2nd c. BCE)",
+  "region": "Aegean Archipelago & Hellenic Mainland",
+  "description": "Classical Hellenic onomastics characterized by noble compound stems (-kles, -dromos, -doros), civic patronymics, polis toponymy, and sacred maritime landscapes.",
+  "phonetic_rules": {
+    "vowels": ["a", "e", "i", "o", "u", "ai", "ei", "oi", "ou", "au", "eu"],
+    "consonants": ["b", "ch", "d", "g", "k", "l", "m", "n", "p", "ph", "r", "rh", "s", "t", "th", "x", "z"],
+    "forbidden_clusters": ["q", "w", "sh", "zh", "jj"]
+  },
+  "seeds": {
+    "given_names_masculine": [
+      "Alexandros", "Alkibiades", "Anaxagoras", "Antigonos", "Aristoteles",
+      "Demosthenes", "Dionysios", "Epameinondas", "Gorgias", "Hektor",
+      "Herakleitos", "Herodotos", "Hippokrates", "Isokrates", "Kallimachos",
+      "Kleisthenes", "Leonidas", "Lysander", "Miltiades", "Nikias",
+      "Pamphilos", "Parmenides", "Peisistratos", "Perikles", "Philoktetes",
+      "Phocion", "Plato", "Polykleitos", "Praxiteles", "Ptolemaios",
+      "Pyrrhos", "Sokrates", "Solon", "Sophokles", "Themistokles",
+      "Theokritos", "Thrasyboulos", "Thukydides", "Timotheos", "Xenophon"
+    ],
+    "given_names_feminine": [
+      "Agathe", "Alkestis", "Andromeda", "Antigone", "Arete",
+      "Ariadne", "Aspasia", "Atalante", "Berenike", "Chara",
+      "Damaris", "Demetria", "Eleni", "Eudokia", "Gorgo",
+      "Harmonia", "Helene", "Hermione", "Hippolyta", "Iphigenia",
+      "Kalliope", "Kassandra", "Kleopatra", "Korinna", "Kyra",
+      "Melissa", "Melite", "Myrina", "Nausikaa", "Olympias",
+      "Penelope", "Philomela", "Rhodope", "Sappho", "Sophia",
+      "Thaïs", "Theodora", "Timarete", "Xanthe", "Zoe"
+    ],
+    "surnames": [
+      "Agathokleides", "Aiakides", "Alkmaionides", "Anaxandrides", "Antigonides",
+      "Argeades", "Aristides", "Asklepiades", "Attalos", "Basilides",
+      "Battiades", "Chalkokondyles", "Chares", "Chrysostomos", "Diakritos",
+      "Diomedes", "Doukas", "Eumolpides", "Eurypontides", "Herakleides",
+      "Hestiades", "Isidoros", "Komnenos", "Laskaris", "Leontides",
+      "Lykourgos", "Melissenos", "Menandros", "Metrodoros", "Nauplios",
+      "Neoptolemos", "Palaiologos", "Peisistratides", "Philometor", "Phokas",
+      "Polydoros", "Seleukides", "Sphrantzes", "Strategos", "Synadenos",
+      "Theodores", "Thessalonikeus", "Tornikios", "Vatatzes", "Xanthopoulos"
+    ],
+    "settlement_roots": [
+      "Abdera", "Amphipolis", "Argos", "Athenai", "Chalkis",
+      "Delphoi", "Eleusis", "Epidauros", "Eretria", "Halikarnassos",
+      "Hermione", "Ithake", "Knossos", "Korinthos", "Larissa",
+      "Megara", "Melos", "Miletos", "Mykenai", "Nauplion",
+      "Naxos", "Olympia", "Orchomenos", "Patrai", "Pella",
+      "Phaisthos", "Plataia", "Pylos", "Rhodos", "Salamis",
+      "Samothrake", "Sparta", "Syrakousai", "Thebai", "Thera",
+      "Zakynthos"
+    ],
+    "prefixes": ["Nea", "Palai", "Kall", "Archi", "Agio", "Megal"],
+    "suffixes": ["polis", "eia", "ion", "os", "inthos", "issos", "on"],
+    "honorific_titles": ["Archon", "Basileus", "Strategos", "Hierophant", "Navarch", "Polemarch"],
+    "epithets": ["the Just", "the Great", "the Orator", "the Builder", "the Victorious", "the Lawgiver", "the Wise"]
+  },
+  "geographic_lexicon": {
+    "orogeny": {
+      "stems": ["Oros", "Koryphe", "Vouno", "Skopelos", "Petra", "Lophos", "Akrion", "Rachi"],
+      "suffixes": ["polis", "on", "os", "ion", "issos", "inthos"]
+    },
+    "hydrology": {
+      "stems": ["Potamos", "Limne", "Krene", "Pigi", "Pelagos", "Kolpos", "Aigialos", "Ryax"],
+      "suffixes": ["on", "as", "ia", "eia", "ades", "os"]
+    },
+    "wilds": {
+      "stems": ["Drys", "Alsos", "Dromos", "Pedion", "Vale", "Agros", "Nomos", "Chora"],
+      "suffixes": ["a", "on", "ia", "eion", "ous"]
+    }
+  },
+  "grammar_templates": {
+    "character_full_name": [
+      "{given} {surname}",
+      "{given} of {settlement}",
+      "{given} the {epithet}",
+      "{title} {given} of {settlement}"
+    ],
+    "settlement_name": [
+      "{root}",
+      "{prefix}{root}",
+      "{root}{suffix}",
+      "Nea {root}",
+      "Palaiopolis of {root}"
+    ],
+    "orogeny_name": [
+      "Mount {stem}",
+      "{stem} {suffix}",
+      "Megalo {stem}",
+      "Iero {stem}"
+    ],
+    "hydrology_name": [
+      "{stem} of {root}",
+      "{stem} {suffix}",
+      "Vathys {stem}",
+      "Galano {stem}"
+    ],
+    "wilds_name": [
+      "{stem} of {root}",
+      "{stem} {suffix}",
+      "Iero {stem}",
+      "Agrio {stem}"
+    ],
+    "honorific_patterns": ["{title} {given}", "{given}, {title} of {settlement}"]
+  }
+}

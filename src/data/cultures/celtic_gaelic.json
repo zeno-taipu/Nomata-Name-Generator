@@ -1,0 +1,107 @@
+{
+  "id": "celtic_gaelic",
+  "name": "Celtic Gaelic",
+  "historical_era": "Early Christian to Medieval Goidelic (5th–13th c. CE)",
+  "region": "Hiberno-Scottish Atlantic Seaboard",
+  "description": "Goidelic Celtic tradition defined by patronymic clan lineages (Mac, O'), descriptive epithets of hair and valor, and topographical markers honoring glens, lochs, and crags.",
+  "phonetic_rules": {
+    "vowels": ["a", "e", "i", "o", "u", "ae", "ai", "ea", "eo", "ia", "oi", "ui"],
+    "consonants": ["b", "bh", "c", "ch", "d", "dh", "f", "g", "gh", "l", "m", "mh", "n", "p", "r", "s", "sh", "t", "th"],
+    "forbidden_clusters": ["k", "w", "x", "y", "z", "jj"]
+  },
+  "seeds": {
+    "given_names_masculine": [
+      "Aengus", "Aidan", "Art", "Bran", "Brian",
+      "Caolan", "Cathal", "Cian", "Ciaran", "Colm",
+      "Conall", "Conchobhar", "Cormac", "Daithi", "Declan",
+      "Diarmait", "Domhnall", "Donnchadh", "Eachann", "Eoghan",
+      "Fearghal", "Fergus", "Fintan", "Fionn", "Flann",
+      "Liam", "Lorcan", "Muircheartach", "Niall", "Oisin",
+      "Padraig", "Roibeard", "Ronan", "Ruairi", "Sean",
+      "Senan", "Tadgh", "Tiernan", "Toirdhealbhach", "Torin"
+    ],
+    "given_names_feminine": [
+      "Aine", "Aisling", "Aoibhinn", "Aoife", "Beibhinn",
+      "Blathnaid", "Brigid", "Bronagh", "Caoimhe", "Clodagh",
+      "Dearbhla", "Deirdre", "Eadaoin", "Eithne", "Emer",
+      "Fintana", "Fionnuala", "Fodhla", "Gormlaith", "Grainne",
+      "Ide", "Lasairfhiona", "Liadan", "Maeve", "Mairead",
+      "Meabh", "Mor", "Muirne", "Muirenn", "Niamh",
+      "Nuala", "Orlaith", "Roisin", "Sadhbh", "Saorlaith",
+      "Siobhan", "Sive", "Slaine", "Sorcha", "Treasa", "Una"
+    ],
+    "surnames": [
+      "Fitzpatrick", "MacAonghuis", "MacCarthy", "MacConmara", "MacDermot",
+      "MacDonald", "MacDonnchadha", "MacDubhghaill", "MacEochadha", "MacGiolla",
+      "MacGrath", "MacIntyre", "MacKenna", "MacLochlainn", "MacMahon",
+      "MacMurrough", "MacNamara", "MacNiall", "MacSweeney", "Magee",
+      "Maguire", "O'Boyle", "O'Brien", "O'Byrne", "O'Callaghan",
+      "O'Carroll", "O'Cleirigh", "O'Connor", "O'Doherty", "O'Donnell",
+      "O'Donoghue", "O'Dowd", "O'Flaherty", "O'Gallagher", "O'Kelly",
+      "O'Kennedy", "O'Loughlin", "O'Malley", "O'Neill", "O'Reilly",
+      "O'Rourke", "O'Shaughnessy", "O'Shea", "O'Sullivan", "O'Toole"
+    ],
+    "settlement_roots": [
+      "Ardmore", "Armagh", "Athlone", "Ballycastle", "Ballymore",
+      "Cashel", "Clonmacnoise", "Clonmel", "Clontarf", "Derry",
+      "Dingle", "Donegal", "Drogheda", "Dundalk", "Dungannon",
+      "Dunluce", "Enniskillen", "Galway", "Glendalough", "Inisheer",
+      "Inishmore", "Kells", "Kildare", "Kilkenny", "Killarney",
+      "Kinsale", "Lismore", "Monaghan", "Mullingar", "Roscommon",
+      "Sligo", "Tara", "Tralee", "Trim", "Tuam",
+      "Tullamore"
+    ],
+    "prefixes": ["Bally", "Dun", "Inis", "Kil", "Rath", "Glen", "Ard"],
+    "suffixes": ["more", "beg", "glen", "buidhe", "dara", "carrick", "shane"],
+    "honorific_titles": ["Ard Ri", "Ri", "Tanaiste", "Brehon", "Ollamh", "Taoiseach", "Tiarna"],
+    "epithets": ["the Red", "the Fair", "of the Battles", "the Gentle", "the Wanderer", "the Swift", "the Seer"]
+  },
+  "geographic_lexicon": {
+    "orogeny": {
+      "stems": ["Ben", "Cruach", "Cnoc", "Slieve", "Tor", "Mullach", "Carraig", "Drum"],
+      "suffixes": ["more", "beg", "ard", "glen", "an", "ach"]
+    },
+    "hydrology": {
+      "stems": ["Loch", "Abhainn", "Sruth", "Tobar", "Eas", "Lough", "Caol", "Inbhir"],
+      "suffixes": ["ach", "an", "dubh", "buidhe", "mor", "linn"]
+    },
+    "wilds": {
+      "stems": ["Doire", "Gleann", "Coill", "Moin", "Ros", "Machaire", "Cluain", "Corcach"],
+      "suffixes": ["ach", "an", "eany", "easa", "oge"]
+    }
+  },
+  "grammar_templates": {
+    "character_full_name": [
+      "{given} {surname}",
+      "{given} the {epithet}",
+      "{title} {given} of {settlement}",
+      "{given} mac {surname}"
+    ],
+    "settlement_name": [
+      "{root}",
+      "Baile {root}",
+      "Dun {root}",
+      "{root} an {hydrology}",
+      "Inis {root}"
+    ],
+    "orogeny_name": [
+      "{stem} {suffix}",
+      "Slieve {stem}",
+      "Cruach na {stem}",
+      "Ben {stem}"
+    ],
+    "hydrology_name": [
+      "{stem} {suffix}",
+      "Loch {stem}",
+      "Abhainn {stem}",
+      "Eas {stem}"
+    ],
+    "wilds_name": [
+      "{stem} {suffix}",
+      "Gleann {stem}",
+      "Coill {stem}",
+      "Doire {stem}"
+    ],
+    "honorific_patterns": ["{title} {given}", "{given}, {title} of {settlement}"]
+  }
+}

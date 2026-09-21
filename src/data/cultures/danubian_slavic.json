@@ -1,0 +1,109 @@
+{
+  "id": "danubian_slavic",
+  "name": "Danubian Slavic",
+  "historical_era": "Early to High Medieval (6th–12th c. CE)",
+  "region": "Danube Basin & Carpathian Foothills",
+  "description": "South and West Slavic linguistic tradition rooted along the Middle Danube, characterized by resonant dithematic name roots (-mir, -slav, -gost), fortified riverine hill-forts, and ancient woodland toponymy.",
+  "phonetic_rules": {
+    "vowels": ["a", "e", "i", "o", "u", "y"],
+    "consonants": ["b", "c", "ch", "d", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "z", "zh"],
+    "forbidden_clusters": ["q", "x", "w", "yy", "jj"]
+  },
+  "seeds": {
+    "given_names_masculine": [
+      "Boleslav", "Borivoj", "Branimir", "Casimir", "Cedomir",
+      "Danimir", "Dobromir", "Dragan", "Dragomir", "Goran",
+      "Gostislav", "Gradimir", "Jaromir", "Kresimir", "Ljudevit",
+      "Lubomir", "Milorad", "Miroslav", "Mstislav", "Negomir",
+      "Ostrogost", "Premysl", "Radivoj", "Radomir", "Ratimir",
+      "Rostislav", "Slaven", "Stanislav", "Svetozar", "Svyatoslav",
+      "Tihomir", "Tomislav", "Vladimir", "Vladislav", "Vlastimir",
+      "Vojislav", "Vratislav", "Vseslav", "Vuk", "Zbynek",
+      "Zdeslav", "Zvonimir"
+    ],
+    "given_names_feminine": [
+      "Biljana", "Bogdana", "Bojana", "Borislava", "Danica",
+      "Daria", "Desislava", "Dobrawa", "Dragana", "Gorana",
+      "Jaroslava", "Jela", "Kalina", "Krasimira", "Lada",
+      "Libuse", "Ljudmila", "Malina", "Milena", "Miroslava",
+      "Morana", "Nadezhda", "Nedelya", "Radmila", "Radoslava",
+      "Slavena", "Stanislava", "Svetlana", "Svyatoslava", "Tihomira",
+      "Valeska", "Velislava", "Vesna", "Vladislava", "Vlasta",
+      "Vojislava", "Zlata", "Zora", "Zorana", "Zvezdana"
+    ],
+    "surnames": [
+      "Belic", "Berislavic", "Bogdanovic", "Borislavic", "Brankovic",
+      "Cetkovic", "Crnojevic", "Dragas", "Dragovic", "Horvat",
+      "Jovanovic", "Kastrioti", "Kotromanic", "Kovac", "Kresimiric",
+      "Lazarevic", "Ljubic", "Maric", "Markovic", "Milanovic",
+      "Milosevic", "Miroslavic", "Nelipic", "Nemanjic", "Novak",
+      "Obilic", "Ostojic", "Petrovic", "Radic", "Radivojevic",
+      "Radosavljevic", "Sidorov", "Simic", "Stanic", "Stefanovic",
+      "Stojanovic", "Subic", "Tomic", "Trpimiric", "Vladisavljevic",
+      "Vlastimirovic", "Vojislavic", "Vukovic", "Zivkovic", "Zrinski"
+    ],
+    "settlement_roots": [
+      "Belgrad", "Bistrica", "Branicevo", "Brod", "Cerna",
+      "Devin", "Dubrava", "Gradac", "Hrad", "Hvar",
+      "Ilok", "Jasenovac", "Kamenica", "Kladovo", "Lipa",
+      "Morava", "Nis", "Novigrad", "Ohrid", "Opatovac",
+      "Pec", "Podgorica", "Pozega", "Pristina", "Ras",
+      "Srem", "Toplica", "Travnik", "Varazdin", "Veliko",
+      "Vidin", "Vinica", "Visegrad", "Vukovar", "Zadar",
+      "Zagorje"
+    ],
+    "prefixes": ["Belo", "Crno", "Gornjo", "Dolnjo", "Staro", "Novo", "Sveto"],
+    "suffixes": ["grad", "vac", "evo", "ica", "iste", "in", "nik"],
+    "honorific_titles": ["Knyaz", "Voivode", "Zupan", "Boyar", "Vladika", "Ban"],
+    "epithets": ["the Brave", "the Wise", "the Falcon", "the Silent", "the Peacemaker", "the Stern", "the Just"]
+  },
+  "geographic_lexicon": {
+    "orogeny": {
+      "stems": ["Gora", "Hrib", "Planina", "Vrh", "Kamen", "Skala", "Kozjak", "Rudnik"],
+      "suffixes": ["grad", "ica", "ov", "ac", "ski", "nik"]
+    },
+    "hydrology": {
+      "stems": ["Bistrica", "Reka", "Potok", "Voda", "Jezero", "Blato", "Izvor", "Drina"],
+      "suffixes": ["ava", "ica", "ec", "na", "sko", "ina"]
+    },
+    "wilds": {
+      "stems": ["Dubrava", "Gaj", "Lug", "Sumar", "Pustara", "Dol", "Polje", "Borje"],
+      "suffixes": ["ak", "ina", "iste", "je", "ovik"]
+    }
+  },
+  "grammar_templates": {
+    "character_full_name": [
+      "{given} {surname}",
+      "{given} the {epithet}",
+      "{title} {given} of {settlement}",
+      "{given} {surname}, {title} of {settlement}"
+    ],
+    "settlement_name": [
+      "{root}",
+      "{prefix}{root}",
+      "{root}{suffix}",
+      "Stari {root}",
+      "Novi {root}",
+      "{root} nad {hydrology}"
+    ],
+    "orogeny_name": [
+      "{stem} {suffix}",
+      "Velika {stem}",
+      "Crna {stem}",
+      "{stem} Planina"
+    ],
+    "hydrology_name": [
+      "{stem}",
+      "{stem} {suffix}",
+      "Bela {stem}",
+      "Tiha {stem}"
+    ],
+    "wilds_name": [
+      "{stem}",
+      "{stem} {suffix}",
+      "Gusta {stem}",
+      "Sveta {stem}"
+    ],
+    "honorific_patterns": ["{title} {given}", "{given}, {title} of {settlement}"]
+  }
+}

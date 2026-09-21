@@ -1,0 +1,107 @@
+{
+  "id": "nordic_scandian",
+  "name": "Nordic Scandian",
+  "historical_era": "Viking Age to High Middle Ages (8th–13th c. CE)",
+  "region": "Scandinavia & North Atlantic Littoral",
+  "description": "Old Norse and Scandinavian onomastic system centered around patronymics (-son, -dottir), pagan theophoric compound stems (Thor-, Freyr-), and harsh maritime and glacial geography.",
+  "phonetic_rules": {
+    "vowels": ["a", "e", "i", "o", "u", "y", "ae", "oe", "aa"],
+    "consonants": ["b", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "th"],
+    "forbidden_clusters": ["c", "q", "w", "x", "z"]
+  },
+  "seeds": {
+    "given_names_masculine": [
+      "Arnbjorn", "Asbjorn", "Bjorn", "Brand", "Einar",
+      "Eirik", "Erling", "Finn", "Frode", "Geir",
+      "Gorm", "Gunnar", "Haakon", "Halfdan", "Hallvard",
+      "Harald", "Hrafn", "Inge", "Ivar", "Ketil",
+      "Knut", "Kolbjorn", "Leif", "Magnus", "Olav",
+      "Orm", "Ragnar", "Roald", "Sigurd", "Sigvat",
+      "Snorri", "Steinar", "Svein", "Thorbjorn", "Torstein",
+      "Trygve", "Ulf", "Valdemar", "Vidar", "Viggo"
+    ],
+    "given_names_feminine": [
+      "Aasa", "Asta", "Aslaug", "Astrid", "Birgit",
+      "Bodil", "Brynhild", "Dagny", "Ellisif", "Freja",
+      "Gerda", "Gro", "Gudrun", "Gunhild", "Gyda",
+      "Helga", "Hilda", "Idunn", "Ingeborg", "Ingrid",
+      "Jorunn", "Kari", "Liv", "Ragnhild", "Rannveig",
+      "Runa", "Sif", "Signe", "Sigrid", "Siv",
+      "Solveig", "Sunniva", "Thora", "Torhild", "Tove",
+      "Tyra", "Unn", "Valdis", "Vigdis", "Ylva"
+    ],
+    "surnames": [
+      "Asbjornsdottir", "Banner", "Bille", "Brahe", "Einarsdottir",
+      "Einarsson", "Eiriksdottir", "Eiriksson", "Erlingsson", "Gunnarsdottir",
+      "Gunnarsson", "Gyldenstierne", "Gyllenstierna", "Haakonsson", "Haraldsdottir",
+      "Haraldsson", "Hrafnsson", "Hvide", "Ivarsdottir", "Ivarsson",
+      "Knutsson", "Krummedige", "Lange", "Leifsson", "Magnusdottir",
+      "Magnusson", "Olavsdottir", "Olavsson", "Oxenstierna", "Ragnarsdottir",
+      "Ragnarsson", "Rosenkrantz", "Sigurdsdottir", "Sigurdsson", "Skram",
+      "Snorrason", "Steinarsson", "Sveinsdottir", "Sveinsson", "Thott",
+      "Torsteinsson", "Trolle", "Ulfstand", "Ulfsson", "Viffert"
+    ],
+    "settlement_roots": [
+      "Aalborg", "Alvastra", "Aros", "Bergen", "Birka",
+      "Borg", "Borgund", "Bornholm", "Dannevirke", "Gotland",
+      "Hedeby", "Helsingborg", "Jelling", "Kaupang", "Konghelle",
+      "Ladby", "Lade", "Lindisfarne", "Lund", "Nidaros",
+      "Odense", "Oslo", "Ribe", "Roskilde", "Sigtuna",
+      "Skara", "Skanor", "Stavanger", "Thorey", "Tonsberg",
+      "Trondheim", "Uppsala", "Vadstena", "Viborg", "Visby",
+      "Ystad"
+    ],
+    "prefixes": ["Nord", "Syd", "Ost", "Vest", "Stor", "Lill", "Gamle"],
+    "suffixes": ["by", "gard", "heim", "nes", "stad", "vik", "toft"],
+    "honorific_titles": ["Jarl", "Konungr", "Hersir", "Gothi", "Lendingrmadr", "Skald", "Thane"],
+    "epithets": ["Ironside", "Bloodaxe", "Fairhair", "the Stout", "Forkbeard", "the Peaceful", "the Bold"]
+  },
+  "geographic_lexicon": {
+    "orogeny": {
+      "stems": ["Fjall", "Tind", "Hals", "Klif", "Holl", "Berg", "Nip", "Snjo"],
+      "suffixes": ["gard", "heim", "nes", "vik", "dahl", "fjell"]
+    },
+    "hydrology": {
+      "stems": ["Fjord", "Vatn", "Elv", "Fors", "Sund", "A", "Bekkr", "Vag"],
+      "suffixes": ["ey", "vik", "os", "nes", "strond", "sund"]
+    },
+    "wilds": {
+      "stems": ["Skogr", "Mork", "Heidi", "Dalr", "Hagi", "Lundr", "Vidr", "Myrr"],
+      "suffixes": ["land", "mark", "rud", "set", "by", "toft"]
+    }
+  },
+  "grammar_templates": {
+    "character_full_name": [
+      "{given} {surname}",
+      "{given} the {epithet}",
+      "{title} {given} of {settlement}",
+      "{given} Son of {settlement}"
+    ],
+    "settlement_name": [
+      "{root}",
+      "{root}{suffix}",
+      "{prefix}{root}",
+      "Gamla {root}",
+      "Ny {root}"
+    ],
+    "orogeny_name": [
+      "{stem} {suffix}",
+      "Ha {stem}",
+      "Store {stem}",
+      "{stem}tind"
+    ],
+    "hydrology_name": [
+      "{stem} {suffix}",
+      "{stem}fjorden",
+      "Blatt {stem}",
+      "Kald {stem}"
+    ],
+    "wilds_name": [
+      "{stem} {suffix}",
+      "Djupe {stem}",
+      "Morke {stem}",
+      "{stem}heimen"
+    ],
+    "honorific_patterns": ["{title} {given}", "{given}, {title} of {settlement}"]
+  }
+}
