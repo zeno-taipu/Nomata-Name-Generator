@@ -512,7 +512,7 @@ const SUBTYPE_RULES: SubtypeRule[] = [
   },
   {
     normalizedSubtype: 'Faction Relic',
-    category: 'character',
+    category: 'artifact',
     aliases: ['faction relic', 'faction relics', 'standard', 'banner', 'seal', 'sacred relic'],
     templates: [
       'Standard of {Parent.name}',

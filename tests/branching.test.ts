@@ -298,7 +298,7 @@ describe('LineageBranchingEngine', () => {
       expect(chapterhouse[0].category).toBe('settlement');
       expect(initiate[0].category).toBe('character');
       expect(envoy[0].category).toBe('character');
-      expect(relic[0].category).toBe('character');
+      expect(relic[0].category).toBe('artifact');
 
       expect(chapterhouse[0].name).toContain('Golden');
     });
