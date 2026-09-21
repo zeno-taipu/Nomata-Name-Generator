@@ -577,6 +577,7 @@ export class LineageBranchingEngine {
   private readonly defaultMarkovOrder: number;
   private readonly defaultTemperature: number;
   private readonly randomFn?: () => number;
+  private readonly markovCache: Map<string, MarkovNameGenerator> = new Map();
   private counter = 0;
 
   constructor(options?: BranchingEngineOptions) {
@@ -600,6 +601,10 @@ export class LineageBranchingEngine {
   private identifyParentDomain(
     parent: LoreEntity
   ): 'settlement' | 'character' | 'faction' | 'artifact' | 'geography_tier1' | 'geography_tier2' | 'geography_tier3' | 'geography_tier4' {
+    if (!parent || typeof parent !== 'object') {
+      throw new Error('LineageBranchingEngine: parent entity must be a valid object');
+    }
+
     const rawSubtype = (parent.subtype ?? (parent.metadata?.subtype as string) ?? '').toLowerCase();
     const tier = (parent.metadata?.tier as number) ?? undefined;
 
@@ -648,7 +653,7 @@ export class LineageBranchingEngine {
     // Default category fallback
     if (parent.category === 'settlement') return 'settlement';
     if (parent.category === 'character') return 'character';
-    return 'geography_tier1';
+    return 'settlement';
   }
 
   /**
@@ -669,7 +674,6 @@ export class LineageBranchingEngine {
       case 'geography_tier1':
         return [
           'Mountain Range',
-          'Interior Mountain Chains',
           'Interior Basin',
           'Primary River Basin',
           'Border Wetlands',
@@ -753,6 +757,10 @@ export class LineageBranchingEngine {
     count?: number,
     options?: BranchOptions
   ): LoreEntity[] {
+    if (!parent || !parent.id || !parent.name) {
+      throw new Error('LineageBranchingEngine: parent entity must have valid id and name');
+    }
+
     const effectiveCount = Math.max(1, count ?? options?.count ?? 1);
 
     // If subtype is empty or 'auto', choose one from available branch subtypes
@@ -787,33 +795,58 @@ export class LineageBranchingEngine {
       templates = rule.cultureTemplates[cultureId];
     }
 
-    // Build context-specific Markov generators if custom order/temperature specified
+    // Build context-specific Markov generators only if templates require Markov tokens
     const markovGenerators: Record<string, MarkovNameGenerator> = {};
-    const order = options?.markovOrder ?? this.defaultMarkovOrder;
-    const temperature = options?.temperature ?? this.defaultTemperature;
+    const needsMarkov = templates.some((t) => t.includes('{Markov:'));
 
-    if (culture?.seeds) {
-      if (culture.seeds.given_names_masculine && culture.seeds.given_names_masculine.length > 0) {
-        const mascGen = new TemperatureMarkovGenerator(culture.seeds.given_names_masculine, order, temperature);
-        markovGenerators['masculine'] = mascGen;
-        markovGenerators['person'] = mascGen;
-        markovGenerators['given'] = mascGen;
-      }
-      if (culture.seeds.settlement_roots && culture.seeds.settlement_roots.length > 0) {
-        const setGen = new TemperatureMarkovGenerator(culture.seeds.settlement_roots, order, temperature);
-        markovGenerators['settlement'] = setGen;
-      }
-    }
+    if (needsMarkov && culture) {
+      const order = options?.markovOrder ?? this.defaultMarkovOrder;
+      const temperature = options?.temperature ?? this.defaultTemperature;
 
-    if (culture?.geographic_lexicon) {
-      if (culture.geographic_lexicon.orogeny?.stems?.length) {
-        markovGenerators['orogeny'] = new TemperatureMarkovGenerator(culture.geographic_lexicon.orogeny.stems, order, temperature);
+      const getOrTrain = (key: string, seeds: string[]): MarkovNameGenerator => {
+        const cacheKey = `${cultureId}:${key}:${order}:${temperature}`;
+        let gen = this.markovCache.get(cacheKey);
+        if (!gen) {
+          gen = new TemperatureMarkovGenerator(seeds, order, temperature);
+          this.markovCache.set(cacheKey, gen);
+        }
+        return gen;
+      };
+
+      if (culture.seeds) {
+        const mascSeeds = culture.seeds.given_names_masculine || [];
+        const femSeeds = culture.seeds.given_names_feminine || [];
+        const allPersonSeeds = [...mascSeeds, ...femSeeds];
+
+        if (mascSeeds.length > 0) {
+          const mascGen = getOrTrain('masculine', mascSeeds);
+          markovGenerators['masculine'] = mascGen;
+        }
+        if (femSeeds.length > 0) {
+          const femGen = getOrTrain('feminine', femSeeds);
+          markovGenerators['feminine'] = femGen;
+        }
+        if (allPersonSeeds.length > 0) {
+          const personGen = getOrTrain('person', allPersonSeeds);
+          markovGenerators['person'] = personGen;
+          markovGenerators['given'] = personGen;
+        }
+
+        if (culture.seeds.settlement_roots && culture.seeds.settlement_roots.length > 0) {
+          markovGenerators['settlement'] = getOrTrain('settlement', culture.seeds.settlement_roots);
+        }
       }
-      if (culture.geographic_lexicon.hydrology?.stems?.length) {
-        markovGenerators['hydrology'] = new TemperatureMarkovGenerator(culture.geographic_lexicon.hydrology.stems, order, temperature);
-      }
-      if (culture.geographic_lexicon.wilds?.stems?.length) {
-        markovGenerators['wilds'] = new TemperatureMarkovGenerator(culture.geographic_lexicon.wilds.stems, order, temperature);
+
+      if (culture.geographic_lexicon) {
+        if (culture.geographic_lexicon.orogeny?.stems?.length) {
+          markovGenerators['orogeny'] = getOrTrain('orogeny', culture.geographic_lexicon.orogeny.stems);
+        }
+        if (culture.geographic_lexicon.hydrology?.stems?.length) {
+          markovGenerators['hydrology'] = getOrTrain('hydrology', culture.geographic_lexicon.hydrology.stems);
+        }
+        if (culture.geographic_lexicon.wilds?.stems?.length) {
+          markovGenerators['wilds'] = getOrTrain('wilds', culture.geographic_lexicon.wilds.stems);
+        }
       }
     }
 

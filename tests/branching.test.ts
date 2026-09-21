@@ -371,4 +371,67 @@ describe('LineageBranchingEngine', () => {
       expect(autoChildren[0].category).toBe('settlement');
     });
   });
+
+  describe('Edge Cases and Defensive Robustness', () => {
+    it('throws descriptive error on invalid or empty parent', () => {
+      expect(() => branching.branchChildren(null as unknown as LoreEntity, 'City Ward')).toThrowError(
+        /parent entity must have valid id and name/
+      );
+      expect(() => branching.branchChildren({} as unknown as LoreEntity, 'City Ward')).toThrowError(
+        /parent entity must have valid id and name/
+      );
+    });
+
+    it('gracefully handles missing/unregistered cultureId with fallback templates', () => {
+      const parent: LoreEntity = {
+        id: 'unknown-1',
+        name: 'Lost Haven',
+        originalName: 'Lost Haven',
+        rootName: 'Lost Haven',
+        originalRoot: 'Lost Haven',
+        category: 'settlement',
+        cultureId: 'nonexistent_culture',
+      };
+
+      const children = branching.branchChildren(parent, 'City Ward', 2);
+      expect(children.length).toBe(2);
+      expect(children[0].parentId).toBe('unknown-1');
+      expect(children[0].name).toContain('Lost Haven');
+    });
+
+    it('synthesizes sensible fallback for novel/unrecognized child subtype', () => {
+      const parent: LoreEntity = {
+        id: 'cit-1',
+        name: 'Ironhold',
+        originalName: 'Ironhold',
+        rootName: 'Ironhold',
+        originalRoot: 'Ironhold',
+        category: 'settlement',
+        cultureId: 'celtic_gaelic',
+      };
+
+      const children = branching.branchChildren(parent, 'Alchemy Foundry', 2);
+      expect(children.length).toBe(2);
+      expect(children[0].subtype).toBe('Alchemy Foundry');
+      expect(children[0].name).toContain('Ironhold');
+    });
+
+    it('handles bulk generation exceeding template count without crash or duplicates', () => {
+      const parent: LoreEntity = {
+        id: 'mega-1',
+        name: 'Corinth',
+        originalName: 'Corinth',
+        rootName: 'Corinth',
+        originalRoot: 'Corinth',
+        category: 'settlement',
+        cultureId: 'greco_aegean',
+      };
+
+      const children = branching.branchChildren(parent, 'City Ward', 15);
+      expect(children.length).toBe(15);
+      // All children should have distinct IDs and valid names
+      const ids = new Set(children.map((c) => c.id));
+      expect(ids.size).toBe(15);
+    });
+  });
 });
