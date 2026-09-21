@@ -34,6 +34,9 @@ export interface LoreEntity {
   originalRoot: string;
   rootName?: string;
   originalTitle?: string;
+  parentId?: string;
+  children?: LoreEntity[];
+  subtype?: string;
   anglicization?: AnglicizationOverlay;
   epithet?: string;
   meaning?: string;
