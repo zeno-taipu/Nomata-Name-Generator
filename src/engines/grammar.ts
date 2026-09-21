@@ -35,6 +35,8 @@ export interface GrammarContext {
   markovGenerators?: Record<string, MarkovNameGenerator>;
   gender?: Gender;
   featureSubtype?: GeographicFeatureType;
+  temperature?: number;
+  markovOrder?: number;
   randomFn?: () => number;
 }
 
@@ -43,6 +45,7 @@ export interface GrammarEngineOptions {
   markovGenerators?: Record<string, MarkovNameGenerator>;
   culture?: CultureProfile | CultureLexicon | Record<string, unknown>;
   maxDepth?: number;
+  temperature?: number;
   randomFn?: () => number;
 }
 
@@ -162,12 +165,14 @@ export class RecursiveGrammarEngine {
     const cleanCategory = category.trim();
     const lowerCat = cleanCategory.toLowerCase();
 
+    const tempOpts = context?.temperature !== undefined ? { temperature: context.temperature } : undefined;
+
     // 1. Check context-specific markovGenerators
     if (context?.markovGenerators) {
       for (const [k, gen] of Object.entries(context.markovGenerators)) {
         if (k.toLowerCase() === lowerCat) {
           try {
-            return gen.generate();
+            return gen.generate(tempOpts);
           } catch {
             // fallback
           }
@@ -179,7 +184,7 @@ export class RecursiveGrammarEngine {
     const engineGen = this.markovGenerators.get(lowerCat);
     if (engineGen) {
       try {
-        return engineGen.generate();
+        return engineGen.generate(tempOpts);
       } catch {
         // fallback
       }
@@ -189,7 +194,7 @@ export class RecursiveGrammarEngine {
     const defaultGen = context?.markov ?? this.defaultMarkov;
     if (defaultGen) {
       try {
-        return defaultGen.generate();
+        return defaultGen.generate(tempOpts);
       } catch {
         // fallback to seeds
       }
@@ -204,7 +209,7 @@ export class RecursiveGrammarEngine {
         let cached = this.cultureMarkovCache.get(cacheKey);
         if (!cached) {
           try {
-            cached = new MarkovNameGenerator(seeds, { order: 2 });
+            cached = new MarkovNameGenerator(seeds, { order: context?.markovOrder ?? 2 });
             this.cultureMarkovCache.set(cacheKey, cached);
           } catch {
             // training failed
@@ -212,7 +217,7 @@ export class RecursiveGrammarEngine {
         }
         if (cached) {
           try {
-            return cached.generate();
+            return cached.generate(tempOpts);
           } catch {
             // generation failed, pick random seed
             const pick = this.chooseRandom(seeds, context);
@@ -301,8 +306,24 @@ export class RecursiveGrammarEngine {
 
     const lowerToken = token.toLowerCase();
 
+    // Check if Markov innovation is activated by temperature (> 0.4)
+    const temp = context?.temperature ?? 0.7;
+    const shouldInnovate =
+      Boolean(context?.markov) &&
+      context?.temperature !== undefined &&
+      context.temperature > 0.4 &&
+      (context?.randomFn ? context.randomFn() : Math.random()) < (context.temperature - 0.35) * 0.7;
+
     // 1. Shorthand mappings
     if (lowerToken === 'given' || lowerToken === 'given_name') {
+      if (shouldInnovate && context?.markov) {
+        try {
+          const gen = context.markov.generate({ temperature: temp });
+          if (gen && gen.length >= 3 && !gen.includes('{')) return gen;
+        } catch {
+          // fallback to static seeds
+        }
+      }
       const gender = context?.gender;
       const masc = (seeds.given_names_masculine as string[]) ?? [];
       const fem = (seeds.given_names_feminine as string[]) ?? [];
@@ -317,11 +338,27 @@ export class RecursiveGrammarEngine {
     }
 
     if (lowerToken === 'surname') {
+      if (shouldInnovate && context?.markov) {
+        try {
+          const gen = context.markov.generate({ temperature: temp });
+          if (gen && gen.length >= 3 && !gen.includes('{')) return gen;
+        } catch {
+          // fallback to static seeds
+        }
+      }
       const sur = seeds.surnames as string[] | undefined;
       if (Array.isArray(sur) && sur.length > 0) return this.chooseRandom(sur, context);
     }
 
     if (lowerToken === 'settlement' || lowerToken === 'settlement_root') {
+      if (shouldInnovate && context?.markov) {
+        try {
+          const gen = context.markov.generate({ temperature: temp });
+          if (gen && gen.length >= 3 && !gen.includes('{')) return gen;
+        } catch {
+          // fallback to static seeds
+        }
+      }
       const setRoots = seeds.settlement_roots as string[] | undefined;
       if (Array.isArray(setRoots) && setRoots.length > 0) return this.chooseRandom(setRoots, context);
     }

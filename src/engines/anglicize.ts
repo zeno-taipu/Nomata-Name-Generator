@@ -141,6 +141,9 @@ const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
     { suffix: 'vic', replacement: 'son' },
     { suffix: 'ich', replacement: 'son' },
     { suffix: 'ic', replacement: 'son' },
+    { suffix: 'grad', replacement: 'burgh' },
+    { suffix: 'ovo', replacement: 'ton' },
+    { suffix: 'ica', replacement: 'ey' },
     { suffix: 'ova', replacement: 'ford' },
     { suffix: 'eva', replacement: 'ford' },
     { suffix: 'ov', replacement: 'ford' },
@@ -152,6 +155,8 @@ const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
     { suffix: 'og', replacement: 'en' },
     { suffix: 'an', replacement: 'ham', toponymicOnly: true },
     { suffix: 'in', replacement: 'ham', toponymicOnly: true },
+    { suffix: 'mor', replacement: 'more' },
+    { suffix: 'beg', replacement: 'little' },
   ],
   nordic_scandian: [
     { suffix: 'sheim', replacement: 'stead' },
@@ -162,8 +167,13 @@ const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
     { suffix: 'son', replacement: 'son' },
     { suffix: 'gard', replacement: 'bury' },
     { suffix: 'borg', replacement: 'burgh' },
+    { suffix: 'by', replacement: 'town' },
+    { suffix: 'stad', replacement: 'stead' },
+    { suffix: 'fjorden', replacement: 'firth' },
+    { suffix: 'fjord', replacement: 'firth' },
   ],
   greco_aegean: [
+    { suffix: 'polis', replacement: 'city' },
     { suffix: 'eios', replacement: 'e' },
     { suffix: 'ios', replacement: 'e' },
     { suffix: 'os', replacement: 'us' },
@@ -173,6 +183,8 @@ const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
   ],
   levantine_semitic: [
     { suffix: 'awi', replacement: 'ite' },
+    { suffix: 'iya', replacement: 'ia' },
+    { suffix: 'iyah', replacement: 'ia' },
     { suffix: 'i', replacement: 'ian' },
   ],
 };
@@ -186,6 +198,18 @@ const COGNATES: Record<string, string> = {
   vasile: 'Basil',
   radomir: 'Radmore',
   vladimir: 'Walter',
+  stanislav: 'Stanley',
+  miroslav: 'Merrick',
+  branimir: 'Branmore',
+  dragan: 'Drake',
+  goran: 'George',
+  zoran: 'Dawn',
+  vuk: 'Wolf',
+  boris: 'Boris',
+  jovan: 'John',
+  milan: 'Miles',
+  luka: 'Luke',
+  marko: 'Mark',
   ioan: 'John',
   ivan: 'John',
   mihail: 'Michael',
@@ -198,6 +222,17 @@ const COGNATES: Record<string, string> = {
   dmitri: 'Demetrius',
   bogdan: 'Godwin',
   mircea: 'Merrick',
+  stari: 'Old',
+  novi: 'New',
+  novo: 'New',
+  gornji: 'Upper',
+  dolnji: 'Lower',
+  donji: 'Lower',
+  bela: 'White',
+  crna: 'Black',
+  velika: 'Great',
+  sveti: 'Saint',
+  sveta: 'Saint',
 
   // Celtic / Gaelic
   gwilym: 'William',
@@ -208,14 +243,34 @@ const COGNATES: Record<string, string> = {
   seamus: 'James',
   cormac: 'Cormick',
   artur: 'Arthur',
+  ruairidh: 'Rory',
+  fionn: 'Finn',
+  ciaran: 'Kieran',
+  domhnall: 'Donald',
+  dun: 'Fort',
+  baile: 'Town',
+  inis: 'Isle',
+  slieve: 'Mount',
+  ben: 'Peak',
+  loch: 'Lake',
 
   // Nordic
   harald: 'Harold',
   knut: 'Canute',
   olaf: 'Olaf',
   thorstein: 'Thurstan',
+  thorbjorn: 'Thorburn',
+  ragnar: 'Rayner',
+  bjorn: 'Bear',
+  eirik: 'Eric',
   hakon: 'Haco',
   sigurd: 'Seward',
+  gamla: 'Old',
+  ny: 'New',
+  store: 'Great',
+  kald: 'Cold',
+  djupe: 'Deep',
+  morke: 'Dark',
 
   // Hellenic
   alexandros: 'Alexander',
@@ -224,6 +279,11 @@ const COGNATES: Record<string, string> = {
   ioannes: 'John',
   konstantinos: 'Constantine',
   theodoros: 'Theodore',
+  nea: 'New',
+  palaiopolis: 'Old City',
+  megalo: 'Great',
+  iero: 'Holy',
+  agrio: 'Wild',
 
   // Levantine
   yusuf: 'Joseph',
@@ -232,6 +292,15 @@ const COGNATES: Record<string, string> = {
   musa: 'Moses',
   maryam: 'Mary',
   sulayman: 'Solomon',
+  tariq: 'Tarik',
+  ali: 'Eli',
+  tell: 'Mount',
+  kfar: 'Village',
+  ain: 'Springs',
+  jabal: 'Mount',
+  wadi: 'Canyon',
+  midbar: 'Desert',
+  waha: 'Oasis',
 };
 
 const TITLE_EPITHET_MAP: Record<string, string> = {
@@ -547,6 +616,17 @@ export class AnglicizationEngine {
       res = res.replace(/([aeou])j\b/gi, '$1y');
     }
 
+    if (!PROTECTED_ENGLISH_WORDS.has(res)) {
+      // Slavic word-final -mir -> -mere
+      res = res.replace(/([A-Za-z]{2,})mir\b/gi, '$1mere');
+      // Greek ph -> f, rh -> r
+      res = res.replace(/ph/gi, 'f');
+      res = res.replace(/\bRh/g, 'R');
+      res = res.replace(/\brh/g, 'r');
+      // Levantine apostrophes / glottal stops
+      res = res.replace(/['`]/g, '');
+    }
+
     return res;
   }
 
@@ -619,18 +699,42 @@ export class AnglicizationEngine {
     let current = text;
     let detectedTitle = originalTitle;
 
-    // 1. Check for Celtic settlements / landmarks (e.g. Dun Aonghasa -> Angus Fort)
+    // 1. Check for Celtic/Nordic/Slavic/Levantine settlements & landmarks
     const dunMatch = current.match(/\bDun\s+([A-Za-z]+)\b/i);
     if (dunMatch) {
       const stem = dunMatch[1];
       const anglicizedStem = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
       current = current.replace(/\bDun\s+[A-Za-z]+\b/i, `${anglicizedStem} Fort`);
-      return {
-        name: current,
-        root: anglicizedStem,
-        title: detectedTitle ? this.anglicizeTitle(detectedTitle) : undefined,
-      };
     }
+
+    current = current.replace(/\bBaile\s+([A-Za-z]+)\b/gi, (_m, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `${anglicized} Town`;
+    });
+    current = current.replace(/\bInis\s+([A-Za-z]+)\b/gi, (_m, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `${anglicized} Isle`;
+    });
+    current = current.replace(/\b(Tell|Jabal|Har|Slieve|Ben)\s+([A-Za-z]+)\b/gi, (_m, _pfx, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `Mount ${anglicized}`;
+    });
+    current = current.replace(/\bKfar\s+([A-Za-z]+)\b/gi, (_m, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `${anglicized} Village`;
+    });
+    current = current.replace(/\b(Stari|Gamla)\s+([A-Za-z]+)\b/gi, (_m, _pfx, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `Old ${anglicized}`;
+    });
+    current = current.replace(/\b(Novi|Novo|Ny|Nea)\s+([A-Za-z]+)\b/gi, (_m, _pfx, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `New ${anglicized}`;
+    });
+    current = current.replace(/\bLoch\s+([A-Za-z]+)\b/gi, (_m, stem) => {
+      const anglicized = this.translateCognate(stem) ?? this.stage1PhoneticSmoothing(stem, cultureId);
+      return `Lake ${anglicized}`;
+    });
 
     // 2. Anglo-Norman Patronymics:
     // Celtic "ap / ab [Name]" -> "Fitz[Name]"

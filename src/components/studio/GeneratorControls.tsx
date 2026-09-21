@@ -8,6 +8,7 @@ import {
   GitBranch,
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
+import { normalizeEntityCategory } from '../../types/domain';
 import { cn } from '../../utils/cn';
 
 export interface GeneratorControlsProps {
@@ -18,6 +19,14 @@ export interface GeneratorControlsProps {
 
 const BATCH_PILLS = [1, 5, 10, 25, 50] as const;
 
+const SUBTYPES_BY_CATEGORY: Record<string, string[]> = {
+  character: ['auto', 'Noble', 'Warrior', 'Scholar', 'Wanderer', 'Artisan'],
+  settlement: ['auto', 'Metropolis', 'Fortress', 'Town', 'Haven', 'Village'],
+  geography: ['auto', 'Mountain Range', 'River Basin', 'Primeval Woods'],
+  faction: ['auto', 'Order', 'Legion', 'Covenant', 'Guild', 'Syndicate'],
+  artifact: ['auto', 'Relic', 'Blade', 'Crown', 'Tome', 'Scepter'],
+};
+
 export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   viewMode = 'grid',
   onViewModeChange,
@@ -25,6 +34,8 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
 }) => {
   const batchCount = useNominaStore((s) => s.batchCount);
   const setBatchCount = useNominaStore((s) => s.setBatchCount);
+  const activeCategory = useNominaStore((s) => s.activeCategory);
+  const targetSubtype = useNominaStore((s) => s.targetSubtype);
   const temperature = useNominaStore((s) => s.temperature);
   const markovOrder = useNominaStore((s) => s.markovOrder);
   const setEngineConfig = useNominaStore((s) => s.setEngineConfig);
@@ -34,6 +45,9 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   const setAnglicizationConfig = useNominaStore((s) => s.setAnglicizationConfig);
   const isGenerating = useNominaStore((s) => s.isGenerating);
   const generateBatch = useNominaStore((s) => s.generateBatch);
+
+  const normalizedCat = normalizeEntityCategory(activeCategory);
+  const availableSubtypes = SUBTYPES_BY_CATEGORY[normalizedCat] || ['auto'];
 
   // Keyboard shortcut listener: Cmd/Ctrl + Enter triggers generateBatch
   useEffect(() => {
@@ -112,6 +126,27 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
                 </button>
               );
             })}
+          </div>
+
+          {/* Target Subtype Selector */}
+          <div className="flex items-center gap-1.5 bg-charcoal-950/60 px-2 py-1 rounded-lg border border-charcoal-700/60">
+            <span className="text-[11px] font-medium text-slate-400 hidden sm:inline">
+              Subtype:
+            </span>
+            <select
+              data-testid="target-subtype-select"
+              value={targetSubtype}
+              onChange={(e) => setEngineConfig({ targetSubtype: e.target.value })}
+              className="bg-charcoal-900 text-xs text-gold-400 border border-charcoal-700/80 rounded px-2 py-0.5 focus:outline-none focus:border-gold-500/50 cursor-pointer font-medium"
+              title="Filter generation to a specific subtype or 'auto'"
+              aria-label="Target Subtype"
+            >
+              {availableSubtypes.map((sub) => (
+                <option key={sub} value={sub} className="bg-charcoal-900 text-slate-200">
+                  {sub === 'auto' ? 'Auto Subtype' : sub}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

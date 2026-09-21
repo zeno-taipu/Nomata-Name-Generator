@@ -254,12 +254,48 @@ const useRawNominaStore = create<NominaState>()(
         })),
 
       setAnglicizationConfig: (config) =>
-        set((state) => ({
-          anglicize: config.anglicize !== undefined ? config.anglicize : state.anglicize,
-          anglicizeMode: config.anglicizeMode !== undefined ? config.anglicizeMode : state.anglicizeMode,
-          exonymDualDisplay:
-            config.exonymDualDisplay !== undefined ? config.exonymDualDisplay : state.exonymDualDisplay,
-        })),
+        set((state) => {
+          const newAnglicize = config.anglicize !== undefined ? config.anglicize : state.anglicize;
+          const newMode = config.anglicizeMode !== undefined ? config.anglicizeMode : state.anglicizeMode;
+          const newDual =
+            config.exonymDualDisplay !== undefined ? config.exonymDualDisplay : state.exonymDualDisplay;
+
+          const anglicizationEngine = new AnglicizationEngine();
+
+          // Transform or revert all entities in the generatedBatch immediately
+          const updatedBatch = state.generatedBatch.map((entity) => {
+            if (newAnglicize) {
+              return anglicizationEngine.anglicizeEntity(entity, {
+                mode: newMode,
+                exonymDualDisplay: newDual,
+                cultureId: entity.cultureId,
+              });
+            } else {
+              return anglicizationEngine.revert(entity);
+            }
+          });
+
+          // Also transform or revert pinnedEntities immediately
+          const updatedPinned = state.pinnedEntities.map((entity) => {
+            if (newAnglicize) {
+              return anglicizationEngine.anglicizeEntity(entity, {
+                mode: newMode,
+                exonymDualDisplay: newDual,
+                cultureId: entity.cultureId,
+              });
+            } else {
+              return anglicizationEngine.revert(entity);
+            }
+          });
+
+          return {
+            anglicize: newAnglicize,
+            anglicizeMode: newMode,
+            exonymDualDisplay: newDual,
+            generatedBatch: updatedBatch,
+            pinnedEntities: updatedPinned,
+          };
+        }),
 
       setCustomVocabulary: (vocab) =>
         set((state) => ({
@@ -285,23 +321,41 @@ const useRawNominaStore = create<NominaState>()(
             ? state.activeCultureIds
             : ['danubian_slavic'];
 
-        const cultureProfiles = state.activeCultureIds
+        const cultureProfiles = activeCultureIds
           .map((id) => getCultureById(id))
           .filter((c): c is CultureProfile => c !== undefined);
 
         const safeProfiles = cultureProfiles.length > 0 ? cultureProfiles : [cultures['danubian_slavic']];
-        const primaryCulture = safeProfiles[0];
 
-        const { augmentedCulture, customVariables, uniqueCustomRoots, templates } = getAugmentedCultureAndVariables(
-          primaryCulture,
-          state.customVocabulary,
-          normalizedCat
-        );
+        // Weighted culture sampler for multi-culture mashups
+        const sampleCultureByWeight = (profiles: CultureProfile[]): CultureProfile => {
+          if (profiles.length <= 1) return profiles[0];
+          const totalWeight = profiles.reduce(
+            (sum, p) => sum + Math.max(0.05, state.cultureWeights[p.id] ?? 1.0),
+            0
+          );
+          let rand = Math.random() * totalWeight;
+          for (const p of profiles) {
+            const w = Math.max(0.05, state.cultureWeights[p.id] ?? 1.0);
+            if (rand <= w) return p;
+            rand -= w;
+          }
+          return profiles[profiles.length - 1];
+        };
 
-        // Gather seed dictionaries with weights
+        // Precompute augmented culture and candidate templates for EACH active culture
+        const cultureContexts = new Map<string, ReturnType<typeof getAugmentedCultureAndVariables>>();
+        for (const cp of safeProfiles) {
+          cultureContexts.set(
+            cp.id,
+            getAugmentedCultureAndVariables(cp, state.customVocabulary, normalizedCat)
+          );
+        }
+
+        // Gather seed dictionaries with user weights for Markov synthesis
         const weightedSeeds: WeightedSeeds[] = [];
         for (const cp of safeProfiles) {
-          const weight = state.cultureWeights[cp.id] ?? 1.0;
+          const weight = Math.max(0.05, state.cultureWeights[cp.id] ?? 1.0);
           let seeds: string[] = [];
 
           if (normalizedCat === 'character') {
@@ -327,26 +381,45 @@ const useRawNominaStore = create<NominaState>()(
           weightedSeeds.push({ seeds, weight });
         }
 
-        if (uniqueCustomRoots.length > 0) {
-          weightedSeeds.push({ seeds: uniqueCustomRoots, weight: 3.5 });
+        // Add custom vocabulary seeds with high weight
+        const firstContext = cultureContexts.get(safeProfiles[0].id)!;
+        if (firstContext.uniqueCustomRoots.length > 0) {
+          weightedSeeds.push({ seeds: firstContext.uniqueCustomRoots, weight: 3.5 });
         }
 
         const markov = new MarkovNameGenerator(undefined, { order: state.markovOrder });
         markov.trainWithWeights(weightedSeeds);
 
-        const grammarEngine = new RecursiveGrammarEngine({
-          markov,
-          culture: augmentedCulture,
-        });
         const anglicizationEngine = new AnglicizationEngine();
-
         const newBatch: LoreEntity[] = [];
-        const candidateTemplates = templates.length > 0 ? templates : ['{root}'];
 
         for (let i = 0; i < state.batchCount; i++) {
+          // Sample the primary culture for this entity according to user-defined weights
+          const chosenCulture = sampleCultureByWeight(safeProfiles);
+          const chosenContext = cultureContexts.get(chosenCulture.id)!;
+
+          const grammarEngine = new RecursiveGrammarEngine({
+            markov,
+            culture: chosenContext.augmentedCulture,
+            temperature: state.temperature,
+          });
+
+          const candidateTemplates =
+            chosenContext.templates.length > 0 ? chosenContext.templates : ['{root}'];
           let template = candidateTemplates[i % candidateTemplates.length];
           let featureSubtype: GeographicFeatureType | undefined;
-          let subtype = state.targetSubtype && state.targetSubtype !== 'auto' ? state.targetSubtype : undefined;
+          let subtype =
+            state.targetSubtype && state.targetSubtype !== 'auto' ? state.targetSubtype : undefined;
+
+          // Cross-culture blending for mashups: occasionally sample surname or modifier from secondary culture
+          const itemVariables = { ...chosenContext.customVariables };
+          if (safeProfiles.length > 1 && Math.random() < 0.4) {
+            const secondaryCulture = sampleCultureByWeight(safeProfiles);
+            const secondaryContext = cultureContexts.get(secondaryCulture.id)!;
+            if (secondaryContext.customVariables['surname']) {
+              itemVariables['surname'] = secondaryContext.customVariables['surname'];
+            }
+          }
 
           if (normalizedCat === 'character') {
             if (!subtype) {
@@ -359,11 +432,24 @@ const useRawNominaStore = create<NominaState>()(
               subtype = subtypes[i % subtypes.length];
             }
           } else if (normalizedCat === 'geography') {
-            const geoTypes: GeographicFeatureType[] = ['orogeny', 'hydrology', 'wilds'];
-            const chosen = geoTypes[i % geoTypes.length];
-            featureSubtype = chosen;
-            if (!subtype) {
-              subtype = chosen === 'orogeny' ? 'Mountain Range' : chosen === 'hydrology' ? 'River Basin' : 'Primeval Woods';
+            if (subtype) {
+              if (subtype.toLowerCase().includes('mountain') || subtype.toLowerCase().includes('peak') || subtype.toLowerCase().includes('pass')) {
+                featureSubtype = 'orogeny';
+              } else if (subtype.toLowerCase().includes('river') || subtype.toLowerCase().includes('basin') || subtype.toLowerCase().includes('delta')) {
+                featureSubtype = 'hydrology';
+              } else {
+                featureSubtype = 'wilds';
+              }
+            } else {
+              const geoTypes: GeographicFeatureType[] = ['orogeny', 'hydrology', 'wilds'];
+              const chosen = geoTypes[i % geoTypes.length];
+              featureSubtype = chosen;
+              subtype =
+                chosen === 'orogeny'
+                  ? 'Mountain Range'
+                  : chosen === 'hydrology'
+                  ? 'River Basin'
+                  : 'Primeval Woods';
             }
           } else if (normalizedCat === 'faction') {
             if (!subtype) subtype = 'Order';
@@ -372,10 +458,12 @@ const useRawNominaStore = create<NominaState>()(
           }
 
           let resolvedName = grammarEngine.resolve(template, {
-            culture: augmentedCulture,
+            culture: chosenContext.augmentedCulture,
             markov,
-            customVariables,
+            customVariables: itemVariables,
             featureSubtype,
+            temperature: state.temperature,
+            markovOrder: state.markovOrder,
           });
 
           if (!resolvedName || resolvedName.includes('{')) {
@@ -393,7 +481,7 @@ const useRawNominaStore = create<NominaState>()(
             originalRoot: rootGuess,
             rootName: rootGuess,
             category: normalizedCat,
-            cultureId: primaryCulture.id,
+            cultureId: chosenCulture.id,
             cultureIds: activeCultureIds.length > 1 ? [...activeCultureIds] : undefined,
             subtype,
             featureSubtype,
@@ -406,6 +494,7 @@ const useRawNominaStore = create<NominaState>()(
             entity = anglicizationEngine.anglicizeEntity(entity, {
               mode: state.anglicizeMode,
               exonymDualDisplay: state.exonymDualDisplay,
+              cultureId: chosenCulture.id,
             });
           }
 
@@ -552,7 +641,11 @@ const useRawNominaStore = create<NominaState>()(
         ];
         markov.train(seeds.length > 0 ? seeds : ['Novigrad', 'Branimir']);
 
-        const grammarEngine = new RecursiveGrammarEngine({ markov, culture: augmentedCulture });
+        const grammarEngine = new RecursiveGrammarEngine({
+          markov,
+          culture: augmentedCulture,
+          temperature: state.temperature,
+        });
         const candidateTemplates = templates.length > 0 ? templates : ['{root}'];
         const template = candidateTemplates[Math.floor(Math.random() * candidateTemplates.length)];
 
@@ -561,6 +654,8 @@ const useRawNominaStore = create<NominaState>()(
           markov,
           customVariables,
           featureSubtype: target.featureSubtype,
+          temperature: state.temperature,
+          markovOrder: state.markovOrder,
         });
         if (!newName || newName.includes('{')) {
           newName = markov.generate({ temperature: state.temperature });
@@ -576,10 +671,12 @@ const useRawNominaStore = create<NominaState>()(
           rootName: newRoot,
         };
 
-        if (target.anglicization?.enabled) {
+        const shouldAnglicize = target.anglicization?.enabled ?? state.anglicize;
+        if (shouldAnglicize) {
           updatedEntity = anglicizationEngine.anglicizeEntity(updatedEntity, {
-            mode: target.anglicization.mode,
-            exonymDualDisplay: target.anglicization.exonymDualDisplay,
+            mode: target.anglicization?.mode ?? state.anglicizeMode,
+            exonymDualDisplay: target.anglicization?.exonymDualDisplay ?? state.exonymDualDisplay,
+            cultureId: target.cultureId,
           });
         }
 
