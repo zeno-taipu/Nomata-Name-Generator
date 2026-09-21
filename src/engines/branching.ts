@@ -375,7 +375,7 @@ const SUBTYPE_RULES: SubtypeRule[] = [
     category: 'geography',
     featureSubtype: 'hydrology',
     tier: 3,
-    aliases: ['tributary', 'tributaries', 'stream', 'brook', 'run', 'creek'],
+    aliases: ['tributary', 'tributaries', 'stream', 'brook', 'run', 'creek', 'river branch', 'river branches', 'river branch / tributary'],
     templates: [
       '{Parent.root} Tributary',
       'Little {Parent.root}',
@@ -614,53 +614,70 @@ export class LineageBranchingEngine {
 
     const rawSubtype = (parent.subtype ?? (parent.metadata?.subtype as string) ?? '').toLowerCase();
     const tier = (parent.metadata?.tier as number) ?? undefined;
+    const normCat = parent.category ? normalizeEntityCategory(parent.category) : undefined;
 
-    // Faction checks
-    if (/(faction|legion|order|guild|cult|cabal|brotherhood|enclave|covenant)/.test(rawSubtype)) {
+    // 1. Faction checks (explicit category 'faction' OR subtype contains legion/order/guild/etc.)
+    if (
+      normCat === 'faction' ||
+      /(faction|legion|order|guild|cult|cabal|brotherhood|enclave|covenant)/.test(rawSubtype)
+    ) {
       return 'faction';
     }
 
-    // Artifact / Relic checks
-    if (/(artifact|relic|weapon|grimoire|tome|sword|blade|bow|shield|heirloom|regalia)/.test(rawSubtype)) {
+    // 2. Artifact / Relic checks (explicit category 'artifact' OR subtype contains relic/weapon/etc.)
+    if (
+      normCat === 'artifact' ||
+      /(artifact|relic|weapon|grimoire|tome|sword|blade|bow|shield|heirloom|regalia)/.test(rawSubtype)
+    ) {
       return 'artifact';
     }
 
-    // Geographic tiers
-    if (tier === 1 || /(macro region|continent|realm|province|territory)/.test(rawSubtype)) {
+    // 3. Geographic hierarchy
+    if (
+      tier === 1 ||
+      (normCat === 'geography' && !tier && !parent.featureSubtype && !/(river|mountain|wild|cave|forest)/.test(rawSubtype)) ||
+      /(macro region|continent|realm|province|territory)/.test(rawSubtype)
+    ) {
       return 'geography_tier1';
     }
-    if (parent.featureSubtype === 'hydrology' || tier === 3 || /(river|hydrology|waterway|stream|delta|lake)/.test(rawSubtype)) {
+    if (
+      parent.featureSubtype === 'hydrology' ||
+      tier === 3 ||
+      /(river|hydrology|waterway|stream|delta|lake|ford|tributary)/.test(rawSubtype)
+    ) {
       return 'geography_tier3';
     }
-    if (parent.featureSubtype === 'orogeny' || tier === 2 || /(mountain|orogeny|range|peaks|ridge|highlands|basin|chain)/.test(rawSubtype)) {
+    if (
+      parent.featureSubtype === 'orogeny' ||
+      tier === 2 ||
+      /(mountain|orogeny|range|peaks|ridge|highlands|basin|chain|pass)/.test(rawSubtype)
+    ) {
       return 'geography_tier2';
     }
-    if (parent.featureSubtype === 'wilds' || tier === 4 || /(wild|forest|wood|marsh|fen|wetland|grove|cave|steppe|biome)/.test(rawSubtype)) {
+    if (
+      parent.featureSubtype === 'wilds' ||
+      tier === 4 ||
+      /(wild|forest|wood|marsh|fen|wetland|grove|cave|steppe|biome|hollow)/.test(rawSubtype)
+    ) {
       return 'geography_tier4';
     }
 
-    const normCat = normalizeEntityCategory(parent.category);
-
-    // Settlement checks
-    if (normCat === 'settlement' || /(settlement|metropolis|city|fortress|town|village|haven|stronghold|keep|outpost|bastion)/.test(rawSubtype)) {
+    // 4. Settlement checks
+    if (
+      normCat === 'settlement' ||
+      /(settlement|metropolis|city|fortress|town|village|haven|stronghold|keep|outpost|bastion)/.test(rawSubtype)
+    ) {
       return 'settlement';
     }
 
-    // Character checks
-    if (normCat === 'character' || /(noble|officer|king|queen|prince|lord|lady|warrior|knight|voivode|knyaz|general|commander)/.test(rawSubtype)) {
+    // 5. Character checks
+    if (
+      normCat === 'character' ||
+      /(noble|officer|king|queen|prince|lord|lady|warrior|knight|voivode|knyaz|general|commander)/.test(rawSubtype)
+    ) {
       return 'character';
     }
 
-    // Geography fallback
-    if (normCat === 'geography') {
-      if (parent.featureSubtype === 'orogeny') return 'geography_tier2';
-      if (parent.featureSubtype === 'hydrology') return 'geography_tier3';
-      if (parent.featureSubtype === 'wilds') return 'geography_tier4';
-      return 'geography_tier1';
-    }
-
-    if (normCat === 'faction') return 'faction';
-    if (normCat === 'artifact') return 'artifact';
     return 'settlement';
   }
 

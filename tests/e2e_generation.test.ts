@@ -11,7 +11,7 @@ import {
   exportToProjectBible,
   importFromProjectBible,
 } from '../src/utils/export';
-import { App } from '../src/App';
+import { App, handleDesktopShortcuts } from '../src/App';
 import type { LoreEntity } from '../src/types/domain';
 
 describe('End-to-End Desktop User Journey & Generation Workflow', () => {
@@ -591,50 +591,50 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
   // 10. Global Desktop Keyboard Shortcut Event Handlers
   // =========================================================================
   it('10. Global desktop keyboard shortcuts (Cmd+E, Cmd+B, Cmd+J)', () => {
-    // Verify keyboard event registration and dispatch logic
     let leftSidebarToggled = false;
     let rightShelfToggled = false;
     let exportModalToggled = false;
 
-    const simulateShortcut = (key: string, isModifier: boolean) => {
-      const e = {
-        key,
-        metaKey: isModifier,
-        ctrlKey: false,
-        defaultPrevented: false,
-        preventDefault() {
-          this.defaultPrevented = true;
-        },
-      };
-
-      if (!e.metaKey && !e.ctrlKey) return;
-      const lowerKey = e.key.toLowerCase();
-      if (lowerKey === 'e') {
-        e.preventDefault();
-        exportModalToggled = !exportModalToggled;
-      } else if (lowerKey === 'b') {
-        e.preventDefault();
+    const actions = {
+      toggleLeftSidebar: () => {
         leftSidebarToggled = !leftSidebarToggled;
-      } else if (lowerKey === 'j') {
-        e.preventDefault();
+      },
+      toggleRightShelf: () => {
         rightShelfToggled = !rightShelfToggled;
-      }
+      },
+      toggleExportModal: () => {
+        exportModalToggled = !exportModalToggled;
+      },
     };
 
     // Trigger Cmd+B (Toggle Sidebar)
-    simulateShortcut('b', true);
+    let handled = handleDesktopShortcuts({ key: 'b', metaKey: true }, actions);
+    expect(handled).toBe(true);
     expect(leftSidebarToggled).toBe(true);
 
     // Trigger Cmd+J (Toggle World Bible Right Shelf)
-    simulateShortcut('j', true);
+    handled = handleDesktopShortcuts({ key: 'j', metaKey: true }, actions);
+    expect(handled).toBe(true);
     expect(rightShelfToggled).toBe(true);
 
     // Trigger Cmd+E (Open Export Modal)
-    simulateShortcut('e', true);
+    handled = handleDesktopShortcuts({ key: 'e', metaKey: true }, actions);
+    expect(handled).toBe(true);
     expect(exportModalToggled).toBe(true);
 
     // Key without Cmd/Ctrl should not trigger
-    simulateShortcut('e', false);
+    handled = handleDesktopShortcuts({ key: 'e', metaKey: false, ctrlKey: false }, actions);
+    expect(handled).toBe(false);
     expect(exportModalToggled).toBe(true); // Still true, not toggled
+
+    // Key inside input or textarea should not trigger
+    const inputMock = { tagName: 'INPUT' } as unknown as EventTarget;
+    handled = handleDesktopShortcuts({ key: 'b', metaKey: true, target: inputMock }, actions);
+    expect(handled).toBe(false);
+    expect(leftSidebarToggled).toBe(true); // Still true, not toggled
+
+    // Key with compound shift modifier should not trigger
+    handled = handleDesktopShortcuts({ key: 'e', metaKey: true, shiftKey: true }, actions);
+    expect(handled).toBe(false);
   });
 });

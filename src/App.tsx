@@ -6,6 +6,54 @@ import { RightShelf } from './components/shelf';
 import { useNominaStore } from './store/useNominaStore';
 import type { LoreEntity } from './types/domain';
 
+export interface DesktopShortcutActions {
+  toggleExportModal: () => void;
+  toggleLeftSidebar: () => void;
+  toggleRightShelf: () => void;
+}
+
+export function handleDesktopShortcuts(
+  e: {
+    key: string;
+    metaKey?: boolean;
+    ctrlKey?: boolean;
+    shiftKey?: boolean;
+    altKey?: boolean;
+    target?: EventTarget | null;
+    preventDefault?: () => void;
+  },
+  actions: DesktopShortcutActions
+): boolean {
+  const isModifier = Boolean(e.metaKey || e.ctrlKey);
+  if (!isModifier || e.shiftKey || e.altKey) return false;
+
+  const target = e.target as HTMLElement | null;
+  if (
+    target &&
+    (target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      (typeof target.isContentEditable === 'boolean' && target.isContentEditable))
+  ) {
+    return false;
+  }
+
+  const key = e.key.toLowerCase();
+  if (key === 'e') {
+    e.preventDefault?.();
+    actions.toggleExportModal();
+    return true;
+  } else if (key === 'b') {
+    e.preventDefault?.();
+    actions.toggleLeftSidebar();
+    return true;
+  } else if (key === 'j') {
+    e.preventDefault?.();
+    actions.toggleRightShelf();
+    return true;
+  }
+  return false;
+}
+
 export const App: React.FC = () => {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState<boolean>(false);
   const [isRightShelfCollapsed, setIsRightShelfCollapsed] = useState<boolean>(false);
@@ -19,20 +67,11 @@ export const App: React.FC = () => {
     if (typeof window === 'undefined') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isModifier = e.metaKey || e.ctrlKey;
-      if (!isModifier) return;
-
-      const key = e.key.toLowerCase();
-      if (key === 'e') {
-        e.preventDefault();
-        setIsExportModalOpen((prev) => !prev);
-      } else if (key === 'b') {
-        e.preventDefault();
-        setIsLeftSidebarCollapsed((prev) => !prev);
-      } else if (key === 'j') {
-        e.preventDefault();
-        setIsRightShelfCollapsed((prev) => !prev);
-      }
+      handleDesktopShortcuts(e, {
+        toggleExportModal: () => setIsExportModalOpen((prev) => !prev),
+        toggleLeftSidebar: () => setIsLeftSidebarCollapsed((prev) => !prev),
+        toggleRightShelf: () => setIsRightShelfCollapsed((prev) => !prev),
+      });
     };
 
     window.addEventListener('keydown', handleKeyDown);
