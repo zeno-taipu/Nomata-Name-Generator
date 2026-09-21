@@ -61,11 +61,15 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
     // If active entity has ancestors, start from the root ancestor or focused entity
     rootEntities = [focusedResult.ancestors[0] || focusedResult.entity];
   } else {
-    // Show entities that have children first; if none have children, show all batch roots
-    const withChildren = generatedBatch.filter(
+    // Show entities that have children first across batch and pinned entities
+    const allRoots = [
+      ...generatedBatch,
+      ...pinnedEntities.filter((p) => !p.parentId && !generatedBatch.some((b) => b.id === p.id)),
+    ];
+    const withChildren = allRoots.filter(
       (e) => e.children && e.children.length > 0
     );
-    rootEntities = withChildren.length > 0 ? withChildren : generatedBatch;
+    rootEntities = withChildren.length > 0 ? withChildren : allRoots;
   }
 
   const renderTreeNode = (node: LoreEntity, depth = 0): React.ReactNode => {

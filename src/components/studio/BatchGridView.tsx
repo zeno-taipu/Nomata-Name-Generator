@@ -26,24 +26,18 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
   const clearBatch = useNominaStore((s) => s.clearBatch);
   const generateBatch = useNominaStore((s) => s.generateBatch);
-  const reRollEntity = useNominaStore((s) => s.reRollEntity);
-  const togglePinEntity = useNominaStore((s) => s.togglePinEntity);
+  const pinAllBatch = useNominaStore((s) => s.pinAllBatch);
+  const reRollBatch = useNominaStore((s) => s.reRollBatch);
   const isGenerating = useNominaStore((s) => s.isGenerating);
 
-  // Pin All: pins all currently unpinned entities in the batch
+  // Pin All: batch operation
   const handlePinAll = () => {
-    const unpinned = generatedBatch.filter((e) => !e.pinned);
-    if (unpinned.length > 0) {
-      unpinned.forEach((e) => togglePinEntity(e));
-    } else {
-      // If all are pinned, unpin all
-      generatedBatch.forEach((e) => togglePinEntity(e));
-    }
+    pinAllBatch();
   };
 
-  // Re-roll all entities in current batch while preserving their hierarchy
+  // Re-roll all entities in current batch
   const handleReRollAll = () => {
-    generatedBatch.forEach((e) => reRollEntity(e.id));
+    reRollBatch();
   };
 
   const allPinned =

@@ -25,7 +25,7 @@ export interface EntityNodeCardProps {
   className?: string;
 }
 
-export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
+const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   entity,
   isCompact = false,
   isSelected = false,
@@ -37,6 +37,15 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState<boolean>(false);
   const [isReRolling, setIsReRolling] = useState<boolean>(false);
   const branchMenuRef = useRef<HTMLDivElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rerollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      if (rerollTimerRef.current) clearTimeout(rerollTimerRef.current);
+    };
+  }, []);
 
   const reRollEntity = useNominaStore((s) => s.reRollEntity);
   const branchEntity = useNominaStore((s) => s.branchEntity);
@@ -58,7 +67,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
 
   const availableSubtypes = LineageBranchingEngine.getAvailableBranchSubtypes(entity);
 
-  // Close branch dropdown when clicking outside
+  // Close branch dropdown on outside click or Escape key
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (
@@ -68,14 +77,22 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
         setIsBranchMenuOpen(false);
       }
     };
-
-    if (isBranchMenuOpen && typeof window !== 'undefined') {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsBranchMenuOpen(false);
+      }
+    };
+    if (isBranchMenuOpen) {
       document.addEventListener('mousedown', handleOutsideClick);
-      return () => document.removeEventListener('mousedown', handleOutsideClick);
+      document.addEventListener('keydown', handleKeyDown);
     }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isBranchMenuOpen]);
 
-  // Copy handler with visual feedback
+  // Copy handler with feedback
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const textToCopy = showDual
@@ -90,7 +107,8 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
       // Fallback or ignore in unsupported environments
     }
     setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 1800);
   };
 
   // Re-roll handler
@@ -98,7 +116,8 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
     e.stopPropagation();
     setIsReRolling(true);
     reRollEntity(entity.id);
-    setTimeout(() => setIsReRolling(false), 300);
+    if (rerollTimerRef.current) clearTimeout(rerollTimerRef.current);
+    rerollTimerRef.current = setTimeout(() => setIsReRolling(false), 300);
   };
 
   // Branch handler
@@ -134,9 +153,18 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
   return (
     <div
       data-testid={`entity-card-${entity.id}`}
+      role="button"
+      tabIndex={0}
+      aria-label={`Entity card: ${entity.name}, ${entity.subtype || entity.category}`}
       onClick={() => onSelect?.(entity)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect?.(entity);
+        }
+      }}
       className={cn(
-        'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none',
+        'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none focus-visible:ring-1 focus-visible:ring-gold-500/50',
         'bg-charcoal-900/90 hover:bg-charcoal-850 border',
         isSelected
           ? 'border-gold-500/60 shadow-[0_0_15px_rgba(208,185,51,0.2)] bg-charcoal-850'
@@ -182,6 +210,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
         <button
           type="button"
           data-testid="pin-button"
+          aria-label={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
           onClick={handleTogglePin}
           className={cn(
             'p-1.5 rounded-lg border transition-colors shrink-0',
@@ -271,6 +300,9 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
           <button
             type="button"
             data-testid="branch-button"
+            aria-label="Branch hierarchical child or subdivision"
+            aria-haspopup="true"
+            aria-expanded={isBranchMenuOpen}
             onClick={(e) => {
               e.stopPropagation();
               setIsBranchMenuOpen(!isBranchMenuOpen);
@@ -287,13 +319,15 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
           {isBranchMenuOpen && (
             <div
               data-testid="branch-dropdown"
-              className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100"
+              role="menu"
+              className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md"
             >
               <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-charcoal-750">
                 Available Lineages
               </div>
               <button
                 type="button"
+                role="menuitem"
                 data-testid="branch-option-auto"
                 onClick={(e) => handleBranchSubtype('auto', e)}
                 className="w-full text-left px-3 py-1.5 text-xs text-gold-400 hover:bg-gold-500/15 flex items-center justify-between transition-colors"
@@ -305,6 +339,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
                 <button
                   key={st}
                   type="button"
+                  role="menuitem"
                   data-testid={`branch-option-${st.toLowerCase().replace(/\s+/g, '-')}`}
                   onClick={(e) => handleBranchSubtype(st, e)}
                   className="w-full text-left px-3 py-1.5 text-xs text-slate-300 hover:bg-charcoal-800 hover:text-gold-300 flex items-center justify-between transition-colors"
@@ -322,6 +357,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
           <button
             type="button"
             data-testid="reroll-button"
+            aria-label="Re-roll name while maintaining hierarchy"
             onClick={handleReRoll}
             className="p-1.5 rounded-md hover:bg-charcoal-800 hover:text-gold-400 transition-colors"
             title="Re-roll name while maintaining hierarchy"
@@ -335,6 +371,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
           <button
             type="button"
             data-testid="anglicize-toggle-button"
+            aria-label={isAnglicized ? 'Revert to authentic historical orthography' : 'Anglicize name'}
             onClick={handleToggleAnglicize}
             className={cn(
               'p-1.5 rounded-md border transition-colors',
@@ -355,6 +392,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
           <button
             type="button"
             data-testid="copy-button"
+            aria-label="Copy name to clipboard"
             onClick={handleCopy}
             className="p-1.5 rounded-md hover:bg-charcoal-800 hover:text-gold-400 transition-colors"
             title="Copy name to clipboard"
@@ -370,6 +408,7 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
           <button
             type="button"
             data-testid="inspect-tree-button"
+            aria-label="Inspect Lineage Tree"
             onClick={handleInspectTree}
             className="flex items-center gap-0.5 px-1.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-gold-400 hover:bg-charcoal-800 transition-colors"
             title="Inspect Lineage Tree"
@@ -382,3 +421,5 @@ export const EntityNodeCard: React.FC<EntityNodeCardProps> = ({
     </div>
   );
 };
+
+export const EntityNodeCard = React.memo(EntityNodeCardComponent);

@@ -65,6 +65,8 @@ export interface NominaState {
   reRollEntity: (entityId: string) => LoreEntity | undefined;
   toggleAnglicizeEntity: (entityId: string) => LoreEntity | undefined;
   togglePinEntity: (entity: LoreEntity) => void;
+  pinAllBatch: () => void;
+  reRollBatch: () => LoreEntity[];
   saveProjectBible: (name?: string) => NominaProjectBible;
   loadProjectBible: (bible: NominaProjectBible) => void;
   clearBatch: () => void;
@@ -645,6 +647,36 @@ const useRawNominaStore = create<NominaState>()(
           const updatedBatch = setPinnedFlagInTree(state.generatedBatch, entity.id, true);
           set({ pinnedEntities: updatedPinned, generatedBatch: updatedBatch });
         }
+      },
+
+      pinAllBatch: () => {
+        const state = get();
+        if (state.generatedBatch.length === 0) return;
+
+        const allPinned = state.generatedBatch.every((b) =>
+          state.pinnedEntities.some((p) => p.id === b.id)
+        );
+
+        if (allPinned) {
+          // Unpin all batch items
+          const batchIds = new Set(state.generatedBatch.map((b) => b.id));
+          const updatedPinned = state.pinnedEntities.filter((p) => !batchIds.has(p.id));
+          const updatedBatch = state.generatedBatch.map((b) => ({ ...b, pinned: false }));
+          set({ pinnedEntities: updatedPinned, generatedBatch: updatedBatch });
+        } else {
+          // Pin all batch items
+          const existingPinnedIds = new Set(state.pinnedEntities.map((p) => p.id));
+          const newPins = state.generatedBatch
+            .filter((b) => !existingPinnedIds.has(b.id))
+            .map((b) => ({ ...cloneEntityTree(b), pinned: true }));
+          const updatedPinned = [...state.pinnedEntities, ...newPins];
+          const updatedBatch = state.generatedBatch.map((b) => ({ ...b, pinned: true }));
+          set({ pinnedEntities: updatedPinned, generatedBatch: updatedBatch });
+        }
+      },
+
+      reRollBatch: () => {
+        return get().generateBatch();
       },
 
       saveProjectBible: (name = 'Nomina World Bible') => {
