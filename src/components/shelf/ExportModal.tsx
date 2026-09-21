@@ -78,6 +78,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   // Compute entities based on selected scope
   const targetEntities = useMemo<LoreEntity[]>(() => {
+    if (!isOpen) return [];
     if (exportScope === 'pinned') {
       return pinnedEntities;
     }
@@ -98,10 +99,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }
     }
     return combined;
-  }, [exportScope, pinnedEntities, generatedBatch]);
+  }, [isOpen, exportScope, pinnedEntities, generatedBatch]);
 
   // Generate serialized content based on format & scope
   const formattedContent = useMemo<string>(() => {
+    if (!isOpen) return '';
     switch (selectedFormat) {
       case 'markdown':
         return exportToMarkdown(targetEntities, { includeWikilinks: true });
@@ -124,7 +126,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       default:
         return '';
     }
-  }, [selectedFormat, targetEntities, exportScope, saveProjectBible]);
+  }, [isOpen, selectedFormat, targetEntities, exportScope, saveProjectBible]);
 
   // Preview content (first 40 lines)
   const previewLines = useMemo(() => {
@@ -190,7 +192,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           filters: [
             {
               name: selectedFormat.toUpperCase(),
-              extensions: [ext.replace(/^\./, '')],
+              extensions:
+                selectedFormat === 'nomina'
+                  ? ['json', 'nomina.json']
+                  : [ext.replace(/^\./, '')],
             },
           ],
         });
@@ -203,8 +208,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           });
           if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
           statusTimerRef.current = setTimeout(() => setImportStatus(null), 3000);
-          return;
         }
+        return;
       } catch (err) {
         console.warn('Native Tauri save dialog failed, falling back to browser download:', err);
       }
@@ -221,7 +226,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
 
         setImportStatus({
           type: 'success',
@@ -297,8 +302,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           });
           if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
           statusTimerRef.current = setTimeout(() => setImportStatus(null), 4000);
-          return;
         }
+        return;
       } catch (err) {
         console.warn('Native open dialog failed, falling back to file input:', err);
       }

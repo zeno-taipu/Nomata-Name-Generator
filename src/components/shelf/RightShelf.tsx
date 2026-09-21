@@ -24,6 +24,8 @@ export interface RightShelfProps {
   isCollapsed?: boolean;
   onToggleCollapse?: (collapsed: boolean) => void;
   onInspectTree?: (entity: LoreEntity) => void;
+  isExportModalOpen?: boolean;
+  onToggleExportModal?: (open: boolean) => void;
   className?: string;
 }
 
@@ -41,16 +43,30 @@ export const RightShelf: React.FC<RightShelfProps> = ({
   isCollapsed: controlledIsCollapsed,
   onToggleCollapse,
   onInspectTree,
+  isExportModalOpen: controlledIsExportModalOpen,
+  onToggleExportModal,
   className,
 }) => {
   const [internalCollapsed, setInternalCollapsed] = useState<boolean>(defaultCollapsed);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<RightShelfCategoryFilter>('all');
-  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [internalExportModalOpen, setInternalExportModalOpen] = useState<boolean>(false);
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
 
   const isCollapsed =
     controlledIsCollapsed !== undefined ? controlledIsCollapsed : internalCollapsed;
+
+  const isExportModalOpen =
+    controlledIsExportModalOpen !== undefined
+      ? controlledIsExportModalOpen
+      : internalExportModalOpen;
+
+  const setExportModalOpen = (open: boolean) => {
+    if (controlledIsExportModalOpen === undefined) {
+      setInternalExportModalOpen(open);
+    }
+    onToggleExportModal?.(open);
+  };
 
   const handleToggle = () => {
     const next = !isCollapsed;
@@ -142,6 +158,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
               type="button"
               data-testid="collapsed-shelf-icon-btn"
               onClick={handleToggle}
+              aria-label="Expand World Bible"
               title="Expand World Bible"
               className="p-2.5 rounded-xl bg-gold-500/10 text-gold-400 border border-gold-500/30 hover:bg-gold-500/20 transition-colors"
             >
@@ -161,7 +178,8 @@ export const RightShelf: React.FC<RightShelfProps> = ({
             <button
               type="button"
               data-testid="collapsed-export-btn"
-              onClick={() => setIsExportModalOpen(true)}
+              onClick={() => setExportModalOpen(true)}
+              aria-label="Open Export Hub"
               title="Open Export Hub"
               className="p-2 rounded-lg text-slate-400 hover:text-gold-400 hover:bg-charcoal-800 border border-transparent hover:border-charcoal-700 transition-colors"
             >
@@ -174,8 +192,11 @@ export const RightShelf: React.FC<RightShelfProps> = ({
             {/* Header: Title, Count, Export, Clear */}
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-charcoal-800 bg-charcoal-950/40">
               <div className="flex items-center gap-2">
-                <BookOpen size={18} className="text-gold-400" />
-                <h3 className="text-sm font-semibold text-slate-100 font-serif tracking-wide">
+                <BookOpen className="text-gold-400" size={17} />
+                <h3
+                  id="right-shelf-title"
+                  className="font-serif font-medium text-sm text-slate-100 tracking-wide"
+                >
                   World Bible
                 </h3>
                 <span
@@ -193,7 +214,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                   data-testid="open-export-modal-btn"
                   aria-label="Export World Bible"
                   title="Export entities or save project bible"
-                  onClick={() => setIsExportModalOpen(true)}
+                  onClick={() => setExportModalOpen(true)}
                   className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 rounded-lg transition-colors"
                 >
                   <Download size={13} />
@@ -363,10 +384,12 @@ export const RightShelf: React.FC<RightShelfProps> = ({
       </aside>
 
       {/* Export Modal Dialog */}
-      <ExportModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-      />
+      {isExportModalOpen && (
+        <ExportModal
+          isOpen={isExportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+        />
+      )}
     </>
   );
 };

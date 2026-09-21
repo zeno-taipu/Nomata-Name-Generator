@@ -106,7 +106,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               >
                 NOMINA
               </span>
-              <span className="hidden md:inline-block px-1.5 py-0.2 text-[9px] font-mono uppercase tracking-wider rounded bg-charcoal-800 border border-charcoal-700 text-slate-400">
+              <span className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider rounded bg-charcoal-800 border border-charcoal-700 text-slate-400">
                 v0.1.0
               </span>
             </div>
