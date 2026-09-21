@@ -210,7 +210,7 @@ const safeStorage = {
   },
 };
 
-export const useNominaStore = create<NominaState>()(
+const useRawNominaStore = create<NominaState>()(
   persist(
     (set, get) => ({
       // Default state
@@ -739,4 +739,19 @@ export const useNominaStore = create<NominaState>()(
       }),
     }
   )
+);
+
+type NominaStoreHook = {
+  (): NominaState;
+  <U>(selector: (state: NominaState) => U): U;
+} & typeof useRawNominaStore;
+
+export const useNominaStore: NominaStoreHook = Object.assign(
+  ((selector?: (state: NominaState) => unknown) => {
+    if (typeof window === 'undefined') {
+      return selector ? selector(useRawNominaStore.getState()) : useRawNominaStore.getState();
+    }
+    return useRawNominaStore(selector ?? ((s) => s));
+  }) as unknown as NominaStoreHook,
+  useRawNominaStore
 );
