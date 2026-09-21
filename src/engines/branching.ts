@@ -573,6 +573,12 @@ for (const rule of SUBTYPE_RULES) {
 // ============================================================================
 
 export class LineageBranchingEngine {
+  private static defaultInstance = new LineageBranchingEngine();
+
+  static getAvailableBranchSubtypes(parent: LoreEntity): string[] {
+    return LineageBranchingEngine.defaultInstance.getAvailableBranchSubtypes(parent);
+  }
+
   private readonly grammarEngine: RecursiveGrammarEngine;
   private readonly anglicizationEngine: AnglicizationEngine;
   private readonly defaultMarkovOrder: number;
