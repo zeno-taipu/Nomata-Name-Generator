@@ -10,13 +10,27 @@ import { cn } from '../../utils/cn';
 export interface CenterStudioProps {
   className?: string;
   defaultViewMode?: 'grid' | 'tree';
+  viewMode?: 'grid' | 'tree';
+  onViewModeChange?: (mode: 'grid' | 'tree') => void;
 }
 
 export const CenterStudio: React.FC<CenterStudioProps> = ({
   className,
   defaultViewMode = 'grid',
+  viewMode: controlledViewMode,
+  onViewModeChange,
 }) => {
-  const [viewMode, setViewMode] = useState<'grid' | 'tree'>(defaultViewMode);
+  const [internalViewMode, setInternalViewMode] = useState<'grid' | 'tree'>(defaultViewMode);
+  const viewMode = controlledViewMode !== undefined ? controlledViewMode : internalViewMode;
+
+  const handleViewModeChange = (mode: 'grid' | 'tree') => {
+    if (controlledViewMode === undefined) {
+      setInternalViewMode(mode);
+    }
+    if (onViewModeChange) {
+      onViewModeChange(mode);
+    }
+  };
 
   const generatedBatch = useNominaStore((s) => s.generatedBatch);
   const pinnedEntities = useNominaStore((s) => s.pinnedEntities);
@@ -43,7 +57,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
       {/* Top Sticky Toolbar */}
       <GeneratorControls
         viewMode={viewMode}
-        onViewModeChange={(mode) => setViewMode(mode)}
+        onViewModeChange={handleViewModeChange}
       />
 
       {/* Central Viewport */}
@@ -52,7 +66,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
           <BatchGridView
             onInspectTree={(entity) => {
               setActiveEntityId(entity.id);
-              setViewMode('tree');
+              handleViewModeChange('tree');
             }}
           />
         ) : (

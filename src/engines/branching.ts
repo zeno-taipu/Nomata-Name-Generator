@@ -629,13 +629,13 @@ export class LineageBranchingEngine {
     if (tier === 1 || /(macro region|continent|realm|province|territory)/.test(rawSubtype)) {
       return 'geography_tier1';
     }
-    if (tier === 2 || parent.featureSubtype === 'orogeny' || /(mountain|orogeny|range|peaks|ridge|highlands|basin|chain)/.test(rawSubtype)) {
-      return 'geography_tier2';
-    }
-    if (tier === 3 || parent.featureSubtype === 'hydrology' || /(river|hydrology|waterway|stream|delta|lake)/.test(rawSubtype)) {
+    if (parent.featureSubtype === 'hydrology' || tier === 3 || /(river|hydrology|waterway|stream|delta|lake)/.test(rawSubtype)) {
       return 'geography_tier3';
     }
-    if (tier === 4 || parent.featureSubtype === 'wilds' || /(wild|forest|wood|marsh|fen|wetland|grove|cave|steppe|biome)/.test(rawSubtype)) {
+    if (parent.featureSubtype === 'orogeny' || tier === 2 || /(mountain|orogeny|range|peaks|ridge|highlands|basin|chain)/.test(rawSubtype)) {
+      return 'geography_tier2';
+    }
+    if (parent.featureSubtype === 'wilds' || tier === 4 || /(wild|forest|wood|marsh|fen|wetland|grove|cave|steppe|biome)/.test(rawSubtype)) {
       return 'geography_tier4';
     }
 

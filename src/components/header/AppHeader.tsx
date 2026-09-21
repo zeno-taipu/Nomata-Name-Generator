@@ -21,6 +21,8 @@ import { cn } from '../../utils/cn';
 export interface AppHeaderProps {
   leftSidebarCollapsed?: boolean;
   rightShelfCollapsed?: boolean;
+  isLeftSidebarCollapsed?: boolean;
+  isRightShelfCollapsed?: boolean;
   onToggleLeftSidebar?: () => void;
   onToggleRightShelf?: () => void;
   onOpenExport?: () => void;
@@ -36,13 +38,17 @@ const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
 };
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
-  leftSidebarCollapsed = false,
-  rightShelfCollapsed = false,
+  leftSidebarCollapsed,
+  rightShelfCollapsed,
+  isLeftSidebarCollapsed,
+  isRightShelfCollapsed,
   onToggleLeftSidebar,
   onToggleRightShelf,
   onOpenExport,
   className,
 }) => {
+  const leftCollapsed = isLeftSidebarCollapsed ?? leftSidebarCollapsed ?? false;
+  const rightCollapsed = isRightShelfCollapsed ?? rightShelfCollapsed ?? false;
   const activeCategory = useNominaStore((s) => s.activeCategory);
   const activeCultureIds = useNominaStore((s) => s.activeCultureIds);
   const pinnedEntities = useNominaStore((s) => s.pinnedEntities);
@@ -79,12 +85,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <button
           type="button"
           data-testid="header-toggle-left-sidebar"
-          aria-label={leftSidebarCollapsed ? 'Expand navigation sidebar' : 'Collapse navigation sidebar'}
-          title={leftSidebarCollapsed ? 'Expand left sidebar' : 'Collapse left sidebar'}
+          aria-label={leftCollapsed ? 'Expand navigation sidebar' : 'Collapse navigation sidebar'}
+          title={leftCollapsed ? 'Expand left sidebar' : 'Collapse left sidebar'}
           onClick={onToggleLeftSidebar}
           className={cn(
             'p-1.5 rounded-lg border transition-colors',
-            leftSidebarCollapsed
+            leftCollapsed
               ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
               : 'text-gold-400 bg-gold-500/10 border-gold-500/30 hover:bg-gold-500/20'
           )}
@@ -184,12 +190,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <button
           type="button"
           data-testid="header-toggle-right-shelf"
-          aria-label={rightShelfCollapsed ? 'Expand World Bible shelf' : 'Collapse World Bible shelf'}
-          title={rightShelfCollapsed ? 'Expand right shelf' : 'Collapse right shelf'}
+          aria-label={rightCollapsed ? 'Expand World Bible shelf' : 'Collapse World Bible shelf'}
+          title={rightCollapsed ? 'Expand right shelf' : 'Collapse right shelf'}
           onClick={onToggleRightShelf}
           className={cn(
             'p-1.5 rounded-lg border transition-colors',
-            rightShelfCollapsed
+            rightCollapsed
               ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
               : 'text-gold-400 bg-gold-500/10 border-gold-500/30 hover:bg-gold-500/20'
           )}
