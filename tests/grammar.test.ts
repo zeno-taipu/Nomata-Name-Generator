@@ -84,4 +84,21 @@ describe('RecursiveGrammarEngine', () => {
     const result = engine.resolve(template);
     expect(result).toBe('The Iron Citadel');
   });
+
+  it('resolves Markov tokens per culture without cross-cultural cache contamination', () => {
+    const multiCultureEngine = new RecursiveGrammarEngine();
+    const gaelicResult = multiCultureEngine.resolve('{Markov:Settlement}', {
+      culture: cultures.celtic_gaelic,
+    });
+    const slavicResult = multiCultureEngine.resolve('{Markov:Settlement}', {
+      culture: cultures.danubian_slavic,
+    });
+    expect(gaelicResult.length).toBeGreaterThan(3);
+    expect(slavicResult.length).toBeGreaterThan(3);
+
+    // Verify cache stores separate Markov models keyed by culture ID and category
+    const cache = (multiCultureEngine as unknown as { cultureMarkovCache: Map<string, unknown> }).cultureMarkovCache;
+    expect(cache.has('celtic_gaelic:settlement')).toBe(true);
+    expect(cache.has('danubian_slavic:settlement')).toBe(true);
+  });
 });

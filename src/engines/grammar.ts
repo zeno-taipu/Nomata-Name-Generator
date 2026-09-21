@@ -94,13 +94,17 @@ export class RecursiveGrammarEngine {
     let safety = 30;
     const bracketRegex = /\[([^\[\]]*)\]/g;
 
-    while (safety > 0 && bracketRegex.test(result)) {
+    while (safety > 0 && result.includes('[')) {
       safety--;
-      result = result.replace(bracketRegex, (_match, inner: string) => {
+      const next = result.replace(bracketRegex, (_match, inner: string) => {
         const parts = inner.split('|');
         const chosen = this.chooseRandom(parts, context);
         return chosen !== undefined ? chosen.trim() : '';
       });
+      if (next === result) {
+        break;
+      }
+      result = next;
     }
 
     return result;
@@ -195,11 +199,13 @@ export class RecursiveGrammarEngine {
     if (culture) {
       const seeds = this.extractCultureSeedsForCategory(cleanCategory, culture, context);
       if (seeds && seeds.length > 0) {
-        let cached = this.cultureMarkovCache.get(lowerCat);
+        const cultureKey = (culture as CultureProfile)?.id ?? 'default';
+        const cacheKey = `${cultureKey}:${lowerCat}`;
+        let cached = this.cultureMarkovCache.get(cacheKey);
         if (!cached) {
           try {
             cached = new MarkovNameGenerator(seeds, { order: 2 });
-            this.cultureMarkovCache.set(lowerCat, cached);
+            this.cultureMarkovCache.set(cacheKey, cached);
           } catch {
             // training failed
           }
