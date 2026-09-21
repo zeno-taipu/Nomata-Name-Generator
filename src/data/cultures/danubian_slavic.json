@@ -74,7 +74,7 @@
   "grammar_templates": {
     "character_full_name": [
       "{given} {surname}",
-      "{given} the {epithet}",
+      "{given} {epithet}",
       "{title} {given} of {settlement}",
       "{given} {surname}, {title} of {settlement}"
     ],

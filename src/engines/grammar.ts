@@ -491,11 +491,13 @@ export class RecursiveGrammarEngine {
   }
 
   /**
-   * Clean up double spaces, punctuation spacing, and trim whitespace
+   * Clean up double spaces, punctuation spacing, redundant articles, and trim whitespace
    */
   private cleanWhitespace(text: string): string {
     return text
       .replace(/\s+/g, ' ')
+      .replace(/\bthe\s+(of\s+the)\b/gi, '$1')
+      .replace(/\b([Tt]he|[Aa]n?)(?:\s+(?:the|a|an))+\b/gi, (match) => match.split(/\s+/)[0])
       .replace(/\s+([,.;:!?])/g, '$1')
       .replace(/\(\s+/g, '(')
       .replace(/\s+\)/g, ')')

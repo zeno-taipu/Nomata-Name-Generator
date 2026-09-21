@@ -226,4 +226,22 @@ describe('AnglicizationEngine', () => {
     expect(reverted.metadata?.role).toBe('ruler');
     expect(reverted.metadata?._originalEpithet).toBeUndefined();
   });
+
+  // 10. Article Deduplication Tests
+  it('collapses duplicate articles during Anglicization and title localization', () => {
+    // Foreign title mapping to English 'the Brave' when preceded by 'the'
+    const result1 = engine.anglicize('Vladislav the cel Viteaz', {
+      mode: 'full',
+      cultureId: 'danubian_slavic',
+    });
+    expect(result1.anglicizedName).toBe('Vladislav the Brave');
+    expect(result1.anglicizedName).not.toMatch(/\bthe\s+the\b/i);
+
+    // Explicit double the in raw input string
+    const result2 = engine.anglicize('Vladislav the the Brave', {
+      mode: 'phonetic',
+    });
+    expect(result2.anglicizedName).toBe('Vladislav the Brave');
+  });
 });
+

@@ -74,7 +74,7 @@
     "character_full_name": [
       "{given} {surname}",
       "{given} of {settlement}",
-      "{given} the {epithet}",
+      "{given} {epithet}",
       "{title} {given} of {settlement}"
     ],
     "settlement_name": [

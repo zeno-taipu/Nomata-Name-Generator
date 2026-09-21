@@ -19,6 +19,16 @@ const PRESET_HONORIFICS = ['Ser', 'Lady', 'Archon', 'Vojvoda', 'Jarl', 'Boyar', 
 const PRESET_PREFIXES = ["O'", 'Mac', 'Von', 'Al-', 'De', 'Fitz', 'Ben'];
 const PRESET_SUFFIXES = ['-ford', '-grad', '-by', '-stead', '-gard', '-vale', '-wick'];
 const PRESET_SEEDS = ['Valer', 'Ael', 'Drak', 'Khor', 'Vane', 'Thal', 'Mor', 'Sol'];
+const PRESET_EPITHETS = [
+  'the Brave',
+  'the Undaunted',
+  'the Bloodhound',
+  'the Iron Hand',
+  'the Silent',
+  'the Swift',
+  'the Wise',
+  'the Shadow',
+];
 
 export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
   isOpen,
@@ -33,6 +43,7 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
   const [prefixInput, setPrefixInput] = useState('');
   const [suffixInput, setSuffixInput] = useState('');
   const [seedInput, setSeedInput] = useState('');
+  const [epithetInput, setEpithetInput] = useState('');
 
   // Handle ESC key to close
   useEffect(() => {
@@ -51,12 +62,14 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
   const currentPrefixes = customVocabulary.customPrefixes ?? [];
   const currentSuffixes = customVocabulary.customSuffixes ?? [];
   const currentSeeds = customVocabulary.customSeeds?.settlement_roots ?? [];
+  const currentEpithets = customVocabulary.customSeeds?.epithets ?? [];
 
   const totalCustomCount =
     currentHonorifics.length +
     currentPrefixes.length +
     currentSuffixes.length +
-    currentSeeds.length;
+    currentSeeds.length +
+    currentEpithets.length;
 
   // Tag manipulation helpers
   const addTag = (
@@ -106,6 +119,20 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
         ...(customVocabulary.customSeeds || {}),
         settlement_roots: newList,
         given_names_masculine: newList,
+        given_names_feminine: newList,
+        surnames: newList,
+        orogeny_stems: newList,
+        hydrology_stems: newList,
+        wilds_stems: newList,
+      },
+    });
+  };
+
+  const updateEpithets = (newList: string[]) => {
+    setCustomVocabulary({
+      customSeeds: {
+        ...(customVocabulary.customSeeds || {}),
+        epithets: newList,
       },
     });
   };
@@ -118,6 +145,12 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
       customSeeds: {
         settlement_roots: [],
         given_names_masculine: [],
+        given_names_feminine: [],
+        surnames: [],
+        orogeny_stems: [],
+        hydrology_stems: [],
+        wilds_stems: [],
+        epithets: [],
       },
     });
   };
@@ -523,6 +556,93 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
                       type="button"
                       onClick={() => removeTag(seed, currentSeeds, updateSeeds)}
                       aria-label={`Remove ${seed}`}
+                      className="hover:text-red-400 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Section 5: Custom Epithets */}
+          <section className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="input-epithet"
+                className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
+              >
+                <span>Custom Epithets & Cognomens</span>
+                <span className="text-slate-400 font-normal">({currentEpithets.length})</span>
+              </label>
+              <span className="text-[11px] text-slate-400">e.g., the Brave, the Undaunted, the Iron Hand</span>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                id="input-epithet"
+                type="text"
+                value={epithetInput}
+                onChange={(e) => setEpithetInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag(epithetInput, currentEpithets, updateEpithets, () => setEpithetInput(''));
+                  }
+                }}
+                placeholder="Enter epithet (e.g. the Brave, the Iron Hand) & press Enter"
+                className="flex-1 px-3 py-2 text-xs bg-charcoal-800 border border-charcoal-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-gold-500/60 focus:ring-1 focus:ring-gold-500/30"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  addTag(epithetInput, currentEpithets, updateEpithets, () => setEpithetInput(''))
+                }
+                className="px-3 py-2 text-xs font-medium rounded-lg bg-gold-500/20 text-gold-300 border border-gold-500/30 hover:bg-gold-500/30 flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add
+              </button>
+            </div>
+
+            {/* Presets */}
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
+              <span className="text-slate-400">Quick Epithets:</span>
+              {PRESET_EPITHETS.map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    if (!currentEpithets.includes(preset)) {
+                      updateEpithets([...currentEpithets, preset]);
+                    }
+                  }}
+                  className={cn(
+                    'px-2 py-0.5 rounded text-[10px] border transition-colors',
+                    currentEpithets.includes(preset)
+                      ? 'bg-gold-500/10 border-gold-500/30 text-gold-400 cursor-default'
+                      : 'bg-charcoal-800 border-charcoal-700 hover:border-slate-500 text-slate-300'
+                  )}
+                >
+                  +{preset}
+                </button>
+              ))}
+            </div>
+
+            {/* Tag Pills */}
+            {currentEpithets.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 p-2 bg-charcoal-850/60 rounded-lg border border-charcoal-750 max-h-32 overflow-y-auto">
+                {currentEpithets.map((ep) => (
+                  <span
+                    key={ep}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-gold-500/10 text-gold-300 border border-gold-500/30"
+                  >
+                    <span>{ep}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeTag(ep, currentEpithets, updateEpithets)}
+                      aria-label={`Remove ${ep}`}
                       className="hover:text-red-400 transition-colors"
                     >
                       <X className="w-3 h-3" />

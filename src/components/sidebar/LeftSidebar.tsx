@@ -49,7 +49,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
     (customVocabulary.honorifics?.length ?? 0) +
     (customVocabulary.customPrefixes?.length ?? 0) +
     (customVocabulary.customSuffixes?.length ?? 0) +
-    (customVocabulary.customSeeds?.settlement_roots?.length ?? 0);
+    (customVocabulary.customSeeds?.settlement_roots?.length ?? 0) +
+    (customVocabulary.customSeeds?.epithets?.length ?? 0);
 
   return (
     <>

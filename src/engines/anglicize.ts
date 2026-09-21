@@ -373,6 +373,11 @@ export class AnglicizationEngine {
       }
     }
 
+    processed = this.sanitizeArticles(processed);
+    if (anglicizedTitle) {
+      anglicizedTitle = this.sanitizeArticles(anglicizedTitle);
+    }
+
     // Build dual display formatting
     const exonymDualDisplay = options?.exonymDualDisplay ?? false;
     let formattedDisplay = processed;
@@ -655,6 +660,7 @@ export class AnglicizationEngine {
         detectedTitle = englishTitle;
       }
     }
+    current = this.sanitizeArticles(current);
 
     // 4. Translate known cognates and roots
     const words = current.split(/(\s+|-)/);
@@ -690,10 +696,22 @@ export class AnglicizationEngine {
     const title = detectedTitle ? this.anglicizeTitle(detectedTitle) : undefined;
 
     return {
-      name: current,
+      name: this.sanitizeArticles(current),
       root,
       title,
     };
+  }
+
+  /**
+   * Sanitizes duplicate consecutive articles (e.g. 'the the', 'The the', 'the of the')
+   */
+  private sanitizeArticles(text: string): string {
+    if (!text) return text;
+    return text
+      .replace(/\bthe\s+(of\s+the)\b/gi, '$1')
+      .replace(/\b([Tt]he|[Aa]n?)(?:\s+(?:the|a|an))+\b/gi, (match) => match.split(/\s+/)[0])
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   /**
@@ -702,14 +720,14 @@ export class AnglicizationEngine {
   private anglicizeTitle(title: string): string {
     const lower = title.toLowerCase().trim();
     if (TITLE_EPITHET_MAP[lower]) {
-      return TITLE_EPITHET_MAP[lower];
+      return this.sanitizeArticles(TITLE_EPITHET_MAP[lower]);
     }
     for (const [foreign, english] of Object.entries(TITLE_EPITHET_MAP)) {
       if (lower.includes(foreign)) {
-        return lower.replace(foreign, english);
+        return this.sanitizeArticles(lower.replace(foreign, english));
       }
     }
-    return title;
+    return this.sanitizeArticles(title);
   }
 
   /**

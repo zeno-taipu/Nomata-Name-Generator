@@ -212,6 +212,125 @@ const safeStorage = {
   },
 };
 
+/**
+ * Prepares augmented culture and custom grammar variables so that all user-supplied
+ * custom vocabulary, affixes, honorifics, epithets, and seed roots are actively applied
+ * during generation, re-rolls, and lineage branching.
+ */
+function getAugmentedCultureAndVariables(
+  primaryCulture: CultureProfile,
+  customVocabulary: CustomVocabularyState | undefined,
+  _category?: EntityCategory
+) {
+  const cs = customVocabulary?.customSeeds;
+  const customRoots: string[] = [
+    ...(cs?.settlement_roots || []),
+    ...(cs?.given_names_masculine || []),
+    ...(cs?.given_names_feminine || []),
+    ...(cs?.surnames || []),
+    ...(cs?.orogeny_stems || []),
+    ...(cs?.hydrology_stems || []),
+    ...(cs?.wilds_stems || []),
+  ];
+  const uniqueCustomRoots = Array.from(new Set(customRoots)).filter((s) => s && s.trim().length > 0);
+
+  const customVariables: Record<string, string | number | string[]> = {};
+
+  if (customVocabulary?.honorifics && customVocabulary.honorifics.length > 0) {
+    customVariables['title'] = customVocabulary.honorifics;
+    customVariables['honorific_titles'] = customVocabulary.honorifics;
+  }
+  if (customVocabulary?.customPrefixes && customVocabulary.customPrefixes.length > 0) {
+    customVariables['prefix'] = customVocabulary.customPrefixes;
+    customVariables['prefixes'] = customVocabulary.customPrefixes;
+  }
+  if (customVocabulary?.customSuffixes && customVocabulary.customSuffixes.length > 0) {
+    customVariables['suffix'] = customVocabulary.customSuffixes;
+    customVariables['suffixes'] = customVocabulary.customSuffixes;
+  }
+  if (cs?.epithets && cs.epithets.length > 0) {
+    customVariables['epithet'] = cs.epithets;
+    customVariables['epithets'] = cs.epithets;
+  }
+
+  if (uniqueCustomRoots.length > 0) {
+    customVariables['root'] = uniqueCustomRoots;
+    customVariables['settlement'] = uniqueCustomRoots;
+    customVariables['settlement_roots'] = uniqueCustomRoots;
+    customVariables['given'] = uniqueCustomRoots;
+    customVariables['given_names_masculine'] = uniqueCustomRoots;
+    customVariables['given_names_feminine'] = uniqueCustomRoots;
+    customVariables['stem'] = uniqueCustomRoots;
+    customVariables['orogeny'] = uniqueCustomRoots;
+    customVariables['hydrology'] = uniqueCustomRoots;
+    customVariables['wilds'] = uniqueCustomRoots;
+    customVariables['surname'] = uniqueCustomRoots;
+  }
+
+  const augmentedCulture: CultureProfile = {
+    ...primaryCulture,
+    seeds: {
+      ...primaryCulture.seeds,
+      given_names_masculine: uniqueCustomRoots.length > 0
+        ? [...uniqueCustomRoots, ...primaryCulture.seeds.given_names_masculine]
+        : primaryCulture.seeds.given_names_masculine,
+      given_names_feminine: uniqueCustomRoots.length > 0
+        ? [...uniqueCustomRoots, ...primaryCulture.seeds.given_names_feminine]
+        : primaryCulture.seeds.given_names_feminine,
+      settlement_roots: uniqueCustomRoots.length > 0
+        ? [...uniqueCustomRoots, ...primaryCulture.seeds.settlement_roots]
+        : primaryCulture.seeds.settlement_roots,
+      surnames: uniqueCustomRoots.length > 0
+        ? [...uniqueCustomRoots, ...primaryCulture.seeds.surnames]
+        : primaryCulture.seeds.surnames,
+      prefixes: customVocabulary?.customPrefixes?.length
+        ? [...customVocabulary.customPrefixes, ...(primaryCulture.seeds.prefixes || [])]
+        : primaryCulture.seeds.prefixes,
+      suffixes: customVocabulary?.customSuffixes?.length
+        ? [...customVocabulary.customSuffixes, ...(primaryCulture.seeds.suffixes || [])]
+        : primaryCulture.seeds.suffixes,
+      honorific_titles: customVocabulary?.honorifics?.length
+        ? [...customVocabulary.honorifics, ...(primaryCulture.seeds.honorific_titles || [])]
+        : primaryCulture.seeds.honorific_titles,
+      epithets: cs?.epithets?.length
+        ? [...cs.epithets, ...(primaryCulture.seeds.epithets || [])]
+        : primaryCulture.seeds.epithets,
+    },
+    geographic_lexicon: {
+      ...primaryCulture.geographic_lexicon,
+      orogeny: {
+        ...primaryCulture.geographic_lexicon.orogeny,
+        stems: uniqueCustomRoots.length > 0
+          ? [...uniqueCustomRoots, ...primaryCulture.geographic_lexicon.orogeny.stems]
+          : primaryCulture.geographic_lexicon.orogeny.stems,
+        suffixes: customVocabulary?.customSuffixes?.length
+          ? [...customVocabulary.customSuffixes, ...primaryCulture.geographic_lexicon.orogeny.suffixes]
+          : primaryCulture.geographic_lexicon.orogeny.suffixes,
+      },
+      hydrology: {
+        ...primaryCulture.geographic_lexicon.hydrology,
+        stems: uniqueCustomRoots.length > 0
+          ? [...uniqueCustomRoots, ...primaryCulture.geographic_lexicon.hydrology.stems]
+          : primaryCulture.geographic_lexicon.hydrology.stems,
+        suffixes: customVocabulary?.customSuffixes?.length
+          ? [...customVocabulary.customSuffixes, ...primaryCulture.geographic_lexicon.hydrology.suffixes]
+          : primaryCulture.geographic_lexicon.hydrology.suffixes,
+      },
+      wilds: {
+        ...primaryCulture.geographic_lexicon.wilds,
+        stems: uniqueCustomRoots.length > 0
+          ? [...uniqueCustomRoots, ...primaryCulture.geographic_lexicon.wilds.stems]
+          : primaryCulture.geographic_lexicon.wilds.stems,
+        suffixes: customVocabulary?.customSuffixes?.length
+          ? [...customVocabulary.customSuffixes, ...primaryCulture.geographic_lexicon.wilds.suffixes]
+          : primaryCulture.geographic_lexicon.wilds.suffixes,
+      },
+    },
+  };
+
+  return { augmentedCulture, customVariables, uniqueCustomRoots };
+}
+
 const useRawNominaStore = create<NominaState>()(
   persist(
     (set, get) => ({
@@ -264,6 +383,10 @@ const useRawNominaStore = create<NominaState>()(
           customVocabulary: {
             ...state.customVocabulary,
             ...vocab,
+            customSeeds: {
+              ...(state.customVocabulary?.customSeeds || {}),
+              ...(vocab.customSeeds || {}),
+            },
           },
         })),
 
@@ -285,6 +408,12 @@ const useRawNominaStore = create<NominaState>()(
 
         const safeProfiles = cultureProfiles.length > 0 ? cultureProfiles : [cultures['danubian_slavic']];
         const primaryCulture = safeProfiles[0];
+
+        const { augmentedCulture, customVariables, uniqueCustomRoots } = getAugmentedCultureAndVariables(
+          primaryCulture,
+          state.customVocabulary,
+          normalizedCat
+        );
 
         // Gather seed dictionaries with weights
         const weightedSeeds: WeightedSeeds[] = [];
@@ -315,20 +444,8 @@ const useRawNominaStore = create<NominaState>()(
           weightedSeeds.push({ seeds, weight });
         }
 
-        if (state.customVocabulary?.customSeeds) {
-          const cs = state.customVocabulary.customSeeds;
-          const customList = [
-            ...(cs.given_names_masculine || []),
-            ...(cs.given_names_feminine || []),
-            ...(cs.surnames || []),
-            ...(cs.settlement_roots || []),
-            ...(cs.orogeny_stems || []),
-            ...(cs.hydrology_stems || []),
-            ...(cs.wilds_stems || []),
-          ];
-          if (customList.length > 0) {
-            weightedSeeds.push({ seeds: customList, weight: 2.0 });
-          }
+        if (uniqueCustomRoots.length > 0) {
+          weightedSeeds.push({ seeds: uniqueCustomRoots, weight: 3.5 });
         }
 
         const markov = new MarkovNameGenerator(undefined, { order: state.markovOrder });
@@ -336,24 +453,9 @@ const useRawNominaStore = create<NominaState>()(
 
         const grammarEngine = new RecursiveGrammarEngine({
           markov,
-          culture: primaryCulture,
+          culture: augmentedCulture,
         });
         const anglicizationEngine = new AnglicizationEngine();
-
-        // Custom variables injection
-        const customVariables: Record<string, string | number | string[]> = {};
-        if (state.customVocabulary?.honorifics && state.customVocabulary.honorifics.length > 0) {
-          customVariables['title'] = state.customVocabulary.honorifics;
-          customVariables['honorific_titles'] = state.customVocabulary.honorifics;
-        }
-        if (state.customVocabulary?.customPrefixes && state.customVocabulary.customPrefixes.length > 0) {
-          customVariables['prefix'] = state.customVocabulary.customPrefixes;
-          customVariables['prefixes'] = state.customVocabulary.customPrefixes;
-        }
-        if (state.customVocabulary?.customSuffixes && state.customVocabulary.customSuffixes.length > 0) {
-          customVariables['suffix'] = state.customVocabulary.customSuffixes;
-          customVariables['suffixes'] = state.customVocabulary.customSuffixes;
-        }
 
         const newBatch: LoreEntity[] = [];
 
@@ -363,14 +465,41 @@ const useRawNominaStore = create<NominaState>()(
           let subtype = state.targetSubtype && state.targetSubtype !== 'auto' ? state.targetSubtype : undefined;
 
           if (normalizedCat === 'character') {
-            const templates = primaryCulture.grammar_templates?.character_full_name || ['{given} {surname}'];
+            let templates = [...(augmentedCulture.grammar_templates?.character_full_name || ['{given} {surname}'])];
+            if (state.customVocabulary?.honorifics && state.customVocabulary.honorifics.length > 0) {
+              templates = [
+                '{title} {given} {surname}',
+                '{title} {given}',
+                '{title} {given} of {settlement}',
+                ...templates,
+              ];
+            }
+            if (state.customVocabulary?.customSeeds?.epithets && state.customVocabulary.customSeeds.epithets.length > 0) {
+              templates = [
+                '{given} {epithet}',
+                '{title} {given} {epithet}',
+                ...templates,
+              ];
+            }
             template = templates[i % templates.length];
             if (!subtype) {
               const subtypes = ['Noble', 'Warrior', 'Scholar', 'Wanderer', 'Artisan'];
               subtype = subtypes[i % subtypes.length];
             }
           } else if (normalizedCat === 'settlement') {
-            const templates = primaryCulture.grammar_templates?.settlement_name || ['{root}'];
+            let templates = [...(augmentedCulture.grammar_templates?.settlement_name || ['{root}'])];
+            if (
+              (state.customVocabulary?.customPrefixes && state.customVocabulary.customPrefixes.length > 0) ||
+              (state.customVocabulary?.customSuffixes && state.customVocabulary.customSuffixes.length > 0)
+            ) {
+              templates = [
+                '{prefix}{root}',
+                '{root}{suffix}',
+                '{prefix}{root}{suffix}',
+                '{prefix} {root}',
+                ...templates,
+              ];
+            }
             template = templates[i % templates.length];
             if (!subtype) {
               const subtypes = ['Metropolis', 'Fortress', 'Town', 'Haven', 'Village'];
@@ -380,7 +509,18 @@ const useRawNominaStore = create<NominaState>()(
             const geoTypes: GeographicFeatureType[] = ['orogeny', 'hydrology', 'wilds'];
             const chosen = geoTypes[i % geoTypes.length];
             featureSubtype = chosen;
-            const geoTemplates = primaryCulture.grammar_templates?.[`${chosen}_name`] || ['{stem}'];
+            let geoTemplates = [...(augmentedCulture.grammar_templates?.[`${chosen}_name`] || ['{stem}'])];
+            if (
+              (state.customVocabulary?.customPrefixes && state.customVocabulary.customPrefixes.length > 0) ||
+              (state.customVocabulary?.customSuffixes && state.customVocabulary.customSuffixes.length > 0)
+            ) {
+              geoTemplates = [
+                '{stem}{suffix}',
+                '{prefix} {stem}',
+                '{prefix}{stem}{suffix}',
+                ...geoTemplates,
+              ];
+            }
             template = geoTemplates[i % geoTemplates.length];
             if (!subtype) {
               subtype = chosen === 'orogeny' ? 'Mountain Range' : chosen === 'hydrology' ? 'River Basin' : 'Primeval Woods';
@@ -394,7 +534,7 @@ const useRawNominaStore = create<NominaState>()(
           }
 
           let resolvedName = grammarEngine.resolve(template, {
-            culture: primaryCulture,
+            culture: augmentedCulture,
             markov,
             customVariables,
             featureSubtype,
@@ -446,6 +586,13 @@ const useRawNominaStore = create<NominaState>()(
 
         if (!parent) return [];
 
+        const parentCulture = getCultureById(parent.cultureId) ?? cultures['danubian_slavic'];
+        const { customVariables, augmentedCulture } = getAugmentedCultureAndVariables(
+          parentCulture,
+          state.customVocabulary,
+          parent.category
+        );
+
         const branchingEngine = new LineageBranchingEngine({
           markovOrder: state.markovOrder,
           temperature: state.temperature,
@@ -462,6 +609,8 @@ const useRawNominaStore = create<NominaState>()(
           temperature: state.temperature,
           anglicize: state.anglicize,
           anglicizeMode: state.anglicizeMode,
+          culture: augmentedCulture,
+          customVariables,
         });
 
         const updater = (p: LoreEntity): LoreEntity => ({
@@ -490,13 +639,20 @@ const useRawNominaStore = create<NominaState>()(
 
         const anglicizationEngine = new AnglicizationEngine();
 
-        // If entity has a parent, branch a replacement from parent
+        // If entity has parentId, use LineageBranchingEngine to maintain lineage consistency
         if (target.parentId) {
           const parent =
             findEntityInTree(state.generatedBatch, target.parentId) ||
             findEntityInTree(state.pinnedEntities, target.parentId);
 
           if (parent) {
+            const parentCulture = getCultureById(parent.cultureId) ?? cultures['danubian_slavic'];
+            const { customVariables, augmentedCulture } = getAugmentedCultureAndVariables(
+              parentCulture,
+              state.customVocabulary,
+              parent.category
+            );
+
             const branchingEngine = new LineageBranchingEngine({
               markovOrder: state.markovOrder,
               temperature: state.temperature,
@@ -513,6 +669,8 @@ const useRawNominaStore = create<NominaState>()(
               temperature: state.temperature,
               anglicize: target.anglicization?.enabled ?? state.anglicize,
               anglicizeMode: target.anglicization?.mode ?? state.anglicizeMode,
+              culture: augmentedCulture,
+              customVariables,
             });
 
             if (tempChild) {
@@ -540,32 +698,65 @@ const useRawNominaStore = create<NominaState>()(
         }
 
         // Otherwise root entity re-roll
-        const culture = getCultureById(target.cultureId) ?? cultures['danubian_slavic'];
+        const baseCulture = getCultureById(target.cultureId) ?? cultures['danubian_slavic'];
+        const { customVariables, augmentedCulture, uniqueCustomRoots } = getAugmentedCultureAndVariables(
+          baseCulture,
+          state.customVocabulary,
+          target.category
+        );
+
         const markov = new MarkovNameGenerator(undefined, { order: state.markovOrder });
         const seeds = [
-          ...(culture.seeds?.given_names_masculine || []),
-          ...(culture.seeds?.given_names_feminine || []),
-          ...(culture.seeds?.settlement_roots || []),
+          ...uniqueCustomRoots,
+          ...(augmentedCulture.seeds?.given_names_masculine || []),
+          ...(augmentedCulture.seeds?.given_names_feminine || []),
+          ...(augmentedCulture.seeds?.settlement_roots || []),
         ];
         markov.train(seeds.length > 0 ? seeds : ['Novigrad', 'Branimir']);
 
-        const grammarEngine = new RecursiveGrammarEngine({ markov, culture });
+        const grammarEngine = new RecursiveGrammarEngine({ markov, culture: augmentedCulture });
         let template = '{root}';
         const normCat = normalizeEntityCategory(target.category);
 
-        if (normCat === 'character' && culture.grammar_templates?.character_full_name?.length) {
-          template = culture.grammar_templates.character_full_name[0];
-        } else if (normCat === 'settlement' && culture.grammar_templates?.settlement_name?.length) {
-          template = culture.grammar_templates.settlement_name[0];
+        if (normCat === 'character' && augmentedCulture.grammar_templates?.character_full_name?.length) {
+          let templates = [...augmentedCulture.grammar_templates.character_full_name];
+          if (state.customVocabulary?.honorifics && state.customVocabulary.honorifics.length > 0) {
+            templates = ['{title} {given} {surname}', '{title} {given}', ...templates];
+          }
+          if (state.customVocabulary?.customSeeds?.epithets && state.customVocabulary.customSeeds.epithets.length > 0) {
+            templates = ['{given} {epithet}', '{title} {given} {epithet}', ...templates];
+          }
+          template = templates[Math.floor(Math.random() * templates.length)];
+        } else if (normCat === 'settlement' && augmentedCulture.grammar_templates?.settlement_name?.length) {
+          let templates = [...augmentedCulture.grammar_templates.settlement_name];
+          if (
+            (state.customVocabulary?.customPrefixes && state.customVocabulary.customPrefixes.length > 0) ||
+            (state.customVocabulary?.customSuffixes && state.customVocabulary.customSuffixes.length > 0)
+          ) {
+            templates = ['{prefix}{root}', '{root}{suffix}', '{prefix}{root}{suffix}', ...templates];
+          }
+          template = templates[Math.floor(Math.random() * templates.length)];
         } else if (normCat === 'geography' && target.featureSubtype) {
-          template = culture.grammar_templates?.[`${target.featureSubtype}_name`]?.[0] ?? '{stem}';
+          let geoTemplates = augmentedCulture.grammar_templates?.[`${target.featureSubtype}_name`] ?? ['{stem}'];
+          if (
+            (state.customVocabulary?.customPrefixes && state.customVocabulary.customPrefixes.length > 0) ||
+            (state.customVocabulary?.customSuffixes && state.customVocabulary.customSuffixes.length > 0)
+          ) {
+            geoTemplates = ['{stem}{suffix}', '{prefix} {stem}', ...geoTemplates];
+          }
+          template = geoTemplates[Math.floor(Math.random() * geoTemplates.length)];
         } else if (normCat === 'faction') {
           template = FACTION_TEMPLATES[Math.floor(Math.random() * FACTION_TEMPLATES.length)];
         } else if (normCat === 'artifact') {
           template = ARTIFACT_TEMPLATES[Math.floor(Math.random() * ARTIFACT_TEMPLATES.length)];
         }
 
-        let newName = grammarEngine.resolve(template, { culture, markov });
+        let newName = grammarEngine.resolve(template, {
+          culture: augmentedCulture,
+          markov,
+          customVariables,
+          featureSubtype: target.featureSubtype,
+        });
         if (!newName || newName.includes('{')) {
           newName = markov.generate({ temperature: state.temperature });
         }

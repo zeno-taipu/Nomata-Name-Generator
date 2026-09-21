@@ -101,4 +101,36 @@ describe('RecursiveGrammarEngine', () => {
     expect(cache.has('celtic_gaelic:settlement')).toBe(true);
     expect(cache.has('danubian_slavic:settlement')).toBe(true);
   });
+
+  it('collapses duplicate consecutive articles like the the into a single article', () => {
+    const slavic = cultures.danubian_slavic;
+    const slavicEngine = new RecursiveGrammarEngine({ culture: slavic });
+
+    // Test template that explicitly attempts to create double 'the'
+    const doubleTheResult = slavicEngine.resolve('{given} the {epithet}', {
+      customVariables: { given: 'Vladislav', epithet: 'the Brave' }
+    });
+    expect(doubleTheResult).toBe('Vladislav the Brave');
+    expect(doubleTheResult).not.toContain('the the');
+
+    // Test capital/mixed case duplicate articles in arbitrary strings
+    const arbitraryDoubleThe = engine.resolve('The the Citadel of the the Night');
+    expect(arbitraryDoubleThe).toBe('The Citadel of the Night');
+  });
+
+  it('ensures all culture character templates generate single-article epithets', () => {
+    for (const culture of Object.values(cultures)) {
+      const cultureEngine = new RecursiveGrammarEngine({ culture });
+      const templates = culture.grammar_templates?.character_full_name || [];
+      for (const template of templates) {
+        // Resolve each template 10 times with random seeds
+        for (let i = 0; i < 10; i++) {
+          const resolved = cultureEngine.resolve(template);
+          expect(resolved).not.toMatch(/\b(the|a|an)\s+\1\b/i);
+          expect(resolved).not.toMatch(/\bthe\s+the\b/i);
+          expect(resolved).not.toMatch(/\bthe\s+of\s+the\b/i);
+        }
+      }
+    }
+  });
 });
