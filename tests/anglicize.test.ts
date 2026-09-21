@@ -146,4 +146,84 @@ describe('AnglicizationEngine', () => {
     expect(reverted.name).toBe('Branimir');
     expect(reverted.anglicization?.enabled).toBe(false);
   });
+
+  // 5. Diacritic Removal & Normalization Tests
+  it('correctly smooths European and Nordic diacritics', () => {
+    expect(engine.anglicize('Stanisław', { mode: 'phonetic' }).anglicizedName).toBe('Stanislaw');
+    expect(engine.anglicize('Vojtěch', { mode: 'phonetic', cultureId: 'danubian_slavic' }).anglicizedName).toBe('Voytech');
+    expect(engine.anglicize('Håkon', { mode: 'phonetic', cultureId: 'nordic_scandian' }).anglicizedName).toBe('Hakon');
+    expect(engine.anglicize('Haakon', { mode: 'phonetic', cultureId: 'nordic_scandian' }).anglicizedName).toBe('Haakon');
+  });
+
+  // 6. Patronymic Precision & Non-Greedy Matching Tests
+  it('does not corrupt names that contain patronymic substrings like Nicholas or Macedon', () => {
+    expect(engine.anglicize('Nicholas', { mode: 'full' }).anglicizedName).toBe('Nicholas');
+    expect(engine.anglicize('Macedon', { mode: 'full' }).anglicizedName).toBe('Macedon');
+
+    // Valid patronymics with whitespace or uppercase letter
+    expect(engine.anglicize('MacDonald', { mode: 'full' }).anglicizedName).toBe('FitzDonald');
+    expect(engine.anglicize('McGregor', { mode: 'full' }).anglicizedName).toBe('FitzGregor');
+    expect(engine.anglicize('Nic Aoidh', { mode: 'full' }).anglicizedName).toBe('FitzAoidh');
+  });
+
+  // 7. Pipeline Cognate Protection Tests
+  it('protects English cognates and Fitz tokens from subsequent mutation', () => {
+    // Preserves English double-l in William
+    expect(engine.anglicize('Gwilym', { mode: 'full' }).anglicizedName).toBe('William');
+
+    // Protects John and FitzJames from J -> Y corruption
+    const johnFitzJames = engine.anglicize('Ioan ap James', { mode: 'full', cultureId: 'celtic_gaelic' });
+    expect(johnFitzJames.anglicizedName).toBe('John FitzJames');
+    expect(johnFitzJames.anglicizedName).not.toContain('Yohn');
+    expect(johnFitzJames.anglicizedName).not.toContain('Yames');
+  });
+
+  // 8. Toponymic vs Personal Suffix Distinction Tests
+  it('distinguishes personal names from settlement toponymic suffixes', () => {
+    // Personal names ending in -an should NOT become -ham
+    const brian = engine.anglicize('Brian', { mode: 'suffix', cultureId: 'celtic_gaelic', category: 'character' });
+    expect(brian.anglicizedName).toBe('Brian');
+
+    const aidan = engine.anglicize('Aidan', { mode: 'suffix', cultureId: 'celtic_gaelic', category: 'character' });
+    expect(aidan.anglicizedName).toBe('Aidan');
+
+    // Settlements ending in -an CAN become -ham
+    const dunSalan = engine.anglicize('Dunsalan', { mode: 'suffix', cultureId: 'celtic_gaelic', category: 'settlement' });
+    expect(dunSalan.anglicizedName).toBe('Dunsalham');
+  });
+
+  // 9. Idempotency & Clean Reversion with Separate Epithet/Title Tests
+  it('guarantees idempotency when toggling modes and preserves distinct titles/epithets', () => {
+    const entity: LoreEntity = {
+      id: 'idem-1',
+      name: 'Vasile cel Viteaz',
+      originalName: 'Vasile cel Viteaz',
+      rootName: 'Vasile',
+      originalRoot: 'Vasile',
+      originalTitle: 'Knyaz',
+      epithet: 'cel Viteaz',
+      category: 'character',
+      cultureId: 'danubian_slavic',
+      metadata: { role: 'ruler' },
+    };
+
+    // First toggle to phonetic
+    const phonetic = engine.anglicizeEntity(entity, { mode: 'phonetic' });
+    expect(phonetic.name).toBe('Vasile cel Viteaz');
+
+    // Then toggle to full from phonetic
+    const full = engine.anglicizeEntity(phonetic, { mode: 'full' });
+    expect(full.name).toBe('Basil the Brave');
+    expect(full.epithet).toBe('the Brave');
+    expect(full.originalTitle).toBe('Knyaz');
+
+    // Revert back
+    const reverted = engine.revert(full);
+    expect(reverted.name).toBe('Vasile cel Viteaz');
+    expect(reverted.rootName).toBe('Vasile');
+    expect(reverted.originalTitle).toBe('Knyaz');
+    expect(reverted.epithet).toBe('cel Viteaz');
+    expect(reverted.metadata?.role).toBe('ruler');
+    expect(reverted.metadata?._originalEpithet).toBeUndefined();
+  });
 });

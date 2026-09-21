@@ -55,11 +55,11 @@ const PHONETIC_CLUSTERS: ClusterMapping[] = [
   { pattern: /dh/gi, replacement: 'd' },
   { pattern: /gh/gi, replacement: 'g' },
 
-  // Celtic mutations
+  // Celtic mutations: only word-initial Ll/ll
   { pattern: /bh/gi, replacement: 'v' },
   { pattern: /mh/gi, replacement: 'v' },
   { pattern: /\bLl/g, replacement: 'L' },
-  { pattern: /ll/gi, replacement: 'l' },
+  { pattern: /\bll/g, replacement: 'l' },
 
   // Q without U to K, lone Q to K
   { pattern: /q(?=[^u]|$)/gi, replacement: 'k' },
@@ -69,21 +69,34 @@ const PHONETIC_CLUSTERS: ClusterMapping[] = [
  * Diacritics mapping for authentic historical orthographies
  */
 const DIACRITIC_MAP: Record<string, string> = {
+  // Czech / Slovak / Baltic carons
   č: 'ch', Č: 'Ch',
   ć: 'ch', Ć: 'Ch',
   š: 'sh', Š: 'Sh',
   ž: 'zh', Ž: 'Zh',
-  đ: 'd',  Đ: 'D',
+  ě: 'e',  Ě: 'E',
+  ř: 'r',  Ř: 'R',
+  ť: 't',  Ť: 'T',
+  ď: 'd',  Ď: 'D',
+  ň: 'n',  Ň: 'N',
+
+  // Polish crossed L, nasal vowels, accents
   ł: 'l',  Ł: 'L',
   ń: 'n',  Ń: 'N',
   ś: 'sh', Ś: 'Sh',
   ź: 'z',  Ź: 'Z',
   ż: 'z',  Ż: 'Z',
+  ą: 'a',  Ą: 'A',
+  ę: 'e',  Ę: 'E',
+
+  // Romanian comma-below / circumflex
   ș: 'sh', Ș: 'Sh',
   ț: 'ts', Ț: 'Ts',
   ă: 'a',  Ă: 'A',
   î: 'i',  Î: 'I',
   â: 'a',  Â: 'A',
+
+  // Germanic / Nordic umlauts & vowels
   ä: 'a',  Ä: 'A',
   ö: 'o',  Ö: 'O',
   ü: 'u',  Ü: 'U',
@@ -92,12 +105,21 @@ const DIACRITIC_MAP: Record<string, string> = {
   ø: 'o',  Ø: 'O',
   ð: 'd',  Ð: 'D',
   þ: 'th', Þ: 'Th',
+
+  // Hungarian double acute
+  ő: 'o',  Ő: 'O',
+  ű: 'u',  Ű: 'U',
+
+  // Standard accents & umlauts
   á: 'a',  Á: 'A',
   é: 'e',  É: 'E',
   í: 'i',  Í: 'I',
   ó: 'o',  Ó: 'O',
   ú: 'u',  Ú: 'U',
   ý: 'y',  Ý: 'Y',
+  ů: 'u',  Ů: 'U',
+  ë: 'e',  Ë: 'E',
+  ï: 'i',  Ï: 'I',
 };
 
 // ============================================================================
@@ -107,6 +129,7 @@ const DIACRITIC_MAP: Record<string, string> = {
 interface SuffixRule {
   suffix: string;
   replacement: string;
+  toponymicOnly?: boolean;
 }
 
 const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
@@ -127,8 +150,8 @@ const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
     { suffix: 'ach', replacement: 'ock' },
     { suffix: 'oc', replacement: 'en' },
     { suffix: 'og', replacement: 'en' },
-    { suffix: 'an', replacement: 'ham' },
-    { suffix: 'in', replacement: 'ham' },
+    { suffix: 'an', replacement: 'ham', toponymicOnly: true },
+    { suffix: 'in', replacement: 'ham', toponymicOnly: true },
   ],
   nordic_scandian: [
     { suffix: 'sheim', replacement: 'stead' },
@@ -144,7 +167,7 @@ const CULTURAL_SUFFIXES: Record<string, SuffixRule[]> = {
     { suffix: 'eios', replacement: 'e' },
     { suffix: 'ios', replacement: 'e' },
     { suffix: 'os', replacement: 'us' },
-    { suffix: 'on', replacement: 'field' },
+    { suffix: 'on', replacement: 'field', toponymicOnly: true },
     { suffix: 'as', replacement: 'e' },
     { suffix: 'is', replacement: 'y' },
   ],
@@ -274,6 +297,21 @@ const TITLE_EPITHET_MAP: Record<string, string> = {
   'sheikh': 'Elder',
 };
 
+/**
+ * Words and English cognates that must be protected from phonetic mutation (e.g. J -> Y, double-l).
+ */
+const PROTECTED_ENGLISH_WORDS = new Set([
+  ...Object.values(COGNATES),
+  'Fitz', 'The', 'the', 'Of', 'of', 'Fort', 'Castle', 'Brave', 'Valiant', 'Great',
+  'Elder', 'Good', 'Fair', 'Holy', 'Terrible', 'Prince', 'Duke', 'Baron', 'Emperor',
+  'King', 'Lord', 'Wise', 'Red', 'Younger', 'Black', 'Bluetooth', 'Hardruler',
+  'Earl', 'Savior', 'Victorious', 'Sovereign',
+  // Common English names with J or double consonants
+  'John', 'James', 'Joseph', 'Jack', 'Jacob', 'Jason', 'Jane', 'Joan', 'Julian', 'Justin',
+  'William', 'Nicholas', 'Arthur', 'Peter', 'Walter', 'Alexander', 'Andrew', 'David',
+  'Thomas', 'Robert', 'Richard', 'Edward', 'Henry', 'George', 'Charles', 'Brian', 'Aidan',
+]);
+
 // ============================================================================
 // Anglicization Engine Class
 // ============================================================================
@@ -319,13 +357,13 @@ export class AnglicizationEngine {
         break;
       }
       case 'suffix': {
-        processed = this.stage2SuffixLocalization(processed, cultureId);
-        anglicizedRoot = this.stage2SuffixLocalization(originalRoot, cultureId);
+        processed = this.stage2SuffixLocalization(processed, cultureId, category);
+        anglicizedRoot = this.stage2SuffixLocalization(originalRoot, cultureId, category);
         break;
       }
       case 'full':
       default: {
-        const fullRes = this.stage3FullLocalization(processed, cultureId, originalRoot, originalTitle);
+        const fullRes = this.stage3FullLocalization(processed, cultureId, originalRoot, originalTitle, category);
         processed = fullRes.name;
         anglicizedRoot = fullRes.root;
         if (fullRes.title) {
@@ -369,26 +407,36 @@ export class AnglicizationEngine {
 
   /**
    * Applies reversible Anglicization to a LoreEntity, mutating a clone and setting overlay.
+   * Derives transformations from originalName and originalRoot to ensure idempotency.
    */
   anglicizeEntity(entity: LoreEntity, options?: AnglicizeOptions): LoreEntity {
+    const baseName = entity.originalName ?? entity.name;
+    const baseRoot = entity.originalRoot ?? entity.rootName ?? entity.name;
+    const baseTitle = entity.originalTitle ?? entity.epithet;
+    const origEpithet = (entity.metadata?._originalEpithet as string | undefined) ?? entity.epithet;
+
     const opts: AnglicizeOptions = {
       ...options,
       cultureId: options?.cultureId ?? entity.cultureId,
       category: entity.category,
-      root: entity.rootName ?? entity.originalRoot,
-      title: entity.originalTitle ?? entity.epithet,
+      root: baseRoot,
+      title: baseTitle,
     };
 
-    const result = this.anglicize(entity.name, opts);
+    const result = this.anglicize(baseName, opts);
 
     return {
       ...entity,
       name: result.anglicizedName,
       rootName: result.anglicizedRoot,
-      originalName: entity.originalName ?? entity.name,
-      originalRoot: entity.originalRoot ?? entity.rootName ?? entity.name,
-      originalTitle: entity.originalTitle ?? entity.epithet,
+      originalName: baseName,
+      originalRoot: baseRoot,
+      originalTitle: entity.originalTitle,
       epithet: result.anglicizedTitle ?? entity.epithet,
+      metadata: {
+        ...entity.metadata,
+        _originalEpithet: origEpithet,
+      },
       anglicization: result.overlay,
     };
   }
@@ -410,6 +458,12 @@ export class AnglicizationEngine {
           exonymDualDisplay: false,
         };
 
+    const origEpithet = (entity.metadata?._originalEpithet as string | undefined) ?? entity.epithet;
+    const cleanMetadata = entity.metadata ? { ...entity.metadata } : undefined;
+    if (cleanMetadata && '_originalEpithet' in cleanMetadata) {
+      delete cleanMetadata._originalEpithet;
+    }
+
     return {
       ...entity,
       name: entity.originalName ?? entity.name,
@@ -417,7 +471,8 @@ export class AnglicizationEngine {
       originalName: entity.originalName ?? entity.name,
       originalRoot: entity.originalRoot ?? entity.rootName ?? entity.name,
       originalTitle: entity.originalTitle,
-      epithet: entity.originalTitle ?? entity.epithet,
+      epithet: origEpithet,
+      metadata: cleanMetadata,
       anglicization: revertedOverlay,
     };
   }
@@ -471,7 +526,7 @@ export class AnglicizationEngine {
     }
 
     // Slavic/Nordic J to Y (when consonant)
-    if (cultureId !== 'levantine_semitic') {
+    if (cultureId !== 'levantine_semitic' && !PROTECTED_ENGLISH_WORDS.has(res)) {
       // Word initial J followed by vowel: Jan -> Yan, Jovan -> Yovan
       res = res.replace(/\bJ([aeiouyAEIOUY])/g, 'Y$1');
       res = res.replace(/\bj([aeiouy])/g, 'y$1');
@@ -479,6 +534,9 @@ export class AnglicizationEngine {
       // Medial j after consonant or vowel: Bjorn -> Byorn, Fjord -> Fyord, Maja -> Maya
       res = res.replace(/([bcdfghklmnprstvwxzBCDFGHKLMNPRSTVWXZ])j([aeiouy])/g, '$1y$2');
       res = res.replace(/([aeiouy])j([aeiouy])/g, '$1y$2');
+
+      // Pre-consonantal j after vowel: Vojtech -> Voytech, Bojko -> Boyko, Majka -> Mayka
+      res = res.replace(/([aeiouy])j([bcdfghklmnpqrstvwxz])/gi, '$1y$2');
 
       // Word final -aj, -ej, -oj, -uj -> -ay, -ey, -oy, -uy
       res = res.replace(/([aeou])j\b/gi, '$1y');
@@ -491,7 +549,7 @@ export class AnglicizationEngine {
    * Stage 2: Morphological & Suffix Localization
    * Translates cultural patronymic/locative suffixes.
    */
-  private stage2SuffixLocalization(text: string, cultureId?: string): string {
+  private stage2SuffixLocalization(text: string, cultureId?: string, category?: EntityCategory): string {
     if (!text) return '';
 
     let res = text;
@@ -511,6 +569,11 @@ export class AnglicizationEngine {
       rules = Object.values(CULTURAL_SUFFIXES).flat();
     }
 
+    // If category is 'character' or not settlement/geography, exclude toponymic-only rules
+    if (category !== 'settlement' && category !== 'geography') {
+      rules = rules.filter((r) => !r.toponymicOnly);
+    }
+
     // Sort rules by suffix length descending so longer suffixes match first
     const sortedRules = [...rules].sort((a, b) => b.suffix.length - a.suffix.length);
 
@@ -518,6 +581,7 @@ export class AnglicizationEngine {
     const words = res.split(/(\s+|-)/);
     const transformed = words.map((token) => {
       if (/^\s+$/.test(token) || token === '-') return token;
+      if (PROTECTED_ENGLISH_WORDS.has(token) || token.startsWith('Fitz')) return token;
 
       for (const { suffix, replacement } of sortedRules) {
         const regex = new RegExp(`(${suffix})$`, 'i');
@@ -543,6 +607,7 @@ export class AnglicizationEngine {
     cultureId?: string,
     originalRoot?: string,
     originalTitle?: string,
+    category?: EntityCategory,
   ): { name: string; root: string; title?: string } {
     if (!text) return { name: '', root: '' };
 
@@ -569,9 +634,10 @@ export class AnglicizationEngine {
       return `Fitz${anglicizedFather}`;
     });
 
-    // Gaelic "Mac [Name]" / "Mc [Name]" / "Nic [Name]" -> "Fitz[Name]"
-    current = current.replace(/\b(Mac|Mc|Nic)\s*([A-Za-z]+)\b/gi, (_match, _prefix, father) => {
-      const anglicizedFather = this.translateCognate(father) ?? father;
+    // Gaelic "Mac / Mc [Name]" / "Nic [Name]" -> "Fitz[Name]" (precise regex requiring [A-Z] or whitespace)
+    current = current.replace(/\b(?:(Mac|Mc)(?=[A-Z])|(Mac|Mc|Nic)\s+)([A-Za-z]+)\b/g, (_match, _p1, _p2, father) => {
+      const fatherStr = (father ?? '') as string;
+      const anglicizedFather = this.translateCognate(fatherStr) ?? fatherStr;
       return `Fitz${anglicizedFather}`;
     });
 
@@ -593,7 +659,7 @@ export class AnglicizationEngine {
     // 4. Translate known cognates and roots
     const words = current.split(/(\s+|-)/);
     const localizedWords = words.map((word) => {
-      if (/^\s+$/.test(word) || word === '-' || word.startsWith('Fitz')) return word;
+      if (/^\s+$/.test(word) || word === '-' || word.startsWith('Fitz') || PROTECTED_ENGLISH_WORDS.has(word)) return word;
       const lower = word.toLowerCase();
       if (COGNATES[lower]) {
         return COGNATES[lower];
@@ -602,16 +668,23 @@ export class AnglicizationEngine {
     });
     current = localizedWords.join('');
 
-    // 5. Apply Suffix Localization & Phonetic Smoothing on remaining segments
-    current = this.stage2SuffixLocalization(current, cultureId);
+    // 5. Apply Suffix Localization & Phonetic Smoothing ONLY on unprotected remaining segments
+    const tokens = current.split(/(\s+|-)/);
+    const processedTokens = tokens.map((token) => {
+      if (/^\s+$/.test(token) || token === '-' || token.startsWith('Fitz') || PROTECTED_ENGLISH_WORDS.has(token)) {
+        return token;
+      }
+      return this.stage2SuffixLocalization(token, cultureId, category);
+    });
+    current = processedTokens.join('');
 
     // Compute anglicized root
     let root = originalRoot ?? this.extractRootGuess(text);
     const rootLower = root.toLowerCase();
     if (COGNATES[rootLower]) {
       root = COGNATES[rootLower];
-    } else {
-      root = this.stage2SuffixLocalization(root, cultureId);
+    } else if (!PROTECTED_ENGLISH_WORDS.has(root)) {
+      root = this.stage2SuffixLocalization(root, cultureId, category);
     }
 
     const title = detectedTitle ? this.anglicizeTitle(detectedTitle) : undefined;
