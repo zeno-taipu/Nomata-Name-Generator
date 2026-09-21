@@ -32,6 +32,7 @@ export interface LoreEntity {
   cultureId: string;
   originalName: string;
   originalRoot: string;
+  rootName?: string;
   originalTitle?: string;
   anglicization?: AnglicizationOverlay;
   epithet?: string;
