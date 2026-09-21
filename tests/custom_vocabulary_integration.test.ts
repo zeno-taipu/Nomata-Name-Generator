@@ -66,10 +66,93 @@ describe('Custom Vocabulary & Lexicon Integration', () => {
     const hasAffix = batch.some((entity) =>
       entity.name.includes('Fort-') ||
       entity.name.includes('New-') ||
-      entity.name.includes('-haven') ||
-      entity.name.includes('-burg')
+      entity.name.includes('haven') ||
+      entity.name.includes('burg')
     );
     expect(hasAffix).toBe(true);
+  });
+
+  it('generates rich morphological variations from seed root Valer rather than regurgitating bare root', () => {
+    useNominaStore.getState().setActiveCategory('settlement');
+    useNominaStore.getState().setCustomVocabulary({
+      customSeeds: {
+        settlement_roots: ['Valer'],
+      },
+    });
+
+    const batch = useNominaStore.getState().generateBatch();
+    expect(batch.length).toBe(10);
+
+    // Root must appear as a stem in the batch
+    const hasValerStem = batch.some((entity) =>
+      entity.name.toLowerCase().includes('valer')
+    );
+    expect(hasValerStem).toBe(true);
+
+    // Generator must NEVER simply regurgitate "Valer" as a full standalone settlement name
+    for (const entity of batch) {
+      expect(entity.name.trim()).not.toBe('Valer');
+    }
+
+    // Settlements containing Valer must be compound variations (e.g. Valergrad, Valerovo, Stari Valer, Dun Valer)
+    const valerEntities = batch.filter((e) => e.name.toLowerCase().includes('valer'));
+    for (const entity of valerEntities) {
+      expect(entity.name.trim().length).toBeGreaterThan('Valer'.length);
+    }
+  });
+
+  it('generates rich character variations from seed root Valer and never outputs Valer Valer', () => {
+    useNominaStore.getState().setActiveCategory('character');
+    useNominaStore.getState().setCustomVocabulary({
+      customSeeds: {
+        given_names_masculine: ['Valer'],
+      },
+    });
+
+    const batch = useNominaStore.getState().generateBatch();
+    expect(batch.length).toBe(10);
+
+    for (const entity of batch) {
+      // Must not repeat raw root as given and surname: "Valer Valer"
+      expect(entity.name.trim()).not.toBe('Valer Valer');
+      expect(entity.name.trim()).not.toBe('Valer');
+    }
+
+    // Must have derived given names or surnames (e.g. Valerik, Valerian, Valerov)
+    const hasDerivedForm = batch.some((entity) =>
+      entity.name.includes('Valerik') ||
+      entity.name.includes('Valerian') ||
+      entity.name.includes('Valerius') ||
+      entity.name.includes('Valerov') ||
+      entity.name.includes('Valerski')
+    );
+    expect(hasDerivedForm).toBe(true);
+  });
+
+  it('actively compounds custom prefixes and suffixes with seed roots', () => {
+    useNominaStore.getState().setActiveCategory('settlement');
+    useNominaStore.getState().setCustomVocabulary({
+      customPrefixes: ['Fort-'],
+      customSuffixes: ['-haven'],
+      customSeeds: {
+        settlement_roots: ['Valer'],
+      },
+    });
+
+    const batch = useNominaStore.getState().generateBatch();
+    expect(batch.length).toBe(10);
+
+    // Check for active prefix or suffix compounding
+    const hasCompoundedAffix = batch.some((entity) =>
+      entity.name.includes('Fort-') || entity.name.includes('haven')
+    );
+    expect(hasCompoundedAffix).toBe(true);
+
+    // No raw hyphen at the start of suffix
+    for (const entity of batch) {
+      expect(entity.name).not.toContain('--');
+      expect(entity.name).not.toContain(' -');
+    }
   });
 
   it('guarantees custom seed roots appear in generated settlement names', () => {
