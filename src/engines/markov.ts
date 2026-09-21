@@ -30,7 +30,7 @@ export class MarkovNameGenerator {
   private seeds: string[] = [];
 
   constructor(seeds?: string[], options?: MarkovOptions) {
-    this.order = Math.max(1, options?.order ?? 2);
+    this.order = Math.max(1, Math.floor(options?.order ?? 2));
     if (seeds && seeds.length > 0) {
       this.train(seeds);
     }
@@ -46,7 +46,7 @@ export class MarkovNameGenerator {
   /**
    * Train the Markov model with weighted seed groups for multi-culture blending
    */
-  trainWithWeights(weightedSeeds: Array<{ seeds: string[]; weight: number }>): void {
+  trainWithWeights(weightedSeeds: WeightedSeeds[]): void {
     for (const group of weightedSeeds) {
       const weight = group.weight ?? 1.0;
       if (weight <= 0 || !Array.isArray(group.seeds)) {
@@ -177,9 +177,8 @@ export class MarkovNameGenerator {
   private sampleCandidate(temperature: number, maxLength: number): string | null {
     let currentGram = '^'.repeat(this.order);
     let result = '';
-    const hardLimit = Math.max(maxLength * 2, 30);
 
-    while (result.length <= hardLimit) {
+    while (result.length <= maxLength) {
       const nextMap = this.transitions.get(currentGram);
       if (!nextMap || nextMap.size === 0) {
         return null;
@@ -191,6 +190,9 @@ export class MarkovNameGenerator {
       }
 
       result += nextChar;
+      if (result.length > maxLength) {
+        return null;
+      }
       currentGram = (currentGram + nextChar).slice(-this.order);
     }
 
@@ -233,17 +235,13 @@ export class MarkovNameGenerator {
       }
     }
 
-    // Fallback to trained seeds if sampling attempts exceeded
+    // Fallback to trained seeds if sampling attempts exceeded and seeds fit constraints
     const matchingSeeds = this.seeds.filter(
       (s) => s.length >= effMin && s.length <= effMax && this.validatePhonotactics(s)
     );
     if (matchingSeeds.length > 0) {
       const randomSeed = matchingSeeds[Math.floor(Math.random() * matchingSeeds.length)];
       return this.formatName(randomSeed);
-    }
-
-    if (this.seeds.length > 0) {
-      return this.formatName(this.seeds[0]);
     }
 
     throw new Error('Failed to generate a valid name within constraints');

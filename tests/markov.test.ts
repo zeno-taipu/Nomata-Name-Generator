@@ -66,4 +66,30 @@ describe('MarkovNameGenerator', () => {
     const generator = new MarkovNameGenerator([]);
     expect(() => generator.generate()).toThrow();
   });
+
+  it('clears transitions and seeds on clear()', () => {
+    const generator = new MarkovNameGenerator(seeds, { order: 2 });
+    expect(generator.transitions.size).toBeGreaterThan(0);
+    generator.clear();
+    expect(generator.transitions.size).toBe(0);
+    expect(() => generator.generate()).toThrow('Markov chain model has not been trained with any seeds');
+  });
+
+  it('throws error when impossible constraints cannot be satisfied', () => {
+    const generator = new MarkovNameGenerator(seeds, { order: 2 });
+    expect(() => generator.generate({ minLength: 50, maxLength: 60, maxAttempts: 5 })).toThrow(
+      'Failed to generate a valid name within constraints'
+    );
+  });
+
+  it('handles extreme temperature boundaries (very low and very high)', () => {
+    const generator = new MarkovNameGenerator(seeds, { order: 2 });
+    const lowTempName = generator.generate({ temperature: 0.01 });
+    expect(typeof lowTempName).toBe('string');
+    expect(lowTempName.length).toBeGreaterThanOrEqual(4);
+
+    const highTempName = generator.generate({ temperature: 2.0 });
+    expect(typeof highTempName).toBe('string');
+    expect(highTempName.length).toBeGreaterThanOrEqual(4);
+  });
 });
