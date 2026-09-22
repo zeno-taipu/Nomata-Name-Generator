@@ -145,15 +145,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     const dateStr = new Date().toISOString().split('T')[0];
     switch (selectedFormat) {
       case 'markdown':
-        return { filename: `nomina-bible-${dateStr}.md`, ext: 'md', mime: 'text/markdown' };
+        return { filename: `nomata-bible-${dateStr}.md`, ext: 'md', mime: 'text/markdown' };
       case 'json':
-        return { filename: `nomina-entities-${dateStr}.json`, ext: 'json', mime: 'application/json' };
+        return { filename: `nomata-entities-${dateStr}.json`, ext: 'json', mime: 'application/json' };
       case 'csv':
-        return { filename: `nomina-entities-${dateStr}.csv`, ext: 'csv', mime: 'text/csv' };
+        return { filename: `nomata-entities-${dateStr}.csv`, ext: 'csv', mime: 'text/csv' };
       case 'nomina':
         return {
-          filename: `nomina-world-bible-${dateStr}.nomina.json`,
-          ext: 'nomina.json',
+          filename: `nomata-world-bible-${dateStr}.nomata.json`,
+          ext: 'nomata.json',
           mime: 'application/json',
         };
     }
@@ -286,8 +286,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           multiple: false,
           filters: [
             {
-              name: 'Nomina Project Bible',
-              extensions: ['nomina.json', 'json'],
+              name: 'Nomata Project Bible',
+              extensions: ['nomata.json', 'nomina.json', 'json'],
             },
           ],
         });
@@ -454,7 +454,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 )}
               >
                 <BookOpen size={13} />
-                <span>Nomina Bible</span>
+                <span>Nomata Bible</span>
               </button>
             </div>
 
@@ -518,14 +518,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <div className="pt-3 border-t border-charcoal-800 flex items-center justify-between gap-4">
             <div className="text-xs">
               <p className="font-medium text-slate-300">Import Existing Project</p>
-              <p className="text-slate-500">Restore a previously saved .nomina.json file</p>
+              <p className="text-slate-500">Restore a previously saved .nomata.json or .nomina.json file</p>
             </div>
 
             <div>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".nomina.json,.json"
+                accept=".nomata.json,.nomina.json,.json"
                 onChange={handleFileChange}
                 className="hidden"
                 data-testid="import-file-input"

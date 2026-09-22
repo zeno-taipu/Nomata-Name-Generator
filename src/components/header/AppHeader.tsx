@@ -110,7 +110,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 data-testid="header-title"
                 className="text-sm font-bold tracking-widest text-gold-400 font-serif"
               >
-                NOMINA
+                NOMATA
               </span>
               <span className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider rounded bg-charcoal-800 border border-charcoal-700 text-slate-400">
                 v0.1.0

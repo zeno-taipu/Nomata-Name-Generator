@@ -170,9 +170,9 @@ export interface GenerationConfig {
 }
 
 /**
- * Nomina Project Bible export/import document format (.nomina.json)
+ * Nomata Project Bible export/import document format (.nomata.json / .nomina.json)
  */
-export interface NominaProjectBible {
+export interface NomataProjectBible {
   version: string;
   name: string;
   entities: LoreEntity[];
@@ -194,3 +194,5 @@ export interface NominaProjectBible {
   };
   savedAt: number;
 }
+
+export type NominaProjectBible = NomataProjectBible;

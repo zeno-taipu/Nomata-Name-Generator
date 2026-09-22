@@ -159,7 +159,7 @@ export function exportToMarkdown(
 
   const lines: string[] = [
     '---',
-    'title: Nomina World Bible Export',
+    'title: Nomata World Bible Export',
     `entity_count: ${idMap.size}`,
     `exported_at: ${new Date().toISOString()}`,
     '---',
@@ -281,7 +281,7 @@ export function importFromProjectBible(jsonString: string): NominaProjectBible {
 
   return {
     version: bible.version,
-    name: bible.name ?? 'Nomina World Bible',
+    name: bible.name ?? 'Nomata World Bible',
     entities: bible.entities,
     pinnedEntityIds: Array.isArray(bible.pinnedEntityIds) ? bible.pinnedEntityIds : [],
     customVocabulary: {

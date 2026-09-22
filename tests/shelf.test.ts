@@ -266,7 +266,7 @@ describe('Right Shelf & App Header Components', () => {
       expect(html).toContain('Markdown');
       expect(html).toContain('JSON');
       expect(html).toContain('CSV');
-      expect(html).toContain('Nomina Bible');
+      expect(html).toContain('Nomata Bible');
       expect(html).toContain('scope-pinned');
       expect(html).toContain('scope-all');
       expect(html).toContain('export-preview-pane');
@@ -281,7 +281,7 @@ describe('Right Shelf & App Header Components', () => {
       });
 
       expect(markdown).toContain('---');
-      expect(markdown).toContain('title: Nomina World Bible Export');
+      expect(markdown).toContain('title: Nomata World Bible Export');
       expect(markdown).toContain('# Radomir');
       expect(markdown).toContain('# Oakhaven');
       expect(markdown).toContain('[[Radomir II]]');
@@ -354,10 +354,10 @@ describe('Right Shelf & App Header Components', () => {
    * 4. AppHeader Component
    * ======================================================================= */
   describe('AppHeader Component', () => {
-    it('renders NOMINA title, subtitle, and branding compass', () => {
+    it('renders NOMATA title, subtitle, and branding compass', () => {
       const html = renderToString(React.createElement(AppHeader));
 
-      expect(html).toContain('NOMINA');
+      expect(html).toContain('NOMATA');
       expect(html).toContain('Desktop Lore &amp; Name Studio');
       expect(html).toContain('v0.1.0');
     });

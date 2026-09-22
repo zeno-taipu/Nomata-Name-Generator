@@ -73,7 +73,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold tracking-wider text-sm text-slate-100 uppercase font-serif">
-                    Nomina
+                    Nomata
                   </span>
                   <span className="text-[10px] px-1.5 py-0.2 font-mono rounded bg-gold-500/10 text-gold-400 border border-gold-500/30">
                     v1.0
@@ -207,7 +207,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   : `${activeCultureIds.length} Blended Cultures`}
               </span>
             </div>
-            <span className="font-mono text-[10px] text-slate-500">Nomina Core</span>
+            <span className="font-mono text-[10px] text-slate-500">Nomata Core</span>
           </div>
         )}
       </aside>

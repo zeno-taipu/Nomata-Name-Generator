@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "nomina",
+  "productName": "nomata",
   "version": "0.1.0",
-  "identifier": "com.nomina.studio",
+  "identifier": "com.nomata.studio",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Nomina — Lore & Name Studio",
+        "title": "Nomata — Lore & Name Studio",
         "width": 1280,
         "height": 820,
         "minWidth": 1024,

@@ -772,7 +772,7 @@ const useRawNominaStore = create<NominaState>()(
         return get().generateBatch();
       },
 
-      saveProjectBible: (name = 'Nomina World Bible') => {
+      saveProjectBible: (name = 'Nomata World Bible') => {
         const state = get();
 
         // Deduplicate entities between pinned and generated batch

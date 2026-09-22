@@ -283,7 +283,7 @@ describe('Sidebar Components & Store Integration', () => {
     it('renders complete sidebar structure with branding, nav, cultures, and buttons', () => {
       const html = renderToString(React.createElement(LeftSidebar));
 
-      expect(html).toContain('Nomina');
+      expect(html).toContain('Nomata');
       expect(html).toContain('v1.0');
       expect(html).toContain('data-testid="left-sidebar"');
       expect(html).toContain('data-testid="sidebar-collapse-toggle"');

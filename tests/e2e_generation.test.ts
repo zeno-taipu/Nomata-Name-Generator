@@ -402,7 +402,7 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
 
     // 7a. Markdown with Obsidian wikilinks
     const markdown = exportToMarkdown(pinnedEntities, { includeWikilinks: true });
-    expect(markdown).toContain('title: Nomina World Bible Export');
+    expect(markdown).toContain('title: Nomata World Bible Export');
     expect(markdown).toContain('# Valkyria Haven, "The Golden Harbor"');
     expect(markdown).toContain('[[Valkyria Docks Ward]]');
     expect(markdown).toContain('nordic_scandian');
@@ -559,7 +559,7 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
 
     // 2. Fixed App Header
     expect(html).toContain('data-testid="app-header"');
-    expect(html).toContain('NOMINA');
+    expect(html).toContain('NOMATA');
     expect(html).toContain('data-testid="header-toggle-left-sidebar"');
     expect(html).toContain('data-testid="header-toggle-right-shelf"');
     expect(html).toContain('data-testid="header-export-btn"');
