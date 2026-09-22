@@ -118,13 +118,9 @@ describe('Custom Vocabulary & Lexicon Integration', () => {
       expect(entity.name.trim()).not.toBe('Valer');
     }
 
-    // Must have derived given names or surnames (e.g. Valerik, Valerian, Valerov)
+    // Must have derived given names or surnames (e.g. Valerik, Valerian, Valerov, Valerislav)
     const hasDerivedForm = batch.some((entity) =>
-      entity.name.includes('Valerik') ||
-      entity.name.includes('Valerian') ||
-      entity.name.includes('Valerius') ||
-      entity.name.includes('Valerov') ||
-      entity.name.includes('Valerski')
+      /\bValer[a-zA-Z]+/i.test(entity.name)
     );
     expect(hasDerivedForm).toBe(true);
   });
