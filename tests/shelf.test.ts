@@ -410,5 +410,18 @@ describe('Right Shelf & App Header Components', () => {
       expect(html).toContain('header-toggle-left-sidebar');
       expect(html).toContain('header-toggle-right-shelf');
     });
+
+    it('renders settings cog button and calls onOpenSettings callback', () => {
+      const openSettingsSpy = vi.fn();
+
+      const html = renderToString(
+        React.createElement(AppHeader, {
+          onOpenSettings: openSettingsSpy,
+        })
+      );
+
+      expect(html).toContain('header-settings-btn');
+      expect(html).toContain('Settings &amp; Appearance');
+    });
   });
 });

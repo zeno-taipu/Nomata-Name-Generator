@@ -11,6 +11,7 @@ import {
   Shield,
   Sparkles,
   Layers,
+  Settings,
   type LucideIcon,
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
@@ -26,6 +27,7 @@ export interface AppHeaderProps {
   onToggleLeftSidebar?: () => void;
   onToggleRightShelf?: () => void;
   onOpenExport?: () => void;
+  onOpenSettings?: () => void;
   className?: string;
 }
 
@@ -45,6 +47,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onToggleLeftSidebar,
   onToggleRightShelf,
   onOpenExport,
+  onOpenSettings,
   className,
 }) => {
   const leftCollapsed = isLeftSidebarCollapsed ?? leftSidebarCollapsed ?? false;
@@ -184,6 +187,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         >
           <Download size={13} />
           <span className="hidden sm:inline">Export</span>
+        </button>
+
+        {/* Settings Cog Button */}
+        <button
+          type="button"
+          data-testid="header-settings-btn"
+          aria-label="Settings & Appearance"
+          title="Settings & Appearance (Cmd+,)"
+          onClick={onOpenSettings}
+          className="p-1.5 rounded-lg border border-charcoal-750 bg-charcoal-900 text-slate-300 hover:text-gold-400 hover:border-gold-500/40 transition-colors"
+        >
+          <Settings size={15} />
         </button>
 
         {/* Right Shelf Toggle Button */}

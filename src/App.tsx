@@ -3,11 +3,14 @@ import { AppHeader } from './components/header';
 import { LeftSidebar } from './components/sidebar';
 import { CenterStudio } from './components/studio';
 import { RightShelf } from './components/shelf';
+import { SettingsModal } from './components/settings';
 import { useNominaStore } from './store/useNominaStore';
+import { applyThemeToDOM } from './utils/theme';
 import type { LoreEntity } from './types/domain';
 
 export interface DesktopShortcutActions {
   toggleExportModal: () => void;
+  toggleSettingsModal: () => void;
   toggleLeftSidebar: () => void;
   toggleRightShelf: () => void;
 }
@@ -50,6 +53,10 @@ export function handleDesktopShortcuts(
     e.preventDefault?.();
     actions.toggleRightShelf();
     return true;
+  } else if (e.key === ',') {
+    e.preventDefault?.();
+    actions.toggleSettingsModal();
+    return true;
   }
   return false;
 }
@@ -58,9 +65,16 @@ export const App: React.FC = () => {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState<boolean>(false);
   const [isRightShelfCollapsed, setIsRightShelfCollapsed] = useState<boolean>(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
   const [centerViewMode, setCenterViewMode] = useState<'grid' | 'tree'>('grid');
 
+  const themeSettings = useNominaStore((s) => s.themeSettings);
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
+
+  // Initialize and synchronize dynamic CSS theme variables on document root
+  useEffect(() => {
+    applyThemeToDOM(themeSettings);
+  }, [themeSettings]);
 
   // Global desktop keyboard shortcuts
   useEffect(() => {
@@ -69,6 +83,7 @@ export const App: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       handleDesktopShortcuts(e, {
         toggleExportModal: () => setIsExportModalOpen((prev) => !prev),
+        toggleSettingsModal: () => setIsSettingsModalOpen((prev) => !prev),
         toggleLeftSidebar: () => setIsLeftSidebarCollapsed((prev) => !prev),
         toggleRightShelf: () => setIsRightShelfCollapsed((prev) => !prev),
       });
@@ -102,6 +117,7 @@ export const App: React.FC = () => {
         rightShelfCollapsed={isRightShelfCollapsed}
         onToggleRightShelf={() => setIsRightShelfCollapsed((prev) => !prev)}
         onOpenExport={() => setIsExportModalOpen(true)}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
       />
 
       {/* Main 3-Column Studio Body */}
@@ -131,6 +147,12 @@ export const App: React.FC = () => {
           onInspectTree={handleInspectTree}
         />
       </div>
+
+      {/* Settings Modal (Appearance, Data Import, Presets) */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </div>
   );
 };

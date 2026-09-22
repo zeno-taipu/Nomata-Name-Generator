@@ -4,11 +4,8 @@ import {
   Upload,
   FileText,
   CheckCircle,
-  Clock,
-  Sparkles,
   Info,
   ShieldCheck,
-  AlertCircle,
 } from 'lucide-react';
 import { cultures } from '../../data/cultures';
 

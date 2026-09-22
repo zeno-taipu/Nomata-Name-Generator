@@ -563,6 +563,7 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
     expect(html).toContain('data-testid="header-toggle-left-sidebar"');
     expect(html).toContain('data-testid="header-toggle-right-shelf"');
     expect(html).toContain('data-testid="header-export-btn"');
+    expect(html).toContain('data-testid="header-settings-btn"');
 
     // 3. Studio 3-Column Body
     expect(html).toContain('data-testid="studio-body"');
@@ -589,10 +590,11 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
   // =========================================================================
   // 10. Global Desktop Keyboard Shortcut Event Handlers
   // =========================================================================
-  it('10. Global desktop keyboard shortcuts (Cmd+E, Cmd+B, Cmd+J)', () => {
+  it('10. Global desktop keyboard shortcuts (Cmd+E, Cmd+B, Cmd+J, Cmd+,)', () => {
     let leftSidebarToggled = false;
     let rightShelfToggled = false;
     let exportModalToggled = false;
+    let settingsModalToggled = false;
 
     const actions = {
       toggleLeftSidebar: () => {
@@ -603,6 +605,9 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
       },
       toggleExportModal: () => {
         exportModalToggled = !exportModalToggled;
+      },
+      toggleSettingsModal: () => {
+        settingsModalToggled = !settingsModalToggled;
       },
     };
 
@@ -620,6 +625,11 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
     handled = handleDesktopShortcuts({ key: 'e', metaKey: true }, actions);
     expect(handled).toBe(true);
     expect(exportModalToggled).toBe(true);
+
+    // Trigger Cmd+, (Open Settings Modal)
+    handled = handleDesktopShortcuts({ key: ',', metaKey: true }, actions);
+    expect(handled).toBe(true);
+    expect(settingsModalToggled).toBe(true);
 
     // Key without Cmd/Ctrl should not trigger
     handled = handleDesktopShortcuts({ key: 'e', metaKey: false, ctrlKey: false }, actions);
