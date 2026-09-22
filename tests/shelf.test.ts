@@ -362,30 +362,10 @@ describe('Right Shelf & App Header Components', () => {
       expect(html).toContain('v0.1.0');
     });
 
-    it('renders active category and culture info', () => {
-      useNominaStore.setState({
-        activeCategory: 'settlement',
-        activeCultureIds: ['danubian_slavic'],
-      });
-
+    it('renders collections button and quick export button', () => {
       const html = renderToString(React.createElement(AppHeader));
 
-      expect(html).toContain('Settlements &amp; Cities');
-      expect(html).toContain('Danubian Slavic');
-    });
-
-    it('renders culture blending display when multiple cultures are active', () => {
-      useNominaStore.setState({
-        activeCultureIds: ['danubian_slavic', 'celtic_gaelic'],
-      });
-
-      const html = renderToString(React.createElement(AppHeader));
-      expect(html).toContain('Danubian Slavic + Celtic Gaelic');
-    });
-
-    it('renders pinned bible count badge and quick export button', () => {
-      const html = renderToString(React.createElement(AppHeader));
-
+      expect(html).toContain('header-collections-btn');
       expect(html).toContain('header-bible-count');
       expect(html).toContain('2');
       expect(html).toContain('header-export-btn');
@@ -408,7 +388,6 @@ describe('Right Shelf & App Header Components', () => {
       );
 
       expect(html).toContain('header-toggle-left-sidebar');
-      expect(html).toContain('header-toggle-right-shelf');
     });
 
     it('renders settings cog button and calls onOpenSettings callback', () => {
@@ -422,20 +401,6 @@ describe('Right Shelf & App Header Components', () => {
 
       expect(html).toContain('header-settings-btn');
       expect(html).toContain('Settings &amp; Appearance');
-    });
-
-    it('renders Target Subtype selector and Anglicize options button in nav bar', () => {
-      useNominaStore.setState({
-        activeCategory: 'character',
-        targetSubtype: 'Warrior',
-      });
-
-      const html = renderToString(React.createElement(AppHeader));
-
-      expect(html).toContain('data-testid="target-subtype-select"');
-      expect(html).toContain('Warrior');
-      expect(html).toContain('Auto Subtype');
-      expect(html).toContain('header-anglicize-btn');
     });
   });
 });

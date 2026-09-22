@@ -368,6 +368,35 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(useNominaStore.getState().generatedBatch.length).toBe(0);
     });
 
+    it('renders status bar in second header with category, subtype dropdown, culture, and anglicize button', () => {
+      useNominaStore.setState({
+        activeCategory: 'settlement',
+        targetSubtype: 'Metropolis',
+        activeCultureIds: ['danubian_slavic'],
+        generatedBatch: [
+          {
+            id: 'ent-1',
+            name: 'Krakov',
+            originalName: 'Krakov',
+            originalRoot: 'Krak',
+            category: 'settlement',
+            cultureId: 'danubian_slavic',
+            children: [],
+          },
+        ],
+      });
+
+      const html = renderToString(React.createElement(BatchGridView));
+
+      expect(html).toContain('data-testid="header-category-indicator"');
+      expect(html).toContain('Settlements &amp; Cities');
+      expect(html).toContain('data-testid="target-subtype-select"');
+      expect(html).toContain('Metropolis');
+      expect(html).toContain('data-testid="header-culture-indicator"');
+      expect(html).toContain('Danubian Slavic');
+      expect(html).toContain('data-testid="header-anglicize-btn"');
+    });
+
     it('pins all batch entities when Pin All is executed', () => {
       const sampleBatch: LoreEntity[] = [
         {
