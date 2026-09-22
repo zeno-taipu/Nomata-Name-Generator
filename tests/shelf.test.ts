@@ -204,7 +204,7 @@ describe('Right Shelf & App Header Components', () => {
       useNominaStore.setState({ pinnedEntities: [] });
 
       const html = renderToString(React.createElement(RightShelf));
-      expect(html).toContain('Your World Bible is empty');
+      expect(html).toContain('Your Collections are empty');
       expect(html).toContain(
         'Click the pin icon on any generated name in the studio to collect it here.'
       );

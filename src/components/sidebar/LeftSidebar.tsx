@@ -7,6 +7,7 @@ import {
 import { CategoryNav } from './CategoryNav';
 import { CultureSelector } from './CultureSelector';
 import { CustomVocabularyModal } from './CustomVocabularyModal';
+import { GeneratorDrawer } from './GeneratorDrawer';
 import { useNominaStore } from '../../store/useNominaStore';
 import { cn } from '../../utils/cn';
 
@@ -50,6 +51,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         )}
         style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
       >
+        {/* Top Generator Controls Section with Chevron */}
+        <GeneratorDrawer isCollapsed={isCollapsed} />
 
         {/* Scrollable Navigation Body */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin scrollbar-thumb-charcoal-700">

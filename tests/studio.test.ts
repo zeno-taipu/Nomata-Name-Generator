@@ -599,10 +599,6 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
 
       const html = renderToString(React.createElement(CenterStudio));
 
-      // Header GeneratorControls
-      expect(html).toContain('generator-controls');
-      expect(html).toContain('Generate');
-
       // Grid Viewport
       expect(html).toContain('batch-grid-view');
       expect(html).toContain('Branimir');
@@ -610,36 +606,34 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       // Floating Stats Bar
       expect(html).toContain('studio-stats-bar');
       expect(html).toContain('Batch:');
-      expect(html).toContain('Bible Pinned:');
+      expect(html).toContain('Collections:');
       expect(html).toContain('T:0.65');
       expect(html).toContain('Ord:2');
       expect(html).toContain('EN:OFF');
     });
 
-    it('switches seamlessly between BatchGridView and LineageTreeView', () => {
+    it('switches seamlessly between BatchGridView, LineageTreeView, and CollectionsView', () => {
       const gridHtml = renderToString(
         React.createElement(CenterStudio, { defaultViewMode: 'grid' })
       );
       expect(gridHtml).toContain('batch-grid-view');
       expect(gridHtml).not.toContain('lineage-tree-view');
+      expect(gridHtml).not.toContain('collections-view');
 
       const treeHtml = renderToString(
         React.createElement(CenterStudio, { defaultViewMode: 'tree' })
       );
       expect(treeHtml).toContain('lineage-tree-view');
       expect(treeHtml).not.toContain('batch-grid-view');
-    });
+      expect(treeHtml).not.toContain('collections-view');
 
-    it('collapses top GeneratorControls bar when in tree view mode', () => {
-      const gridHtml = renderToString(
-        React.createElement(CenterStudio, { defaultViewMode: 'grid' })
+      const collectionsHtml = renderToString(
+        React.createElement(CenterStudio, { defaultViewMode: 'collections' })
       );
-      expect(gridHtml).toContain('generator-controls');
-
-      const treeHtml = renderToString(
-        React.createElement(CenterStudio, { defaultViewMode: 'tree' })
-      );
-      expect(treeHtml).not.toContain('generator-controls');
+      expect(collectionsHtml).toContain('collections-view');
+      expect(collectionsHtml).toContain('Collections');
+      expect(collectionsHtml).not.toContain('batch-grid-view');
+      expect(collectionsHtml).not.toContain('lineage-tree-view');
     });
   });
 });

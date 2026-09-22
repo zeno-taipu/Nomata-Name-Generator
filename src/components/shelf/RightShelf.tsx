@@ -185,7 +185,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                   id="right-shelf-title"
                   className="font-serif font-medium text-sm text-slate-100 tracking-wide"
                 >
-                  World Bible
+                  Collections
                 </h3>
                 <span
                   data-testid="pinned-count-badge"
@@ -200,7 +200,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                 <button
                   type="button"
                   data-testid="open-export-modal-btn"
-                  aria-label="Export World Bible"
+                  aria-label="Export Collections"
                   title="Export entities or save project bible"
                   onClick={() => setExportModalOpen(true)}
                   className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 rounded-lg transition-colors"
@@ -322,7 +322,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-slate-300 font-serif">
-                      Your World Bible is empty
+                      Your Collections are empty
                     </h4>
                     <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-[210px]">
                       Click the pin icon on any generated name in the studio to collect it here.

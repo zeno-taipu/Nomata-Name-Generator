@@ -2,17 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AppHeader } from './components/header';
 import { LeftSidebar } from './components/sidebar';
 import { CenterStudio } from './components/studio';
-import { RightShelf } from './components/shelf';
+import { ExportModal } from './components/shelf';
 import { SettingsModal } from './components/settings';
 import { useNominaStore } from './store/useNominaStore';
 import { applyThemeToDOM } from './utils/theme';
-import type { LoreEntity } from './types/domain';
 
 export interface DesktopShortcutActions {
   toggleExportModal: () => void;
   toggleSettingsModal: () => void;
   toggleLeftSidebar: () => void;
-  toggleRightShelf: () => void;
+  toggleRightShelf?: () => void;
+  toggleCollections?: () => void;
 }
 
 export function handleDesktopShortcuts(
@@ -51,7 +51,11 @@ export function handleDesktopShortcuts(
     return true;
   } else if (key === 'j') {
     e.preventDefault?.();
-    actions.toggleRightShelf();
+    if (actions.toggleCollections) {
+      actions.toggleCollections();
+    } else if (actions.toggleRightShelf) {
+      actions.toggleRightShelf();
+    }
     return true;
   } else if (e.key === ',') {
     e.preventDefault?.();
@@ -63,18 +67,20 @@ export function handleDesktopShortcuts(
 
 export const App: React.FC = () => {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState<boolean>(false);
-  const [isRightShelfCollapsed, setIsRightShelfCollapsed] = useState<boolean>(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
-  const [centerViewMode, setCenterViewMode] = useState<'grid' | 'tree'>('grid');
+  const [centerViewMode, setCenterViewMode] = useState<'grid' | 'tree' | 'collections'>('grid');
 
   const themeSettings = useNominaStore((s) => s.themeSettings);
-  const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
 
   // Initialize and synchronize dynamic CSS theme variables on document root
   useEffect(() => {
     applyThemeToDOM(themeSettings);
   }, [themeSettings]);
+
+  const handleToggleCollections = useCallback(() => {
+    setCenterViewMode((prev) => (prev === 'collections' ? 'grid' : 'collections'));
+  }, []);
 
   // Global desktop keyboard shortcuts
   useEffect(() => {
@@ -85,7 +91,7 @@ export const App: React.FC = () => {
         toggleExportModal: () => setIsExportModalOpen((prev) => !prev),
         toggleSettingsModal: () => setIsSettingsModalOpen((prev) => !prev),
         toggleLeftSidebar: () => setIsLeftSidebarCollapsed((prev) => !prev),
-        toggleRightShelf: () => setIsRightShelfCollapsed((prev) => !prev),
+        toggleCollections: handleToggleCollections,
       });
     };
 
@@ -93,15 +99,7 @@ export const App: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
-
-  const handleInspectTree = useCallback(
-    (entity: LoreEntity) => {
-      setActiveEntityId(entity.id);
-      setCenterViewMode('tree');
-    },
-    [setActiveEntityId]
-  );
+  }, [handleToggleCollections]);
 
   return (
     <div
@@ -113,14 +111,13 @@ export const App: React.FC = () => {
         isLeftSidebarCollapsed={isLeftSidebarCollapsed}
         leftSidebarCollapsed={isLeftSidebarCollapsed}
         onToggleLeftSidebar={() => setIsLeftSidebarCollapsed((prev) => !prev)}
-        isRightShelfCollapsed={isRightShelfCollapsed}
-        rightShelfCollapsed={isRightShelfCollapsed}
-        onToggleRightShelf={() => setIsRightShelfCollapsed((prev) => !prev)}
+        isCollectionsView={centerViewMode === 'collections'}
+        onToggleCollections={handleToggleCollections}
         onOpenExport={() => setIsExportModalOpen(true)}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
       />
 
-      {/* Main 3-Column Studio Body */}
+      {/* Main 2-Column Studio Body */}
       <div
         data-testid="studio-body"
         className="flex-1 flex overflow-hidden relative"
@@ -131,22 +128,20 @@ export const App: React.FC = () => {
           onToggleCollapse={setIsLeftSidebarCollapsed}
         />
 
-        {/* Center Column: Controls, Batch Grid Viewport & Lineage Tree */}
+        {/* Center/Main Column: Batch Grid Viewport, Lineage Tree & Collections */}
         <CenterStudio
           className="flex-1 min-w-0 h-full overflow-hidden"
           viewMode={centerViewMode}
           onViewModeChange={setCenterViewMode}
-        />
-
-        {/* Right Column: World Bible Shelf & Export Modal */}
-        <RightShelf
-          isCollapsed={isRightShelfCollapsed}
-          onToggleCollapse={setIsRightShelfCollapsed}
-          isExportModalOpen={isExportModalOpen}
-          onToggleExportModal={setIsExportModalOpen}
-          onInspectTree={handleInspectTree}
+          onOpenExport={() => setIsExportModalOpen(true)}
         />
       </div>
+
+      {/* Export Hub Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+      />
 
       {/* Settings Modal (Appearance, Data Import, Presets) */}
       <SettingsModal

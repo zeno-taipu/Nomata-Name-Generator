@@ -5,6 +5,7 @@ import { useNominaStore } from '../src/store/useNominaStore';
 import { CATEGORIES, CategoryNav } from '../src/components/sidebar/CategoryNav';
 import { CultureSelector } from '../src/components/sidebar/CultureSelector';
 import { CustomVocabularyModal } from '../src/components/sidebar/CustomVocabularyModal';
+import { GeneratorDrawer } from '../src/components/sidebar/GeneratorDrawer';
 import { LeftSidebar } from '../src/components/sidebar/LeftSidebar';
 import { cultureList, getCultureById } from '../src/data/cultures';
 import type { EntityCategory } from '../src/types/domain';
@@ -280,10 +281,12 @@ describe('Sidebar Components & Store Integration', () => {
   });
 
   describe('LeftSidebar Container Component', () => {
-    it('renders sidebar structure with nav, cultures, and custom vocabulary', () => {
+    it('renders sidebar structure with nav, cultures, custom vocabulary, and generator controls', () => {
       const html = renderToString(React.createElement(LeftSidebar));
 
       expect(html).toContain('data-testid="left-sidebar"');
+      expect(html).toContain('data-testid="sidebar-generate-button"');
+      expect(html).toContain('data-testid="sidebar-generator-options-toggle"');
       expect(html).toContain('data-testid="open-custom-vocab-button"');
       expect(html).toContain('People &amp; Characters');
       expect(html).toContain('Origins &amp; Cultures');
@@ -292,12 +295,13 @@ describe('Sidebar Components & Store Integration', () => {
       expect(html).not.toContain('Lore &amp; Anthroponymy Engine');
     });
 
-    it('renders in collapsed state with w-16 class', () => {
+    it('renders in collapsed state with w-16 class and compact generate button', () => {
       const html = renderToString(
         React.createElement(LeftSidebar, { isCollapsed: true })
       );
 
       expect(html).toContain('w-16');
+      expect(html).toContain('data-testid="sidebar-generate-button"');
       expect(html).not.toContain('Lore &amp; Anthroponymy Engine');
     });
 
@@ -329,6 +333,24 @@ describe('Sidebar Components & Store Integration', () => {
       expect(batch).toHaveLength(5);
       expect(batch[0].category).toBe('settlement');
       expect(batch[0].name.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GeneratorDrawer Component', () => {
+    it('renders primary generate button and chevron options toggle button', () => {
+      const html = renderToString(React.createElement(GeneratorDrawer));
+
+      expect(html).toContain('data-testid="sidebar-generate-button"');
+      expect(html).toContain('Generate');
+      expect(html).toContain('⌘⏎');
+      expect(html).toContain('data-testid="sidebar-generator-options-toggle"');
+    });
+
+    it('renders in compact collapsed mode when isCollapsed is true', () => {
+      const html = renderToString(React.createElement(GeneratorDrawer, { isCollapsed: true }));
+
+      expect(html).toContain('data-testid="sidebar-generate-button"');
+      expect(html).not.toContain('data-testid="sidebar-generator-options-toggle"');
     });
   });
 });

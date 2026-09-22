@@ -24,8 +24,10 @@ export interface AppHeaderProps {
   rightShelfCollapsed?: boolean;
   isLeftSidebarCollapsed?: boolean;
   isRightShelfCollapsed?: boolean;
+  isCollectionsView?: boolean;
   onToggleLeftSidebar?: () => void;
   onToggleRightShelf?: () => void;
+  onToggleCollections?: () => void;
   onOpenExport?: () => void;
   onOpenSettings?: () => void;
   className?: string;
@@ -44,8 +46,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   rightShelfCollapsed,
   isLeftSidebarCollapsed,
   isRightShelfCollapsed,
+  isCollectionsView,
   onToggleLeftSidebar,
   onToggleRightShelf,
+  onToggleCollections,
   onOpenExport,
   onOpenSettings,
   className,
@@ -156,24 +160,30 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: World Bible Count Badge, Export Hub Trigger & Right Shelf Toggle */}
+      {/* Right: Collections Toggle / Count Badge, Export Hub Trigger & Settings Cog */}
       <div className="flex items-center gap-2">
-        {/* World Bible Counter Button */}
+        {/* Collections View Toggle / Count Button */}
         <button
           type="button"
-          data-testid="header-bible-count-btn"
-          aria-label={`World Bible: ${pinnedEntities.length} pinned lore items`}
-          title="Pinned World Bible count"
-          onClick={onToggleRightShelf}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-charcoal-900 border border-charcoal-750 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 transition-colors"
+          data-testid="header-collections-btn"
+          data-testid-alias="header-bible-count-btn"
+          aria-label={`Collections: ${pinnedEntities.length} saved lore items`}
+          title={isCollectionsView ? 'Return to Generator Grid' : 'View Collections'}
+          onClick={onToggleCollections || onToggleRightShelf}
+          className={cn(
+            'flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-all select-none',
+            isCollectionsView
+              ? 'bg-gold-500/20 border-gold-500/50 text-gold-300 shadow-[0_0_10px_rgba(var(--color-accent-rgb),0.2)]'
+              : 'bg-charcoal-900 border-charcoal-750 text-slate-300 hover:border-gold-500/40 hover:text-gold-400'
+          )}
         >
           <BookOpen size={14} className="text-gold-400" />
-          <span className="hidden sm:inline text-slate-400">Bible:</span>
+          <span className="hidden sm:inline text-slate-400">Collections:</span>
           <span
-            data-testid="header-bible-count"
+            data-testid="header-collections-count"
             className="font-mono font-semibold text-gold-400"
           >
-            {pinnedEntities.length}
+            <span data-testid="header-bible-count">{pinnedEntities.length}</span>
           </span>
         </button>
 
@@ -182,7 +192,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           type="button"
           data-testid="header-export-btn"
           aria-label="Open Export Hub"
-          title="Open Export Hub & Lore Bible Exporter"
+          title="Open Export Hub"
           onClick={onOpenExport}
           className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-charcoal-950 bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 rounded-lg shadow-sm shadow-gold-500/10 transition-all active:scale-[0.98]"
         >
@@ -202,22 +212,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <Settings size={15} />
         </button>
 
-        {/* Right Shelf Toggle Button */}
-        <button
-          type="button"
-          data-testid="header-toggle-right-shelf"
-          aria-label={rightCollapsed ? 'Expand World Bible shelf' : 'Collapse World Bible shelf'}
-          title={rightCollapsed ? 'Expand right shelf' : 'Collapse right shelf'}
-          onClick={onToggleRightShelf}
-          className={cn(
-            'p-1.5 rounded-lg border transition-colors',
-            rightCollapsed
-              ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
-              : 'text-gold-400 bg-gold-500/10 border-gold-500/30 hover:bg-gold-500/20'
-          )}
-        >
-          <PanelRight size={16} />
-        </button>
+        {/* Right Shelf Toggle Button (only rendered if onToggleRightShelf is provided) */}
+        {onToggleRightShelf && (
+          <button
+            type="button"
+            data-testid="header-toggle-right-shelf"
+            aria-label={rightCollapsed ? 'Expand right shelf' : 'Collapse right shelf'}
+            title={rightCollapsed ? 'Expand right shelf' : 'Collapse right shelf'}
+            onClick={onToggleRightShelf}
+            className={cn(
+              'p-1.5 rounded-lg border transition-colors',
+              rightCollapsed
+                ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
+                : 'text-gold-400 bg-gold-500/10 border-gold-500/30 hover:bg-gold-500/20'
+            )}
+          >
+            <PanelRight size={16} />
+          </button>
+        )}
       </div>
     </header>
   );

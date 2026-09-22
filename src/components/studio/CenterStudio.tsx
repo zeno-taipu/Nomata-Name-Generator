@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { Layers, Pin } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
 import { getCultureById } from '../../data/cultures';
-import { GeneratorControls } from './GeneratorControls';
 import { BatchGridView } from './BatchGridView';
 import { LineageTreeView } from './LineageTreeView';
+import { CollectionsView } from './CollectionsView';
 import { cn } from '../../utils/cn';
 
 export interface CenterStudioProps {
   className?: string;
-  defaultViewMode?: 'grid' | 'tree';
-  viewMode?: 'grid' | 'tree';
-  onViewModeChange?: (mode: 'grid' | 'tree') => void;
+  defaultViewMode?: 'grid' | 'tree' | 'collections';
+  viewMode?: 'grid' | 'tree' | 'collections';
+  onViewModeChange?: (mode: 'grid' | 'tree' | 'collections') => void;
+  onOpenExport?: () => void;
 }
 
 export const CenterStudio: React.FC<CenterStudioProps> = ({
@@ -19,11 +20,12 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
   defaultViewMode = 'grid',
   viewMode: controlledViewMode,
   onViewModeChange,
+  onOpenExport,
 }) => {
-  const [internalViewMode, setInternalViewMode] = useState<'grid' | 'tree'>(defaultViewMode);
+  const [internalViewMode, setInternalViewMode] = useState<'grid' | 'tree' | 'collections'>(defaultViewMode);
   const viewMode = controlledViewMode !== undefined ? controlledViewMode : internalViewMode;
 
-  const handleViewModeChange = (mode: 'grid' | 'tree') => {
+  const handleViewModeChange = (mode: 'grid' | 'tree' | 'collections') => {
     if (controlledViewMode === undefined) {
       setInternalViewMode(mode);
     }
@@ -55,21 +57,29 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
       )}
       style={{ backgroundColor: 'var(--bg-app)' }}
     >
-      {/* Top Sticky Toolbar - Collapsed in Tree View */}
-      {viewMode === 'grid' && <GeneratorControls />}
-
       {/* Central Viewport */}
       <main className="flex-1 overflow-hidden flex flex-col relative min-h-0">
-        {viewMode === 'grid' ? (
+        {viewMode === 'grid' && (
           <BatchGridView
             onInspectTree={(entity) => {
               setActiveEntityId(entity.id);
               handleViewModeChange('tree');
             }}
           />
-        ) : (
+        )}
+        {viewMode === 'tree' && (
           <LineageTreeView
             onBackToGrid={() => handleViewModeChange('grid')}
+          />
+        )}
+        {viewMode === 'collections' && (
+          <CollectionsView
+            onBackToGrid={() => handleViewModeChange('grid')}
+            onInspectTree={(entity) => {
+              setActiveEntityId(entity.id);
+              handleViewModeChange('tree');
+            }}
+            onOpenExport={onOpenExport}
           />
         )}
       </main>
@@ -80,7 +90,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
         className="flex flex-wrap items-center justify-between gap-3 px-6 py-2 border-t border-charcoal-800/80 bg-charcoal-900/90 backdrop-blur-md text-xs text-slate-400 z-10 shrink-0"
         style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
       >
-        {/* Left Stats: Batch Count & Pinned Count */}
+        {/* Left Stats: Batch Count & Collections Count */}
         <div className="flex items-center gap-4">
           <div
             data-testid="stats-batch-count"
@@ -101,7 +111,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
           >
             <Pin className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
             <span>
-              Bible Pinned:{' '}
+              Collections:{' '}
               <strong className="text-slate-200 font-mono font-medium">
                 {pinnedEntities.length}
               </strong>

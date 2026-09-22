@@ -561,30 +561,29 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
     expect(html).toContain('data-testid="app-header"');
     expect(html).toContain('NOMATA');
     expect(html).toContain('data-testid="header-toggle-left-sidebar"');
-    expect(html).toContain('data-testid="header-toggle-right-shelf"');
+    expect(html).toContain('data-testid="header-collections-btn"');
     expect(html).toContain('data-testid="header-export-btn"');
     expect(html).toContain('data-testid="header-settings-btn"');
 
-    // 3. Studio 3-Column Body
+    // 3. Studio 2-Column Body (LeftSidebar & CenterStudio)
     expect(html).toContain('data-testid="studio-body"');
 
-    // Left Column: LeftSidebar
+    // Left Column: LeftSidebar with Generate Button & Options Chevron
     expect(html).toContain('data-testid="left-sidebar"');
+    expect(html).toContain('data-testid="sidebar-generate-button"');
+    expect(html).toContain('data-testid="sidebar-generator-options-toggle"');
     expect(html).toContain('People &amp; Characters');
     expect(html).toContain('Origins &amp; Cultures');
     expect(html).toContain('data-testid="open-custom-vocab-button"');
 
-    // Center Column: CenterStudio
+    // Center/Main Column: CenterStudio
     expect(html).toContain('data-testid="center-studio"');
-    expect(html).toContain('data-testid="generator-controls"');
     expect(html).toContain('data-testid="batch-grid-view"');
     expect(html).toContain('Cormac of the Fjord');
 
-    // Right Column: RightShelf
-    expect(html).toContain('data-testid="right-shelf"');
-    expect(html).toContain('World Bible');
-    expect(html).toContain('pinned-count-badge');
-    expect(html).toContain('Eldridge Tower');
+    // Header Collections button displays count
+    expect(html).toContain('Collections');
+    expect(html).toContain('header-collections-count');
   });
 
   // =========================================================================
@@ -592,7 +591,7 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
   // =========================================================================
   it('10. Global desktop keyboard shortcuts (Cmd+E, Cmd+B, Cmd+J, Cmd+,)', () => {
     let leftSidebarToggled = false;
-    let rightShelfToggled = false;
+    let collectionsToggled = false;
     let exportModalToggled = false;
     let settingsModalToggled = false;
 
@@ -600,8 +599,8 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
       toggleLeftSidebar: () => {
         leftSidebarToggled = !leftSidebarToggled;
       },
-      toggleRightShelf: () => {
-        rightShelfToggled = !rightShelfToggled;
+      toggleCollections: () => {
+        collectionsToggled = !collectionsToggled;
       },
       toggleExportModal: () => {
         exportModalToggled = !exportModalToggled;
@@ -616,10 +615,10 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
     expect(handled).toBe(true);
     expect(leftSidebarToggled).toBe(true);
 
-    // Trigger Cmd+J (Toggle World Bible Right Shelf)
+    // Trigger Cmd+J (Toggle Collections View)
     handled = handleDesktopShortcuts({ key: 'j', metaKey: true }, actions);
     expect(handled).toBe(true);
-    expect(rightShelfToggled).toBe(true);
+    expect(collectionsToggled).toBe(true);
 
     // Trigger Cmd+E (Open Export Modal)
     handled = handleDesktopShortcuts({ key: 'e', metaKey: true }, actions);
