@@ -264,6 +264,40 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       const reverted = useNominaStore.getState().toggleAnglicizeEntity(mockEntity.id);
       expect(reverted?.anglicization?.enabled).toBe(false);
     });
+
+    it('renders delete subordinate button in tree mode on child nodes and handles deletion', () => {
+      const childEntity: LoreEntity = {
+        id: 'subordinate-1',
+        parentId: 'parent-1',
+        name: 'Vyshegrad Lower Ward',
+        originalName: 'Vyshegrad Lower Ward',
+        originalRoot: 'Vyshe',
+        category: 'settlement',
+        cultureId: 'danubian_slavic',
+        children: [],
+      };
+
+      const treeHtml = renderToString(
+        React.createElement(EntityNodeCard, { entity: childEntity, mode: 'tree' })
+      );
+      expect(treeHtml).toContain('data-testid="delete-subordinate-button"');
+      expect(treeHtml).toContain('Delete subordinate entity');
+
+      // In grid mode or for root node, delete subordinate button should not be rendered
+      const rootEntity: LoreEntity = {
+        ...childEntity,
+        parentId: undefined,
+      };
+      const rootTreeHtml = renderToString(
+        React.createElement(EntityNodeCard, { entity: rootEntity, mode: 'tree' })
+      );
+      expect(rootTreeHtml).not.toContain('data-testid="delete-subordinate-button"');
+
+      const gridHtml = renderToString(
+        React.createElement(EntityNodeCard, { entity: childEntity, mode: 'grid' })
+      );
+      expect(gridHtml).not.toContain('data-testid="delete-subordinate-button"');
+    });
   });
 
   describe('BatchGridView Component', () => {
@@ -481,6 +515,62 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('Parent Realm');
       expect(html).toContain('Child Outpost');
     });
+
+    it('renders floating temperature and anglicize controls with hover popovers', () => {
+      useNominaStore.getState().setEngineConfig({ temperature: 0.8 });
+      useNominaStore.getState().setAnglicizationConfig({
+        anglicize: true,
+        anglicizeMode: 'suffix',
+        exonymDualDisplay: true,
+      });
+
+      const html = renderToString(React.createElement(LineageTreeView));
+
+      expect(html).toContain('data-testid="tree-floating-controls"');
+      expect(html).toContain('data-testid="tree-temp-floating-button"');
+      expect(html).toContain('data-testid="tree-temperature-slider"');
+      expect(html).toContain('data-testid="tree-temp-preset-0.3"');
+      expect(html).toContain('data-testid="tree-anglicize-floating-button"');
+      expect(html).toContain('data-testid="tree-anglicize-toggle"');
+      expect(html).toContain('data-testid="tree-anglicize-mode-suffix"');
+      expect(html).toContain('data-testid="tree-dual-display-toggle"');
+    });
+
+    it('deletes subordinate from tree via deleteEntity in store', () => {
+      const parent: LoreEntity = {
+        id: 'parent-del',
+        name: 'Parent Realm',
+        originalName: 'Parent Realm',
+        originalRoot: 'Parent',
+        category: 'settlement',
+        cultureId: 'danubian_slavic',
+        children: [
+          {
+            id: 'child-del',
+            parentId: 'parent-del',
+            name: 'Child Ward',
+            originalName: 'Child Ward',
+            originalRoot: 'Child',
+            category: 'settlement',
+            cultureId: 'danubian_slavic',
+            children: [],
+          },
+        ],
+      };
+
+      useNominaStore.setState({
+        generatedBatch: [parent],
+        activeEntityId: 'child-del',
+      });
+
+      expect(useNominaStore.getState().generatedBatch[0].children?.length).toBe(1);
+      const deleted = useNominaStore.getState().deleteEntity('child-del');
+      expect(deleted).toBe(true);
+
+      const updatedBatch = useNominaStore.getState().generatedBatch;
+      expect(updatedBatch[0].children?.length).toBe(0);
+      expect(useNominaStore.getState().activeEntityId).toBeNull();
+    });
   });
 
   describe('CenterStudio Container Component', () => {
@@ -538,6 +628,18 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       );
       expect(treeHtml).toContain('lineage-tree-view');
       expect(treeHtml).not.toContain('batch-grid-view');
+    });
+
+    it('collapses top GeneratorControls bar when in tree view mode', () => {
+      const gridHtml = renderToString(
+        React.createElement(CenterStudio, { defaultViewMode: 'grid' })
+      );
+      expect(gridHtml).toContain('generator-controls');
+
+      const treeHtml = renderToString(
+        React.createElement(CenterStudio, { defaultViewMode: 'tree' })
+      );
+      expect(treeHtml).not.toContain('generator-controls');
     });
   });
 });

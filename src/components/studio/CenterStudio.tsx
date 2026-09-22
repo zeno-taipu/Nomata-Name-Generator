@@ -55,8 +55,8 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
       )}
       style={{ backgroundColor: 'var(--bg-app)' }}
     >
-      {/* Top Sticky Toolbar */}
-      <GeneratorControls />
+      {/* Top Sticky Toolbar - Collapsed in Tree View */}
+      {viewMode === 'grid' && <GeneratorControls />}
 
       {/* Central Viewport */}
       <main className="flex-1 overflow-hidden flex flex-col relative min-h-0">

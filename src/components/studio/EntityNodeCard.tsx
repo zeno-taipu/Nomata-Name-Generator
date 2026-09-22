@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Sparkles,
   Plus,
+  Trash2,
 } from 'lucide-react';
 import type { LoreEntity } from '../../types/domain';
 import { useNominaStore } from '../../store/useNominaStore';
@@ -24,6 +25,7 @@ export interface EntityNodeCardProps {
   mode?: 'grid' | 'tree';
   onSelect?: (entity: LoreEntity) => void;
   onInspectTree?: (entity: LoreEntity) => void;
+  onDelete?: (entity: LoreEntity) => void;
   className?: string;
 }
 
@@ -34,6 +36,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   mode = 'grid',
   onSelect,
   onInspectTree,
+  onDelete,
   className,
 }) => {
   const [copied, setCopied] = useState<boolean>(false);
@@ -55,6 +58,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   const setEntityBranchSubtype = useNominaStore((s) => s.setEntityBranchSubtype);
   const toggleAnglicizeEntity = useNominaStore((s) => s.toggleAnglicizeEntity);
   const togglePinEntity = useNominaStore((s) => s.togglePinEntity);
+  const deleteEntity = useNominaStore((s) => s.deleteEntity);
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
   const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
 
@@ -165,7 +169,17 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
     }
   };
 
+  // Delete subordinate handler
+  const handleDeleteSubordinate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteEntity(entity.id);
+    if (onDelete) {
+      onDelete(entity);
+    }
+  };
+
   const childrenCount = entity.children?.length ?? 0;
+  const isSubordinate = Boolean(entity.parentId);
 
   return (
     <div
@@ -223,27 +237,43 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           )}
         </div>
 
-        {/* Pin Button */}
-        <button
-          type="button"
-          data-testid="pin-button"
-          aria-label={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
-          onClick={handleTogglePin}
-          className={cn(
-            'p-1.5 rounded-lg border transition-colors shrink-0',
-            entity.pinned
-              ? 'bg-gold-500/20 border-gold-500/40 text-gold-400'
-              : 'border-transparent text-slate-400 hover:text-gold-400 hover:bg-charcoal-800'
+        {/* Top Header Actions: Delete Subordinate (in Tree mode) & Pin Button */}
+        <div className="flex items-center gap-1 shrink-0">
+          {mode === 'tree' && (isSubordinate || onDelete) && (
+            <button
+              type="button"
+              data-testid="delete-subordinate-button"
+              aria-label="Delete subordinate entity"
+              onClick={handleDeleteSubordinate}
+              className="p-1.5 rounded-lg border border-transparent text-slate-400 hover:text-red-400 hover:bg-charcoal-800 hover:border-red-500/30 transition-colors"
+              title="Delete this subordinate from lineage"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           )}
-          title={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
-        >
-          <Pin
+
+          {/* Pin Button */}
+          <button
+            type="button"
+            data-testid="pin-button"
+            aria-label={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
+            onClick={handleTogglePin}
             className={cn(
-              'w-4 h-4',
-              entity.pinned ? 'fill-gold-400 text-gold-400' : 'text-slate-400'
+              'p-1.5 rounded-lg border transition-colors shrink-0',
+              entity.pinned
+                ? 'bg-gold-500/20 border-gold-500/40 text-gold-400'
+                : 'border-transparent text-slate-400 hover:text-gold-400 hover:bg-charcoal-800'
             )}
-          />
-        </button>
+            title={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
+          >
+            <Pin
+              className={cn(
+                'w-4 h-4',
+                entity.pinned ? 'fill-gold-400 text-gold-400' : 'text-slate-400'
+              )}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Main Body: Entity Name, Dual Display, and Etymology */}

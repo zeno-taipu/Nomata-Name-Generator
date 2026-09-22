@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   GitBranch,
   Network,
@@ -6,6 +6,8 @@ import {
   ChevronLeft,
   CornerDownRight,
   X,
+  Sliders,
+  Languages,
 } from 'lucide-react';
 import type { LoreEntity } from '../../types/domain';
 import { useNominaStore } from '../../store/useNominaStore';
@@ -48,6 +50,18 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
   const pinnedEntities = useNominaStore((s) => s.pinnedEntities);
   const activeEntityId = useNominaStore((s) => s.activeEntityId);
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
+
+  // Temperature and Anglicize configuration from store
+  const temperature = useNominaStore((s) => s.temperature);
+  const setEngineConfig = useNominaStore((s) => s.setEngineConfig);
+  const anglicize = useNominaStore((s) => s.anglicize);
+  const anglicizeMode = useNominaStore((s) => s.anglicizeMode);
+  const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
+  const setAnglicizationConfig = useNominaStore((s) => s.setAnglicizationConfig);
+
+  // Floating controls hover states
+  const [isTempOpen, setIsTempOpen] = useState<boolean>(false);
+  const [isAnglicizeOpen, setIsAnglicizeOpen] = useState<boolean>(false);
 
   // Combine batch and pinned entities for lineage inspection
   const allEntities = [...generatedBatch, ...pinnedEntities];
@@ -151,7 +165,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
   return (
     <div
       data-testid="lineage-tree-view"
-      className={cn('flex flex-col h-full w-full', className)}
+      className={cn('relative flex flex-col h-full w-full', className)}
     >
       {/* Tree View Header & Breadcrumb Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b border-charcoal-800 bg-charcoal-950/40">
@@ -225,6 +239,228 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Floating Synthesis Controls (Temperature & Anglicize) on Right Edge */}
+      <aside
+        data-testid="tree-floating-controls"
+        className="absolute right-4 top-16 z-30 flex flex-col gap-3 pointer-events-auto"
+        aria-label="Tree Canvas Quick Controls"
+      >
+        {/* Temperature Floating Control */}
+        <div
+          data-testid="tree-temp-floating-container"
+          className="relative group/temp"
+          onMouseEnter={() => setIsTempOpen(true)}
+          onMouseLeave={() => setIsTempOpen(false)}
+        >
+          {/* Trigger Button */}
+          <button
+            type="button"
+            data-testid="tree-temp-floating-button"
+            onClick={() => setIsTempOpen((prev) => !prev)}
+            aria-label="Adjust Temperature & Creativity"
+            title={`Temperature: ${temperature.toFixed(2)} (Hover to adjust)`}
+            className={cn(
+              'flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-charcoal-900/90 border shadow-lg backdrop-blur-md transition-all',
+              isTempOpen
+                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(208,185,51,0.25)] bg-charcoal-800'
+                : 'border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/50 hover:bg-charcoal-800'
+            )}
+          >
+            <Sliders className="w-4 h-4 text-gold-400" />
+            <span className="text-[9px] font-mono font-semibold text-gold-400 -mt-0.5">
+              {temperature.toFixed(1)}
+            </span>
+          </button>
+
+          {/* Temperature Popover Modal */}
+          <div
+            data-testid="tree-temp-popover"
+            className={cn(
+              'absolute right-full top-0 mr-3 w-72 p-4 rounded-xl bg-charcoal-900/95 border border-charcoal-700/90 shadow-2xl backdrop-blur-md transition-all duration-200 z-40 text-slate-200',
+              isTempOpen
+                ? 'opacity-100 translate-x-0 pointer-events-auto visible'
+                : 'opacity-0 translate-x-2 pointer-events-none invisible group-hover/temp:opacity-100 group-hover/temp:translate-x-0 group-hover/temp:pointer-events-auto group-hover/temp:visible'
+            )}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-charcoal-800 mb-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                <Sliders className="w-3.5 h-3.5 text-gold-400" />
+                <span>Temperature & Innovation</span>
+              </div>
+              <span className="font-mono text-xs font-bold text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/30">
+                {temperature.toFixed(2)}
+              </span>
+            </div>
+
+            {/* Slider */}
+            <div className="space-y-1.5">
+              <input
+                type="range"
+                data-testid="tree-temperature-slider"
+                min="0.1"
+                max="1.0"
+                step="0.05"
+                value={temperature}
+                onChange={(e) =>
+                  setEngineConfig({ temperature: parseFloat(e.target.value) })
+                }
+                className="w-full h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-gold-400 focus:outline-none"
+                aria-label="Temperature slider"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                <span>Fidelity (0.1)</span>
+                <span>Innovation (1.0)</span>
+              </div>
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-charcoal-800">
+              <span className="text-[10px] text-slate-400">Presets:</span>
+              {[
+                { label: 'Strict', val: 0.3 },
+                { label: 'Balanced', val: 0.7 },
+                { label: 'Wild', val: 0.95 },
+              ].map((preset) => (
+                <button
+                  key={preset.val}
+                  type="button"
+                  data-testid={`tree-temp-preset-${preset.val}`}
+                  onClick={() => setEngineConfig({ temperature: preset.val })}
+                  className={cn(
+                    'px-2 py-0.5 text-[10px] rounded font-mono transition-colors',
+                    Math.abs(temperature - preset.val) < 0.05
+                      ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40'
+                      : 'bg-charcoal-800 text-slate-400 hover:text-slate-200'
+                  )}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Anglicize Floating Control */}
+        <div
+          data-testid="tree-anglicize-floating-container"
+          className="relative group/anglicize"
+          onMouseEnter={() => setIsAnglicizeOpen(true)}
+          onMouseLeave={() => setIsAnglicizeOpen(false)}
+        >
+          {/* Trigger Button */}
+          <button
+            type="button"
+            data-testid="tree-anglicize-floating-button"
+            onClick={() => setIsAnglicizeOpen((prev) => !prev)}
+            aria-label="Anglicize Configuration"
+            title={`Anglicization: ${anglicize ? 'ON' : 'OFF'} (Hover to configure)`}
+            className={cn(
+              'relative flex items-center justify-center w-10 h-10 rounded-xl bg-charcoal-900/90 border shadow-lg backdrop-blur-md transition-all',
+              isAnglicizeOpen || anglicize
+                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(208,185,51,0.25)] bg-charcoal-800'
+                : 'border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/50 hover:bg-charcoal-800'
+            )}
+          >
+            <Languages className="w-4 h-4 text-gold-400" />
+            <span
+              className={cn(
+                'absolute top-1.5 right-1.5 w-2 h-2 rounded-full transition-colors',
+                anglicize ? 'bg-gold-400 animate-pulse' : 'bg-charcoal-600'
+              )}
+            />
+          </button>
+
+          {/* Anglicize Popover Modal */}
+          <div
+            data-testid="tree-anglicize-popover"
+            className={cn(
+              'absolute right-full top-0 mr-3 w-72 p-4 rounded-xl bg-charcoal-900/95 border border-charcoal-700/90 shadow-2xl backdrop-blur-md transition-all duration-200 z-40 text-slate-200',
+              isAnglicizeOpen
+                ? 'opacity-100 translate-x-0 pointer-events-auto visible'
+                : 'opacity-0 translate-x-2 pointer-events-none invisible group-hover/anglicize:opacity-100 group-hover/anglicize:translate-x-0 group-hover/anglicize:pointer-events-auto group-hover/anglicize:visible'
+            )}
+          >
+            {/* Header & Toggle */}
+            <div className="flex items-center justify-between pb-2 border-b border-charcoal-800 mb-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                <Languages className="w-3.5 h-3.5 text-gold-400" />
+                <span>Anglicization</span>
+              </div>
+              <button
+                type="button"
+                data-testid="tree-anglicize-toggle"
+                onClick={() => setAnglicizationConfig({ anglicize: !anglicize })}
+                className={cn(
+                  'px-2.5 py-0.5 rounded text-xs font-medium border transition-colors',
+                  anglicize
+                    ? 'bg-gold-500/20 text-gold-400 border-gold-500/40'
+                    : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
+                )}
+              >
+                {anglicize ? 'Enabled' : 'Disabled'}
+              </button>
+            </div>
+
+            {/* Mode Selectors */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium text-slate-400">Mode</label>
+              <div className="grid grid-cols-3 gap-1">
+                {(
+                  [
+                    { id: 'phonetic', label: 'Phonetic' },
+                    { id: 'suffix', label: 'Suffix' },
+                    { id: 'full', label: 'Archaic' },
+                  ] as const
+                ).map((m) => {
+                  const isActive = anglicizeMode === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      data-testid={`tree-anglicize-mode-${m.id}`}
+                      disabled={!anglicize}
+                      onClick={() => setAnglicizationConfig({ anglicizeMode: m.id })}
+                      className={cn(
+                        'py-1 text-xs rounded border text-center transition-colors font-medium',
+                        !anglicize && 'opacity-40 cursor-not-allowed border-charcoal-800 text-slate-500',
+                        anglicize && isActive
+                          ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                          : 'bg-charcoal-800/80 border-charcoal-700/60 text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
+                      )}
+                    >
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Dual Display Option */}
+            <div className="mt-3 pt-2.5 border-t border-charcoal-800 flex items-center justify-between">
+              <span className="text-xs text-slate-300">Dual Display (Exonym)</span>
+              <button
+                type="button"
+                data-testid="tree-dual-display-toggle"
+                disabled={!anglicize}
+                onClick={() =>
+                  setAnglicizationConfig({ exonymDualDisplay: !exonymDualDisplay })
+                }
+                className={cn(
+                  'px-2 py-0.5 text-xs font-mono rounded border transition-colors',
+                  !anglicize && 'opacity-40 cursor-not-allowed border-charcoal-800 text-slate-500',
+                  anglicize && exonymDualDisplay
+                    ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                    : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
+                )}
+              >
+                {exonymDualDisplay ? 'ON' : 'OFF'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
 
       {/* Main Tree Canvas */}
       <div className="flex-1 p-6 overflow-y-auto">

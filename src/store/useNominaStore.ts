@@ -79,6 +79,7 @@ export interface NominaState {
   togglePinEntity: (entity: LoreEntity) => void;
   pinAllBatch: () => void;
   reRollBatch: () => LoreEntity[];
+  deleteEntity: (entityId: string) => boolean;
   saveProjectBible: (name?: string) => NominaProjectBible;
   loadProjectBible: (bible: NominaProjectBible) => void;
   clearBatch: () => void;
@@ -135,6 +136,38 @@ function updateEntityInTree(
   });
 
   return { updated, list: nextList, found };
+}
+
+function removeEntityFromTree(
+  entities: LoreEntity[],
+  id: string
+): { removed: boolean; list: LoreEntity[]; deleted?: LoreEntity } {
+  let removed = false;
+  let deleted: LoreEntity | undefined;
+
+  const nextList: LoreEntity[] = [];
+  for (const entity of entities) {
+    if (entity.id === id) {
+      removed = true;
+      deleted = entity;
+      continue; // Filter this entity out
+    }
+    if (entity.children && entity.children.length > 0) {
+      const childRes = removeEntityFromTree(entity.children, id);
+      if (childRes.removed) {
+        removed = true;
+        deleted = childRes.deleted;
+        nextList.push({
+          ...entity,
+          children: childRes.list,
+        });
+        continue;
+      }
+    }
+    nextList.push(entity);
+  }
+
+  return { removed, list: nextList, deleted };
 }
 
 function setPinnedFlagInTree(entities: LoreEntity[], id: string, pinned: boolean): LoreEntity[] {
@@ -821,6 +854,26 @@ const useRawNominaStore = create<NominaState>()(
 
       reRollBatch: () => {
         return get().generateBatch();
+      },
+
+      deleteEntity: (entityId: string) => {
+        const state = get();
+        const batchRes = removeEntityFromTree(state.generatedBatch, entityId);
+        const pinnedRes = removeEntityFromTree(state.pinnedEntities, entityId);
+
+        if (!batchRes.removed && !pinnedRes.removed) {
+          return false;
+        }
+
+        const nextActiveId = state.activeEntityId === entityId ? null : state.activeEntityId;
+
+        set({
+          generatedBatch: batchRes.list,
+          pinnedEntities: pinnedRes.list,
+          activeEntityId: nextActiveId,
+        });
+
+        return true;
       },
 
       saveProjectBible: (name = 'Nomata World Bible') => {
