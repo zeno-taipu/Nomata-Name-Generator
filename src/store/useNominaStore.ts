@@ -15,6 +15,12 @@ import { RecursiveGrammarEngine } from '../engines/grammar';
 import { AnglicizationEngine } from '../engines/anglicize';
 import { LineageBranchingEngine } from '../engines/branching';
 import { prepareCustomGenerationContext } from '../engines/vocabulary';
+import {
+  type ThemeSettings,
+  DEFAULT_THEME_SETTINGS,
+  THEME_PRESETS,
+} from '../theme/themeConfig';
+import { applyThemeToDOM } from '../utils/theme';
 
 export interface CustomVocabularyState {
   honorifics?: string[];
@@ -52,6 +58,7 @@ export interface NominaState {
   activeEntityId: string | null;
   pinnedEntities: LoreEntity[];
   isGenerating: boolean;
+  themeSettings: ThemeSettings;
 
   // Actions
   setActiveCategory: (cat: EntityCategory) => void;
@@ -61,6 +68,9 @@ export interface NominaState {
   setAnglicizationConfig: (config: AnglicizationConfig) => void;
   setCustomVocabulary: (vocab: Partial<CustomVocabularyState>) => void;
   setActiveEntityId: (id: string | null) => void;
+  updateThemeSettings: (partial: Partial<ThemeSettings>) => void;
+  resetThemeSettings: () => void;
+  applyPresetTheme: (presetId: string) => void;
   generateBatch: () => LoreEntity[];
   branchEntity: (parentId: string, childSubtype?: string, count?: number) => LoreEntity[];
   setEntityBranchSubtype: (entityId: string, subtype: string) => void;
@@ -238,9 +248,31 @@ const useRawNominaStore = create<NominaState>()(
       activeEntityId: null,
       pinnedEntities: [],
       isGenerating: false,
+      themeSettings: DEFAULT_THEME_SETTINGS,
 
       // Actions
       setActiveCategory: (cat) => set({ activeCategory: cat }),
+
+      updateThemeSettings: (partial) => {
+        const current = get().themeSettings || DEFAULT_THEME_SETTINGS;
+        const updated = { ...current, ...partial };
+        set({ themeSettings: updated });
+        applyThemeToDOM(updated);
+      },
+
+      resetThemeSettings: () => {
+        set({ themeSettings: { ...DEFAULT_THEME_SETTINGS } });
+        applyThemeToDOM(DEFAULT_THEME_SETTINGS);
+      },
+
+      applyPresetTheme: (presetId) => {
+        const preset = THEME_PRESETS.find((p) => p.id === presetId);
+        if (!preset) return;
+        const current = get().themeSettings || DEFAULT_THEME_SETTINGS;
+        const updated = { ...current, ...preset.settings };
+        set({ themeSettings: updated });
+        applyThemeToDOM(updated);
+      },
 
       setActiveCultureIds: (ids, weights = {}) =>
         set({ activeCultureIds: ids, cultureWeights: weights }),
@@ -880,6 +912,7 @@ const useRawNominaStore = create<NominaState>()(
         customVocabulary: state.customVocabulary,
         pinnedEntities: state.pinnedEntities,
         generatedBatch: state.generatedBatch,
+        themeSettings: state.themeSettings,
       }),
     }
   )

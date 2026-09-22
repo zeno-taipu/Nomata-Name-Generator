@@ -180,7 +180,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
       }}
       className={cn(
         'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none focus-visible:ring-1 focus-visible:ring-gold-500/50',
-        'bg-charcoal-900/90 hover:bg-charcoal-850 border',
+        'theme-card-surface border',
         isSelected
           ? 'border-gold-500/60 shadow-[0_0_15px_rgba(208,185,51,0.2)] bg-charcoal-850'
           : 'border-charcoal-700/70 hover:border-gold-500/30 hover:shadow-lg',
@@ -194,7 +194,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {/* Subtype Badge */}
           <span
             data-testid="entity-subtype"
-            className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-charcoal-800 border border-charcoal-700/80 text-slate-300 capitalize truncate max-w-[140px]"
+            className="px-2 py-0.5 font-medium rounded-full bg-charcoal-800 border border-charcoal-700/80 text-slate-300 capitalize truncate max-w-[140px] theme-badge-font"
           >
             {entity.subtype || entity.category}
           </span>
@@ -202,7 +202,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {/* Culture Tag */}
           <span
             data-testid="entity-culture"
-            className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 truncate max-w-[140px]"
+            className="px-2 py-0.5 font-medium rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 truncate max-w-[140px] theme-badge-font"
             title={`Origin: ${culture?.name || entity.cultureId}`}
           >
             {culture?.name || entity.cultureId}
@@ -212,7 +212,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {childrenCount > 0 && (
             <span
               data-testid="entity-children-badge"
-              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-gold-500/10 border border-gold-500/30 text-gold-400"
+              className="flex items-center gap-1 px-1.5 py-0.5 font-mono rounded bg-gold-500/10 border border-gold-500/30 text-gold-400 theme-badge-font"
               title={`${childrenCount} subordinate descendant${childrenCount > 1 ? 's' : ''}`}
             >
               <GitBranch className="w-3 h-3" />
@@ -249,7 +249,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         <div className="flex items-baseline gap-2 flex-wrap">
           <h3
             data-testid="entity-name"
-            className="font-serif font-bold text-lg text-slate-100 tracking-wide group-hover:text-gold-300 transition-colors"
+            className="font-bold tracking-wide group-hover:text-gold-300 transition-colors theme-entity-font"
           >
             {entity.name}
           </h3>
@@ -268,7 +268,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         {(entity.originalTitle || entity.epithet) && (
           <p
             data-testid="entity-epithet"
-            className="text-xs text-gold-400/70 font-serif italic mt-0.5 truncate"
+            className="text-gold-400/70 italic mt-0.5 truncate theme-subtitle-font"
           >
             {entity.originalTitle || entity.epithet}
           </p>
@@ -279,7 +279,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {(entity.rootName || entity.originalRoot) && (
             <span
               data-testid="entity-root-badge"
-              className="px-1.5 py-0.5 rounded bg-charcoal-950/70 border border-charcoal-700/60 font-mono text-slate-400"
+              className="px-1.5 py-0.5 rounded bg-charcoal-950/70 border border-charcoal-700/60 font-mono text-slate-400 theme-mono-font"
               title="Lexical Root Etymon"
             >
               {`root: ${entity.rootName || entity.originalRoot}`}

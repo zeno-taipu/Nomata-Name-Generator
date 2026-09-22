@@ -1,0 +1,88 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { applyThemeToDOM, hexToRgb } from '../src/utils/theme';
+import { DEFAULT_THEME_SETTINGS, THEME_PRESETS, type ThemeSettings } from '../src/theme/themeConfig';
+
+describe('Theme Engine & DOM CSS Injection', () => {
+  let originalDocument: unknown;
+  let mockProperties: Record<string, string>;
+
+  beforeEach(() => {
+    mockProperties = {};
+    originalDocument = (globalThis as unknown as { document?: unknown }).document;
+    (globalThis as unknown as { document: unknown }).document = {
+      documentElement: {
+        style: {
+          setProperty: (name: string, value: string) => {
+            mockProperties[name] = value;
+          },
+          getPropertyValue: (name: string) => {
+            return mockProperties[name] || '';
+          },
+        },
+      },
+    };
+  });
+
+  afterEach(() => {
+    if (originalDocument === undefined) {
+      delete (globalThis as unknown as { document?: unknown }).document;
+    } else {
+      (globalThis as unknown as { document: unknown }).document = originalDocument;
+    }
+  });
+
+  it('converts hex to RGB components correctly', () => {
+    expect(hexToRgb('#ffffff')).toEqual({ r: 255, g: 255, b: 255 });
+    expect(hexToRgb('#000000')).toEqual({ r: 0, g: 0, b: 0 });
+    expect(hexToRgb('#d0b933')).toEqual({ r: 208, g: 185, b: 51 });
+    expect(hexToRgb('fff')).toEqual({ r: 255, g: 255, b: 255 });
+  });
+
+  it('injects default theme CSS variables onto document.documentElement', () => {
+    applyThemeToDOM(DEFAULT_THEME_SETTINGS);
+
+    const doc = (globalThis as unknown as { document: { documentElement: { style: { getPropertyValue: (k: string) => string } } } }).document;
+    const style = doc.documentElement.style;
+    expect(style.getPropertyValue('--color-accent')).toBe('#d0b933');
+    expect(style.getPropertyValue('--bg-app')).toBe('#0c0d0e');
+    expect(style.getPropertyValue('--bg-card')).toBe('#18191e');
+    expect(style.getPropertyValue('--card-opacity')).toBe('0.9');
+    expect(style.getPropertyValue('--card-blur')).toBe('8px');
+    expect(style.getPropertyValue('--font-size-entity-name')).toBe('17px');
+    expect(style.getPropertyValue('--font-size-ui')).toBe('13px');
+    expect(style.getPropertyValue('--font-family-entity')).toBe('Cinzel, Georgia, serif');
+  });
+
+  it('updates CSS variables dynamically with custom theme settings', () => {
+    const customTheme: ThemeSettings = {
+      ...DEFAULT_THEME_SETTINGS,
+      primaryAccent: '#38bdf8',
+      bgApp: '#030712',
+      cardOpacity: 0.75,
+      cardBlur: 14,
+      fontSizeEntityName: 24,
+      fontFamilyEntityName: 'Inter, sans-serif',
+    };
+
+    applyThemeToDOM(customTheme);
+
+    const doc = (globalThis as unknown as { document: { documentElement: { style: { getPropertyValue: (k: string) => string } } } }).document;
+    const style = doc.documentElement.style;
+    expect(style.getPropertyValue('--color-accent')).toBe('#38bdf8');
+    expect(style.getPropertyValue('--bg-app')).toBe('#030712');
+    expect(style.getPropertyValue('--card-opacity')).toBe('0.75');
+    expect(style.getPropertyValue('--card-blur')).toBe('14px');
+    expect(style.getPropertyValue('--font-size-entity-name')).toBe('24px');
+    expect(style.getPropertyValue('--font-family-entity')).toBe('Inter, sans-serif');
+  });
+
+  it('provides valid presets with required color and opacity attributes', () => {
+    expect(THEME_PRESETS.length).toBeGreaterThanOrEqual(5);
+    for (const preset of THEME_PRESETS) {
+      expect(preset.id).toBeDefined();
+      expect(preset.name).toBeDefined();
+      expect(preset.preview.accent).toBeDefined();
+      expect(preset.preview.bg).toBeDefined();
+    }
+  });
+});

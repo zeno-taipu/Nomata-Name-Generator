@@ -2,8 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-accent: #d0b933;
+  --color-accent-secondary: #ece29c;
+  --color-border: #22232a;
+  --color-text-primary: #f1f5f9;
+  --color-text-muted: #94a3b8;
+
+  --bg-app: #0c0d0e;
+  --bg-panel: #121316;
+  --bg-header: #0c0d0e;
+  --bg-card: #18191e;
+  --bg-card-computed: rgba(24, 25, 30, 0.9);
+  --card-opacity: 0.9;
+  --card-blur: 8px;
+
+  --font-size-entity-name: 17px;
+  --font-size-ui: 13px;
+  --font-size-subtitle: 12px;
+  --font-size-badge: 11px;
+  --font-size-mono: 11px;
+
+  --font-family-entity: Cinzel, Georgia, serif;
+  --font-family-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
 @layer base {
   body {
-    @apply bg-charcoal-900 text-slate-100 select-none;
+    background-color: var(--bg-app);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-ui);
+    @apply select-none;
   }
+}
+
+/* Custom theme dynamic utilities */
+.theme-card-surface {
+  background-color: var(--bg-card-computed);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+}
+
+.theme-entity-font {
+  font-family: var(--font-family-entity);
+  font-size: var(--font-size-entity-name);
+}
+
+.theme-subtitle-font {
+  font-size: var(--font-size-subtitle);
+}
+
+.theme-badge-font {
+  font-size: var(--font-size-badge);
+}
+
+.theme-mono-font {
+  font-size: var(--font-size-mono);
+}
+
+.theme-ui-font {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-ui);
 }
