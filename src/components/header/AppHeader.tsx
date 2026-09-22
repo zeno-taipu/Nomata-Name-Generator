@@ -81,6 +81,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         'relative flex items-center justify-between px-4 h-14 bg-charcoal-950 border-b border-charcoal-800 select-none z-30',
         className
       )}
+      style={{ backgroundColor: 'var(--bg-header)', borderColor: 'var(--color-border)' }}
     >
       {/* Left: Sidebar Collapse Toggle + Logo & Nomina Branding */}
       <div className="flex items-center gap-3">

@@ -73,6 +73,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
         'sticky top-0 z-10 w-full bg-charcoal-900/95 backdrop-blur-md border-b border-charcoal-700/80 px-4 py-3 shadow-md',
         className
       )}
+      style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Left Section: Primary Action & Batch Count */}
@@ -87,7 +88,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               'relative group flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-200 select-none shadow-sm',
               isGenerating
                 ? 'bg-gold-500/50 text-charcoal-950 cursor-not-allowed'
-                : 'bg-gradient-to-r from-gold-400 to-amber-500 hover:from-gold-300 hover:to-amber-400 text-charcoal-950 shadow-[0_0_15px_rgba(208,185,51,0.25)] hover:shadow-[0_0_20px_rgba(208,185,51,0.4)] active:scale-[0.98]'
+                : 'bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-charcoal-950 shadow-md shadow-gold-500/25 hover:shadow-lg hover:shadow-gold-500/40 active:scale-[0.98]'
             )}
             title="Generate names based on current parameters (⌘ + Enter)"
           >

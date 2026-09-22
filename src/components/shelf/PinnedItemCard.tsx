@@ -100,7 +100,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
       aria-label={`Pinned lore item: ${entity.name}, ${entity.subtype || entity.category}`}
       className={cn(
         'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none',
-        'bg-charcoal-900/90 hover:bg-charcoal-850 border',
+        'theme-card-surface border',
         isActive
           ? 'border-gold-500/60 shadow-[0_0_12px_rgba(208,185,51,0.18)] bg-charcoal-850'
           : 'border-charcoal-700/70 hover:border-gold-500/30 hover:shadow-md',
@@ -114,7 +114,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {/* Subtype Badge */}
           <span
             data-testid="pinned-item-subtype"
-            className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-charcoal-800 border border-charcoal-700/80 text-slate-300 capitalize truncate max-w-[120px]"
+            className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-charcoal-800 border border-charcoal-700/80 text-slate-300 capitalize truncate max-w-[120px] theme-badge-font"
           >
             {entity.subtype || entity.category}
           </span>
@@ -122,7 +122,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {/* Culture Tag */}
           <span
             data-testid="pinned-item-culture"
-            className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 truncate max-w-[120px]"
+            className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 truncate max-w-[120px] theme-badge-font"
             title={`Origin: ${culture?.name || entity.cultureId}`}
           >
             {culture?.name || entity.cultureId}
@@ -132,7 +132,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {childrenCount > 0 && (
             <span
               data-testid="pinned-item-children"
-              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-gold-500/10 border border-gold-500/30 text-gold-400"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-gold-500/10 border border-gold-500/30 text-gold-400 theme-badge-font"
               title={`${childrenCount} branched lineage children`}
             >
               <GitBranch size={10} />
@@ -191,7 +191,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
         <div className="flex items-baseline gap-1.5 flex-wrap">
           <h4
             data-testid="pinned-item-name"
-            className="text-sm font-semibold tracking-wide text-slate-100 font-serif truncate"
+            className="text-sm font-semibold tracking-wide text-slate-100 font-serif truncate theme-entity-font"
             title={entity.name}
           >
             {entity.name}
@@ -200,7 +200,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {showDual && (
             <span
               data-testid="pinned-item-original-name"
-              className="text-xs text-gold-400/90 font-serif italic"
+              className="text-xs text-gold-400/90 font-serif italic theme-subtitle-font"
               title={`Original historical form: ${entity.originalName}`}
             >
               {`(${entity.originalName})`}
@@ -212,7 +212,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
         {entity.epithet && (
           <p
             data-testid="pinned-item-epithet"
-            className="text-xs text-slate-400 italic truncate mt-0.5"
+            className="text-xs text-slate-400 italic truncate mt-0.5 theme-subtitle-font"
           >
             {entity.epithet}
           </p>

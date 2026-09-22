@@ -48,6 +48,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
           isCollapsed ? 'w-16' : 'w-80',
           className
         )}
+        style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
       >
 
         {/* Scrollable Navigation Body */}

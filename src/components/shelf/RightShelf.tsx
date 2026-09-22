@@ -137,6 +137,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
           isCollapsed ? 'w-14 min-w-[3.5rem]' : 'w-80 min-w-[20rem] max-w-[20rem]',
           className
         )}
+        style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
       >
         {/* Collapsed Vertical Bar View */}
         {isCollapsed ? (

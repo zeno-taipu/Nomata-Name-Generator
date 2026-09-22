@@ -47,6 +47,28 @@ export function applyThemeToDOM(theme: ThemeSettings = DEFAULT_THEME_SETTINGS): 
   root.style.setProperty('--card-opacity', String(theme.cardOpacity));
   root.style.setProperty('--card-blur', `${theme.cardBlur}px`);
 
+  // RGB channel variables for Tailwind alpha-value support
+  const accentRgb = hexToRgb(theme.primaryAccent);
+  const secAccentRgb = hexToRgb(theme.secondaryAccent);
+  const borderRgb = hexToRgb(theme.borderColor);
+  const textPriRgb = hexToRgb(theme.textPrimary);
+  const textMutRgb = hexToRgb(theme.textMuted);
+
+  const bgAppRgb = hexToRgb(theme.bgApp);
+  const bgPanelRgb = hexToRgb(theme.bgPanel);
+  const bgHeaderRgb = hexToRgb(theme.bgHeader);
+
+  root.style.setProperty('--color-accent-rgb', `${accentRgb.r} ${accentRgb.g} ${accentRgb.b}`);
+  root.style.setProperty('--color-accent-secondary-rgb', `${secAccentRgb.r} ${secAccentRgb.g} ${secAccentRgb.b}`);
+  root.style.setProperty('--color-border-rgb', `${borderRgb.r} ${borderRgb.g} ${borderRgb.b}`);
+  root.style.setProperty('--color-text-primary-rgb', `${textPriRgb.r} ${textPriRgb.g} ${textPriRgb.b}`);
+  root.style.setProperty('--color-text-muted-rgb', `${textMutRgb.r} ${textMutRgb.g} ${textMutRgb.b}`);
+
+  root.style.setProperty('--bg-app-rgb', `${bgAppRgb.r} ${bgAppRgb.g} ${bgAppRgb.b}`);
+  root.style.setProperty('--bg-panel-rgb', `${bgPanelRgb.r} ${bgPanelRgb.g} ${bgPanelRgb.b}`);
+  root.style.setProperty('--bg-header-rgb', `${bgHeaderRgb.r} ${bgHeaderRgb.g} ${bgHeaderRgb.b}`);
+  root.style.setProperty('--bg-card-rgb', `${cardRgb.r} ${cardRgb.g} ${cardRgb.b}`);
+
   // Font Sizes
   root.style.setProperty('--font-size-entity-name', `${theme.fontSizeEntityName}px`);
   root.style.setProperty('--font-size-ui', `${theme.fontSizeUi}px`);

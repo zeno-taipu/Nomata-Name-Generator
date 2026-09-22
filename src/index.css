@@ -4,15 +4,24 @@
 
 :root {
   --color-accent: #d0b933;
+  --color-accent-rgb: 208 185 51;
   --color-accent-secondary: #ece29c;
+  --color-accent-secondary-rgb: 236 226 156;
   --color-border: #22232a;
+  --color-border-rgb: 34 35 42;
   --color-text-primary: #f1f5f9;
+  --color-text-primary-rgb: 241 245 249;
   --color-text-muted: #94a3b8;
+  --color-text-muted-rgb: 148 163 184;
 
   --bg-app: #0c0d0e;
+  --bg-app-rgb: 12 13 14;
   --bg-panel: #121316;
+  --bg-panel-rgb: 18 19 22;
   --bg-header: #0c0d0e;
+  --bg-header-rgb: 12 13 14;
   --bg-card: #18191e;
+  --bg-card-rgb: 24 25 30;
   --bg-card-computed: rgba(24, 25, 30, 0.9);
   --card-opacity: 0.9;
   --card-blur: 8px;
@@ -37,10 +46,26 @@
 }
 
 /* Custom theme dynamic utilities */
+.theme-surface-app {
+  background-color: var(--bg-app);
+  color: var(--color-text-primary);
+}
+
+.theme-surface-panel {
+  background-color: var(--bg-panel);
+  border-color: var(--color-border);
+}
+
+.theme-surface-header {
+  background-color: var(--bg-header);
+  border-color: var(--color-border);
+}
+
 .theme-card-surface {
   background-color: var(--bg-card-computed);
   backdrop-filter: blur(var(--card-blur));
   -webkit-backdrop-filter: blur(var(--card-blur));
+  border-color: var(--color-border);
 }
 
 .theme-entity-font {

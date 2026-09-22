@@ -53,6 +53,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
         'relative flex flex-col flex-1 h-full min-w-0 bg-charcoal-950 overflow-hidden',
         className
       )}
+      style={{ backgroundColor: 'var(--bg-app)' }}
     >
       {/* Top Sticky Toolbar */}
       <GeneratorControls
@@ -78,6 +79,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
       <footer
         data-testid="studio-stats-bar"
         className="flex flex-wrap items-center justify-between gap-3 px-6 py-2 border-t border-charcoal-800/80 bg-charcoal-900/90 backdrop-blur-md text-xs text-slate-400 z-10 shrink-0"
+        style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
       >
         {/* Left Stats: Batch Count & Pinned Count */}
         <div className="flex items-center gap-4">
