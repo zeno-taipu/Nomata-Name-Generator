@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Palette, Database, Sparkles, X } from 'lucide-react';
+import { Settings, Palette, Database, X } from 'lucide-react';
 import { StyleTab } from './StyleTab';
 import { DataImportTab } from './DataImportTab';
-import { PresetsTab } from './PresetsTab';
 import { cn } from '../../utils/cn';
 
-export type SettingsTabId = 'style' | 'import' | 'presets';
+export type SettingsTabId = 'import' | 'style' | 'presets';
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -16,14 +15,16 @@ export interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
-  initialTab = 'style',
+  initialTab = 'import',
 }) => {
-  const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab);
+  const [activeTab, setActiveTab] = useState<SettingsTabId>(
+    initialTab === 'presets' ? 'style' : initialTab
+  );
 
   // Synchronize initialTab if provided when opened
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(initialTab);
+      setActiveTab(initialTab === 'presets' ? 'style' : initialTab);
     }
   }, [isOpen, initialTab]);
 
@@ -69,7 +70,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 Settings & Appearance
               </h2>
               <p className="text-[11px] text-slate-400">
-                Colors, typography, card transparency & seed database ingestion
+                Seed database ingestion, colors, theme presets & typography
               </p>
             </div>
           </div>
@@ -85,23 +86,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Navigation Bar */}
+        {/* Tab Navigation Bar: 1. Data & Ingestion, 2. Colors & Typography */}
         <div className="flex items-center gap-1.5 px-6 pt-3 pb-2 border-b border-charcoal-800 bg-charcoal-950/40 shrink-0">
-          <button
-            type="button"
-            data-testid="tab-style"
-            onClick={() => setActiveTab('style')}
-            className={cn(
-              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all',
-              activeTab === 'style'
-                ? 'bg-gold-500/15 text-gold-300 border border-gold-500/40 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800 border border-transparent'
-            )}
-          >
-            <Palette className="w-3.5 h-3.5" />
-            <span>Style & Typography</span>
-          </button>
-
           <button
             type="button"
             data-testid="tab-import"
@@ -119,25 +105,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           <button
             type="button"
-            data-testid="tab-presets"
-            onClick={() => setActiveTab('presets')}
+            data-testid="tab-style"
+            onClick={() => setActiveTab('style')}
             className={cn(
               'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all',
-              activeTab === 'presets'
+              activeTab === 'style' || activeTab === 'presets'
                 ? 'bg-gold-500/15 text-gold-300 border border-gold-500/40 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800 border border-transparent'
             )}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Theme Presets</span>
+            <Palette className="w-3.5 h-3.5" />
+            <span>Colors & Typography</span>
           </button>
         </div>
 
         {/* Scrollable Tab Content Area */}
         <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-charcoal-700">
-          {activeTab === 'style' && <StyleTab />}
           {activeTab === 'import' && <DataImportTab />}
-          {activeTab === 'presets' && <PresetsTab />}
+          {(activeTab === 'style' || activeTab === 'presets') && <StyleTab />}
         </div>
 
         {/* Footer Actions */}

@@ -28,11 +28,17 @@ describe('Settings Modal & Configuration Tabs', () => {
 
       expect(html).toContain('data-testid="settings-modal"');
       expect(html).toContain('Settings &amp; Appearance');
-      expect(html).toContain('data-testid="tab-style"');
       expect(html).toContain('data-testid="tab-import"');
-      expect(html).toContain('data-testid="tab-presets"');
+      expect(html).toContain('data-testid="tab-style"');
       expect(html).toContain('data-testid="close-settings-button"');
       expect(html).toContain('data-testid="done-settings-button"');
+
+      // Assert tab order: Data & Ingestion first, then Colors & Typography
+      const importIdx = html.indexOf('data-testid="tab-import"');
+      const styleIdx = html.indexOf('data-testid="tab-style"');
+      expect(importIdx).toBeGreaterThan(-1);
+      expect(styleIdx).toBeGreaterThan(-1);
+      expect(importIdx).toBeLessThan(styleIdx);
     });
 
     it('renders specific initial tab when requested', () => {
@@ -40,18 +46,25 @@ describe('Settings Modal & Configuration Tabs', () => {
         React.createElement(SettingsModal, {
           isOpen: true,
           onClose: () => {},
-          initialTab: 'import',
+          initialTab: 'style',
         })
       );
 
-      expect(html).toContain('Seed Database &amp; Corpus Ingestion Hub');
-      expect(html).toContain('data-testid="seed-dropzone"');
+      expect(html).toContain('data-testid="style-presets-subsection"');
+      expect(html).toContain('data-testid="color-primary-accent"');
     });
   });
 
   describe('StyleTab Component', () => {
-    it('renders color pickers, opacity slider, font size sliders, and font family dropdowns', () => {
+    it('renders theme presets sub-section, color pickers, opacity slider, font size sliders, and font family dropdowns', () => {
       const html = renderToString(React.createElement(StyleTab));
+
+      // Premade theme presets sub-section
+      expect(html).toContain('data-testid="style-presets-subsection"');
+      expect(html).toContain('data-testid="reset-theme-button"');
+      expect(html).toContain('data-testid="preset-card-default"');
+      expect(html).toContain('data-testid="preset-card-obsidian_amber"');
+      expect(html).toContain('data-testid="preset-card-emerald_archive"');
 
       // Color pickers
       expect(html).toContain('data-testid="color-primary-accent"');
