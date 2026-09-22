@@ -5,9 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   Sliders,
-  Languages,
 } from 'lucide-react';
-import { normalizeEntityCategory } from '../../types/domain';
 import { useNominaStore } from '../../store/useNominaStore';
 import { cn } from '../../utils/cn';
 
@@ -36,20 +34,9 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
   const generateBatch = useNominaStore((s) => s.generateBatch);
   const batchCount = useNominaStore((s) => s.batchCount);
   const setBatchCount = useNominaStore((s) => s.setBatchCount);
-  const targetSubtype = useNominaStore((s) => s.targetSubtype);
-  const activeCategory = useNominaStore((s) => s.activeCategory);
   const temperature = useNominaStore((s) => s.temperature);
   const markovOrder = useNominaStore((s) => s.markovOrder);
   const setEngineConfig = useNominaStore((s) => s.setEngineConfig);
-
-  const anglicize = useNominaStore((s) => s.anglicize);
-  const anglicizeMode = useNominaStore((s) => s.anglicizeMode);
-  const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
-  const setAnglicizationConfig = useNominaStore((s) => s.setAnglicizationConfig);
-
-  // Available subtypes derived dynamically from active category
-  const normalizedCat = normalizeEntityCategory(activeCategory);
-  const availableSubtypes = SUBTYPES_BY_CATEGORY[normalizedCat] || ['auto'];
 
   // Global Keyboard Shortcut: ⌘/Ctrl + Enter to trigger generation
   useEffect(() => {
@@ -186,31 +173,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
             </div>
           </div>
 
-          {/* 2. Target Subtype Selector */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="target-subtype-select"
-              className="text-[11px] font-medium text-slate-400 block"
-            >
-              Target Subtype:
-            </label>
-            <select
-              id="target-subtype-select"
-              data-testid="target-subtype-select"
-              value={targetSubtype}
-              onChange={(e) => setEngineConfig({ targetSubtype: e.target.value })}
-              className="w-full bg-charcoal-900 text-xs text-gold-400 border border-charcoal-750 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-gold-500/50 cursor-pointer font-medium"
-              title="Filter generation to a specific subtype or 'auto'"
-            >
-              {availableSubtypes.map((sub) => (
-                <option key={sub} value={sub} className="bg-charcoal-900 text-slate-200">
-                  {sub === 'auto' ? 'Auto Subtype' : sub}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 3. Temperature Slider */}
+          {/* 2. Temperature Slider */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] text-slate-400">
               <span className="flex items-center gap-1">
@@ -240,7 +203,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
             </div>
           </div>
 
-          {/* 4. Markov Order Toggle */}
+          {/* 3. Markov Order Toggle */}
           <div className="space-y-1.5">
             <div className="text-[11px] font-medium text-slate-400">Markov Order:</div>
             <div className="grid grid-cols-2 gap-1.5 bg-charcoal-900 p-1 rounded-lg border border-charcoal-750">
@@ -269,91 +232,6 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
                 )}
               >
                 Order 3 (Strict)
-              </button>
-            </div>
-          </div>
-
-          {/* 5. Anglicization Toolbar */}
-          <div className="space-y-2 pt-1 border-t border-charcoal-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-300">
-                <Languages className="w-3.5 h-3.5 text-gold-400" />
-                <span>Anglicize:</span>
-              </div>
-
-              {/* Global Anglicize Toggle */}
-              <button
-                type="button"
-                data-testid="anglicize-toggle"
-                onClick={() => setAnglicizationConfig({ anglicize: !anglicize })}
-                className={cn(
-                  'flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium transition-colors border',
-                  anglicize
-                    ? 'bg-gold-500/20 text-gold-400 border-gold-500/40'
-                    : 'bg-charcoal-900 text-slate-400 border-charcoal-750 hover:text-slate-200'
-                )}
-              >
-                <span>{anglicize ? 'Enabled' : 'Disabled'}</span>
-                <span
-                  className={cn(
-                    'w-1.5 h-1.5 rounded-full ml-0.5',
-                    anglicize ? 'bg-gold-400 animate-pulse' : 'bg-charcoal-600'
-                  )}
-                />
-              </button>
-            </div>
-
-            {/* Mode Selectors (Phonetic / Suffix / Full) */}
-            <div className="grid grid-cols-3 gap-1">
-              {(
-                [
-                  { id: 'phonetic', label: 'Phonetic' },
-                  { id: 'suffix', label: 'Suffix' },
-                  { id: 'full', label: 'Archaic' },
-                ] as const
-              ).map((m) => {
-                const isModeActive = anglicizeMode === m.id;
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    data-testid={`anglicize-mode-${m.id}`}
-                    disabled={!anglicize}
-                    onClick={() => setAnglicizationConfig({ anglicizeMode: m.id })}
-                    className={cn(
-                      'py-1 text-[11px] rounded transition-colors text-center font-medium border',
-                      !anglicize && 'opacity-40 cursor-not-allowed border-transparent text-slate-500',
-                      isModeActive && anglicize
-                        ? 'bg-gold-500/20 text-gold-300 border-gold-500/40 font-semibold'
-                        : 'bg-charcoal-900/80 border-charcoal-750 text-slate-400 hover:text-slate-200'
-                    )}
-                  >
-                    {m.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Exonym Dual Display Toggle */}
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] text-slate-400">Dual Display:</span>
-              <button
-                type="button"
-                data-testid="dual-display-toggle"
-                disabled={!anglicize}
-                onClick={() =>
-                  setAnglicizationConfig({ exonymDualDisplay: !exonymDualDisplay })
-                }
-                className={cn(
-                  'px-2 py-0.5 text-[10px] font-mono rounded border transition-colors',
-                  !anglicize && 'opacity-40 cursor-not-allowed border-transparent text-slate-500',
-                  exonymDualDisplay && anglicize
-                    ? 'bg-gold-500/10 text-gold-300 border-gold-500/40 font-semibold'
-                    : 'bg-charcoal-900 text-slate-400 border-charcoal-750 hover:text-slate-200'
-                )}
-                title="Dual Display: Exonym (Endonym) format"
-              >
-                {exonymDualDisplay ? 'Dual (ON)' : 'Single (OFF)'}
               </button>
             </div>
           </div>

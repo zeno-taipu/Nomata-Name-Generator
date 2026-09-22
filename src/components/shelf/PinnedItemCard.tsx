@@ -4,6 +4,7 @@ import {
   GitBranch,
   Copy,
   Check,
+  Languages,
 } from 'lucide-react';
 import type { LoreEntity } from '../../types/domain';
 import { useNominaStore } from '../../store/useNominaStore';
@@ -35,6 +36,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
   }, []);
 
   const togglePinEntity = useNominaStore((s) => s.togglePinEntity);
+  const toggleAnglicizeEntity = useNominaStore((s) => s.toggleAnglicizeEntity);
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
   const activeEntityId = useNominaStore((s) => s.activeEntityId);
   const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
@@ -158,6 +160,27 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
             )}
           >
             {copied ? <Check size={13} className="text-gold-400" /> : <Copy size={13} />}
+          </button>
+
+          {/* Quick Anglicize Toggle */}
+          <button
+            type="button"
+            data-testid="pinned-anglicize-btn"
+            data-testid-alias="anglicize-toggle-button"
+            aria-label={isAnglicized ? 'Revert to authentic historical orthography' : 'Anglicize name'}
+            title={isAnglicized ? 'Revert to authentic orthography' : 'Anglicize name'}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleAnglicizeEntity(entity.id);
+            }}
+            className={cn(
+              'p-1 rounded-md transition-colors border',
+              isAnglicized
+                ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                : 'text-slate-400 hover:text-gold-400 hover:bg-charcoal-750 border-transparent hover:border-charcoal-700'
+            )}
+          >
+            <Languages size={13} />
           </button>
 
           {/* Inspect Tree Action */}

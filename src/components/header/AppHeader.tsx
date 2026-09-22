@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Compass,
   PanelLeft,
@@ -12,11 +12,14 @@ import {
   Sparkles,
   Layers,
   Settings,
+  Languages,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
 import { getCultureById } from '../../data/cultures';
 import { normalizeEntityCategory } from '../../types/domain';
+import { SUBTYPES_BY_CATEGORY } from '../sidebar/GeneratorDrawer';
 import { cn } from '../../utils/cn';
 
 export interface AppHeaderProps {
@@ -59,11 +62,44 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const activeCategory = useNominaStore((s) => s.activeCategory);
   const activeCultureIds = useNominaStore((s) => s.activeCultureIds);
   const pinnedEntities = useNominaStore((s) => s.pinnedEntities);
+  const targetSubtype = useNominaStore((s) => s.targetSubtype);
+  const setEngineConfig = useNominaStore((s) => s.setEngineConfig);
+  const anglicize = useNominaStore((s) => s.anglicize);
+  const anglicizeMode = useNominaStore((s) => s.anglicizeMode);
+  const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
+  const setAnglicizationConfig = useNominaStore((s) => s.setAnglicizationConfig);
+  const globalAnglicize = useNominaStore((s) => s.globalAnglicize);
+
+  const [isAnglicizeOpen, setIsAnglicizeOpen] = useState<boolean>(false);
+  const anglicizeRef = useRef<HTMLDivElement>(null);
+
+  // Close Anglicize modal on outside click or Escape key
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (anglicizeRef.current && !anglicizeRef.current.contains(e.target as Node)) {
+        setIsAnglicizeOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsAnglicizeOpen(false);
+      }
+    };
+    if (isAnglicizeOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isAnglicizeOpen]);
 
   // Normalize category to display icon and human-readable label
   const normalizedCat = normalizeEntityCategory(activeCategory);
   const catMeta = CATEGORY_META[normalizedCat] || { label: activeCategory, icon: Layers };
   const CategoryIcon = catMeta.icon;
+  const availableSubtypes = SUBTYPES_BY_CATEGORY[normalizedCat] || ['auto'];
 
   // Active cultures display string
   const cultureNames = activeCultureIds
@@ -134,7 +170,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* Center: Active Category Indicator & Blended Culture Origin Badge */}
+      {/* Center: Active Category Indicator, Target Subtype & Culture Origin Badge */}
       <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-charcoal-900 border border-charcoal-800 text-xs">
         {/* Category Pill */}
         <div
@@ -147,6 +183,28 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
         <span className="text-charcoal-700 select-none">•</span>
 
+        {/* Target Subtype Selector */}
+        <div className="flex items-center gap-1 text-slate-400">
+          <span className="text-slate-500 hidden lg:inline">Subtype:</span>
+          <select
+            id="target-subtype-select"
+            data-testid="target-subtype-select"
+            data-testid-alias="header-target-subtype-select"
+            value={targetSubtype}
+            onChange={(e) => setEngineConfig({ targetSubtype: e.target.value })}
+            className="bg-charcoal-800/90 text-xs text-gold-400 border border-charcoal-700/80 rounded-md px-2 py-0.5 focus:outline-none focus:border-gold-500/50 cursor-pointer font-medium hover:border-gold-500/30 transition-colors"
+            title="Filter generation to a specific subtype or 'auto'"
+          >
+            {availableSubtypes.map((sub) => (
+              <option key={sub} value={sub} className="bg-charcoal-900 text-slate-200">
+                {sub === 'auto' ? 'Auto Subtype' : sub}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <span className="text-charcoal-700 select-none">•</span>
+
         {/* Culture Pill */}
         <div
           data-testid="header-culture-indicator"
@@ -154,13 +212,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           title={`Active Cultures: ${cultureNames.join(', ')}`}
         >
           <span className="text-slate-500">Culture:</span>
-          <span className="text-gold-400/90 font-medium truncate max-w-[200px]">
+          <span className="text-gold-400/90 font-medium truncate max-w-[150px]">
             {cultureDisplay}
           </span>
         </div>
       </div>
 
-      {/* Right: Collections Toggle / Count Badge, Export Hub Trigger & Settings Cog */}
+      {/* Right: Collections Toggle, Export Hub, Anglicization Modal Trigger & Settings Cog */}
       <div className="flex items-center gap-2">
         {/* Collections View Toggle / Count Button */}
         <button
@@ -200,6 +258,141 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <span className="hidden sm:inline">Export</span>
         </button>
 
+        {/* Anglicization Options Icon & Popover Modal */}
+        <div className="relative" ref={anglicizeRef}>
+          <button
+            type="button"
+            data-testid="header-anglicize-btn"
+            aria-label="Anglicization Options"
+            title="Anglicization Options (Configure phonetic smoothing, suffixes, exonym dual display, and global actions)"
+            onClick={() => setIsAnglicizeOpen((prev) => !prev)}
+            className={cn(
+              'p-1.5 rounded-lg border transition-colors relative',
+              isAnglicizeOpen
+                ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+                : 'bg-charcoal-900 text-slate-300 border-charcoal-750 hover:text-gold-400 hover:border-gold-500/40'
+            )}
+          >
+            <Languages size={15} className="text-gold-400" />
+            {anglicize && (
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
+            )}
+          </button>
+
+          {/* Anglicize Options Modal / Popover */}
+          {isAnglicizeOpen && (
+            <div
+              data-testid="header-anglicize-modal"
+              className="absolute right-0 top-full mt-2 w-72 p-4 rounded-xl bg-charcoal-900 border border-charcoal-700 shadow-2xl backdrop-blur-md z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150"
+              style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-2.5 border-b border-charcoal-800 mb-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                  <Languages className="w-4 h-4 text-gold-400" />
+                  <span>Anglicization Options</span>
+                </div>
+                <button
+                  type="button"
+                  data-testid="header-anglicize-close-btn"
+                  onClick={() => setIsAnglicizeOpen(false)}
+                  className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-charcoal-800 transition-colors"
+                  aria-label="Close Anglicization options"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+
+              {/* Mode Selectors */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-slate-400 block">
+                  Anglicization Mode
+                </label>
+                <div className="grid grid-cols-3 gap-1">
+                  {(
+                    [
+                      { id: 'phonetic', label: 'Phonetic' },
+                      { id: 'suffix', label: 'Suffix' },
+                      { id: 'full', label: 'Archaic' },
+                    ] as const
+                  ).map((m) => {
+                    const isActive = anglicizeMode === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        data-testid={`anglicize-mode-${m.id}`}
+                        onClick={() => setAnglicizationConfig({ anglicizeMode: m.id })}
+                        className={cn(
+                          'py-1 text-xs rounded border text-center transition-colors font-medium',
+                          isActive
+                            ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                            : 'bg-charcoal-800 border-charcoal-700 text-slate-400 hover:text-slate-200 hover:bg-charcoal-750'
+                        )}
+                      >
+                        {m.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dual Display Option */}
+              <div className="mt-3 pt-2.5 border-t border-charcoal-800 flex items-center justify-between">
+                <span className="text-xs text-slate-300">Dual Display (Exonym)</span>
+                <button
+                  type="button"
+                  data-testid="dual-display-toggle"
+                  onClick={() =>
+                    setAnglicizationConfig({ exonymDualDisplay: !exonymDualDisplay })
+                  }
+                  className={cn(
+                    'px-2.5 py-0.5 text-xs font-mono rounded border transition-colors',
+                    exonymDualDisplay
+                      ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                      : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
+                  )}
+                >
+                  {exonymDualDisplay ? 'ON' : 'OFF'}
+                </button>
+              </div>
+
+              {/* Helper Note for Card Language Icon */}
+              <p className="mt-3 text-[11px] text-slate-400 leading-relaxed bg-charcoal-950/60 p-2 rounded-lg border border-charcoal-800">
+                Click the <Languages className="w-3 h-3 text-gold-400 inline mx-0.5 -mt-0.5" /> icon on any card to anglicize or revert that card individually.
+              </p>
+
+              {/* Global Anglicize Section */}
+              <div className="mt-3 pt-2.5 border-t border-charcoal-800 space-y-1.5">
+                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Global Actions
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    data-testid="global-anglicize-collections-btn"
+                    onClick={() => globalAnglicize('pinned')}
+                    className="flex-1 py-1.5 px-2 text-[11px] rounded bg-gold-500/15 hover:bg-gold-500/25 text-gold-400 border border-gold-500/40 transition-colors font-medium text-center shadow-sm"
+                    title="Anglicize all entities in Collections"
+                  >
+                    Anglicize Collections
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="global-anglicize-all-btn"
+                    data-testid-alias="anglicize-toggle"
+                    onClick={() => globalAnglicize('all')}
+                    className="flex-1 py-1.5 px-2 text-[11px] rounded bg-charcoal-800 hover:bg-charcoal-750 text-slate-300 border border-charcoal-700 transition-colors font-medium text-center"
+                    title="Anglicize all entities currently loaded (batch & collections)"
+                  >
+                    Anglicize All
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Settings Cog Button */}
         <button
           type="button"
@@ -234,3 +427,4 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     </header>
   );
 };
+

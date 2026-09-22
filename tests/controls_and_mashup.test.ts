@@ -41,11 +41,11 @@ describe('Interactive Controls, Culture Mashup Weights & Real-Time Anglicization
     expect(levantineCount).toBeGreaterThanOrEqual(18); // > 70%
   });
 
-  it('immediately transforms generated batch and pinned entities in real-time when Anglicize is toggled', () => {
+  it('sets Anglicization options without mutating cards automatically, and supports individual and global anglicization', () => {
     const store = useNominaStore.getState();
     store.setActiveCultureIds(['danubian_slavic']);
     store.setBatchCount(5);
-    store.setAnglicizationConfig({ anglicize: false });
+    store.setAnglicizationConfig({ anglicize: false, anglicizeMode: 'phonetic' });
 
     // Generate batch with non-anglicized baseline
     const initialBatch = store.generateBatch();
@@ -57,32 +57,39 @@ describe('Interactive Controls, Culture Mashup Weights & Real-Time Anglicization
     expect(useNominaStore.getState().pinnedEntities.length).toBe(1);
     expect(useNominaStore.getState().pinnedEntities[0].anglicization?.enabled).toBeFalsy();
 
-    // Toggle Anglicize ON in real-time
-    store.setAnglicizationConfig({ anglicize: true, anglicizeMode: 'suffix' });
+    // Setting options in the modal updates config without changing cards
+    store.setAnglicizationConfig({ anglicizeMode: 'suffix' });
+    expect(useNominaStore.getState().anglicizeMode).toBe('suffix');
+    // Cards remain untouched
+    expect(useNominaStore.getState().generatedBatch[0].anglicization?.enabled).toBeFalsy();
+    expect(useNominaStore.getState().pinnedEntities[0].anglicization?.enabled).toBeFalsy();
 
-    const updatedBatch = useNominaStore.getState().generatedBatch;
-    const updatedPinned = useNominaStore.getState().pinnedEntities;
+    // Anglicize is activated by the language icon on each card individually
+    const anglicizedIndividual = store.toggleAnglicizeEntity(initialBatch[0].id);
+    expect(anglicizedIndividual?.anglicization?.enabled).toBe(true);
+    expect(anglicizedIndividual?.anglicization?.mode).toBe('suffix');
+    // Other batch cards remain untouched
+    expect(useNominaStore.getState().generatedBatch[1].anglicization?.enabled).toBeFalsy();
 
-    // Both visible batch and pinned entities must immediately have anglicization enabled
-    expect(updatedBatch[0].anglicization?.enabled).toBe(true);
-    expect(updatedBatch[0].anglicization?.mode).toBe('suffix');
-    expect(updatedPinned[0].anglicization?.enabled).toBe(true);
-    expect(updatedPinned[0].anglicization?.mode).toBe('suffix');
+    // Revert individual card losslessly
+    const revertedIndividual = store.toggleAnglicizeEntity(initialBatch[0].id);
+    expect(revertedIndividual?.anglicization?.enabled).toBe(false);
+    expect(revertedIndividual?.name).toBe(initialBatch[0].originalName);
 
-    // Switch mode to 'full' in real-time
-    store.setAnglicizationConfig({ anglicizeMode: 'full' });
-    const fullModeBatch = useNominaStore.getState().generatedBatch;
-    expect(fullModeBatch[0].anglicization?.mode).toBe('full');
+    // Global Anglicize button (e.g. for Collections or All) explicitly transforms cards
+    store.globalAnglicize('pinned', true);
+    expect(useNominaStore.getState().pinnedEntities[0].anglicization?.enabled).toBe(true);
+    expect(useNominaStore.getState().pinnedEntities[0].anglicization?.mode).toBe('suffix');
 
-    // Toggle Anglicize OFF in real-time -> reverts back losslessly
-    store.setAnglicizationConfig({ anglicize: false });
-    const revertedBatch = useNominaStore.getState().generatedBatch;
-    const revertedPinned = useNominaStore.getState().pinnedEntities;
+    // Global Anglicize All explicitly transforms both batch and pinned
+    store.globalAnglicize('all', true);
+    expect(useNominaStore.getState().generatedBatch[0].anglicization?.enabled).toBe(true);
+    expect(useNominaStore.getState().pinnedEntities[0].anglicization?.enabled).toBe(true);
 
-    expect(revertedBatch[0].name).toBe(revertedBatch[0].originalName);
-    expect(revertedBatch[0].anglicization?.enabled).toBe(false);
-    expect(revertedPinned[0].name).toBe(revertedPinned[0].originalName);
-    expect(revertedPinned[0].anglicization?.enabled).toBe(false);
+    // Global revert
+    store.globalAnglicize('all', false);
+    expect(useNominaStore.getState().generatedBatch[0].anglicization?.enabled).toBe(false);
+    expect(useNominaStore.getState().pinnedEntities[0].anglicization?.enabled).toBe(false);
   });
 
   it('drives novel variations at high temperature and strictly conforms to seeds at low temperature', () => {

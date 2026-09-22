@@ -58,6 +58,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
   const anglicizeMode = useNominaStore((s) => s.anglicizeMode);
   const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
   const setAnglicizationConfig = useNominaStore((s) => s.setAnglicizationConfig);
+  const globalAnglicize = useNominaStore((s) => s.globalAnglicize);
 
   // Floating controls hover states
   const [isTempOpen, setIsTempOpen] = useState<boolean>(false);
@@ -382,24 +383,25 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                 : 'opacity-0 translate-x-2 pointer-events-none invisible group-hover/anglicize:opacity-100 group-hover/anglicize:translate-x-0 group-hover/anglicize:pointer-events-auto group-hover/anglicize:visible'
             )}
           >
-            {/* Header & Toggle */}
+            {/* Header & Global Anglicize Toggle */}
             <div className="flex items-center justify-between pb-2 border-b border-charcoal-800 mb-3">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
                 <Languages className="w-3.5 h-3.5 text-gold-400" />
-                <span>Anglicization</span>
+                <span>Anglicization Options</span>
               </div>
               <button
                 type="button"
                 data-testid="tree-anglicize-toggle"
-                onClick={() => setAnglicizationConfig({ anglicize: !anglicize })}
+                onClick={() => globalAnglicize('all')}
                 className={cn(
-                  'px-2.5 py-0.5 rounded text-xs font-medium border transition-colors',
+                  'px-2 py-0.5 rounded text-[11px] font-medium border transition-colors',
                   anglicize
                     ? 'bg-gold-500/20 text-gold-400 border-gold-500/40'
                     : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
                 )}
+                title="Global Anglicize all cards in view"
               >
-                {anglicize ? 'Enabled' : 'Disabled'}
+                {anglicize ? 'Global (ON)' : 'Global (OFF)'}
               </button>
             </div>
 
@@ -420,12 +422,10 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                       key={m.id}
                       type="button"
                       data-testid={`tree-anglicize-mode-${m.id}`}
-                      disabled={!anglicize}
                       onClick={() => setAnglicizationConfig({ anglicizeMode: m.id })}
                       className={cn(
                         'py-1 text-xs rounded border text-center transition-colors font-medium',
-                        !anglicize && 'opacity-40 cursor-not-allowed border-charcoal-800 text-slate-500',
-                        anglicize && isActive
+                        isActive
                           ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
                           : 'bg-charcoal-800/80 border-charcoal-700/60 text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
                       )}
@@ -443,14 +443,12 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
               <button
                 type="button"
                 data-testid="tree-dual-display-toggle"
-                disabled={!anglicize}
                 onClick={() =>
                   setAnglicizationConfig({ exonymDualDisplay: !exonymDualDisplay })
                 }
                 className={cn(
                   'px-2 py-0.5 text-xs font-mono rounded border transition-colors',
-                  !anglicize && 'opacity-40 cursor-not-allowed border-charcoal-800 text-slate-500',
-                  anglicize && exonymDualDisplay
+                  exonymDualDisplay
                     ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
                     : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
                 )}
@@ -458,6 +456,11 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                 {exonymDualDisplay ? 'ON' : 'OFF'}
               </button>
             </div>
+
+            {/* Helper Note */}
+            <p className="mt-2.5 text-[10px] text-slate-400 leading-tight bg-charcoal-950/60 p-1.5 rounded border border-charcoal-800">
+              Click the <Languages className="w-3 h-3 text-gold-400 inline mx-0.5 -mt-0.5" /> icon on any card to anglicize individually.
+            </p>
           </div>
         </div>
       </aside>

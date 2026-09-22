@@ -423,5 +423,19 @@ describe('Right Shelf & App Header Components', () => {
       expect(html).toContain('header-settings-btn');
       expect(html).toContain('Settings &amp; Appearance');
     });
+
+    it('renders Target Subtype selector and Anglicize options button in nav bar', () => {
+      useNominaStore.setState({
+        activeCategory: 'character',
+        targetSubtype: 'Warrior',
+      });
+
+      const html = renderToString(React.createElement(AppHeader));
+
+      expect(html).toContain('data-testid="target-subtype-select"');
+      expect(html).toContain('Warrior');
+      expect(html).toContain('Auto Subtype');
+      expect(html).toContain('header-anglicize-btn');
+    });
   });
 });

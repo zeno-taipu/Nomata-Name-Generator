@@ -76,6 +76,7 @@ export interface NominaState {
   setEntityBranchSubtype: (entityId: string, subtype: string) => void;
   reRollEntity: (entityId: string) => LoreEntity | undefined;
   toggleAnglicizeEntity: (entityId: string) => LoreEntity | undefined;
+  globalAnglicize: (target?: 'all' | 'batch' | 'pinned', forceState?: boolean) => void;
   togglePinEntity: (entity: LoreEntity) => void;
   pinAllBatch: () => void;
   reRollBatch: () => LoreEntity[];
@@ -320,46 +321,51 @@ const useRawNominaStore = create<NominaState>()(
         })),
 
       setAnglicizationConfig: (config) =>
+        set((state) => ({
+          anglicize: config.anglicize !== undefined ? config.anglicize : state.anglicize,
+          anglicizeMode: config.anglicizeMode !== undefined ? config.anglicizeMode : state.anglicizeMode,
+          exonymDualDisplay:
+            config.exonymDualDisplay !== undefined ? config.exonymDualDisplay : state.exonymDualDisplay,
+        })),
+
+      globalAnglicize: (target = 'all', forceState) =>
         set((state) => {
-          const newAnglicize = config.anglicize !== undefined ? config.anglicize : state.anglicize;
-          const newMode = config.anglicizeMode !== undefined ? config.anglicizeMode : state.anglicizeMode;
-          const newDual =
-            config.exonymDualDisplay !== undefined ? config.exonymDualDisplay : state.exonymDualDisplay;
-
           const anglicizationEngine = new AnglicizationEngine();
+          const hasBatch = target === 'all' || target === 'batch';
+          const hasPinned = target === 'all' || target === 'pinned';
 
-          // Transform or revert all entities in the generatedBatch immediately
-          const updatedBatch = state.generatedBatch.map((entity) => {
-            if (newAnglicize) {
-              return anglicizationEngine.anglicizeEntity(entity, {
-                mode: newMode,
-                exonymDualDisplay: newDual,
+          const targetEntities = [
+            ...(hasBatch ? state.generatedBatch : []),
+            ...(hasPinned ? state.pinnedEntities : []),
+          ];
+          const shouldEnable =
+            forceState !== undefined
+              ? forceState
+              : !targetEntities.every((e) => e.anglicization?.enabled);
+
+          const updateEntity = (entity: LoreEntity): LoreEntity => {
+            const updatedChildren =
+              entity.children && entity.children.length > 0
+                ? entity.children.map(updateEntity)
+                : entity.children;
+
+            let res: LoreEntity;
+            if (shouldEnable) {
+              res = anglicizationEngine.anglicizeEntity(entity, {
+                mode: state.anglicizeMode,
+                exonymDualDisplay: state.exonymDualDisplay,
                 cultureId: entity.cultureId,
               });
             } else {
-              return anglicizationEngine.revert(entity);
+              res = anglicizationEngine.revert(entity);
             }
-          });
-
-          // Also transform or revert pinnedEntities immediately
-          const updatedPinned = state.pinnedEntities.map((entity) => {
-            if (newAnglicize) {
-              return anglicizationEngine.anglicizeEntity(entity, {
-                mode: newMode,
-                exonymDualDisplay: newDual,
-                cultureId: entity.cultureId,
-              });
-            } else {
-              return anglicizationEngine.revert(entity);
-            }
-          });
+            return { ...res, children: updatedChildren };
+          };
 
           return {
-            anglicize: newAnglicize,
-            anglicizeMode: newMode,
-            exonymDualDisplay: newDual,
-            generatedBatch: updatedBatch,
-            pinnedEntities: updatedPinned,
+            anglicize: shouldEnable,
+            generatedBatch: hasBatch ? state.generatedBatch.map(updateEntity) : state.generatedBatch,
+            pinnedEntities: hasPinned ? state.pinnedEntities.map(updateEntity) : state.pinnedEntities,
           };
         }),
 
