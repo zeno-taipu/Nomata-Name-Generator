@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ChevronDown,
   Sparkles,
+  Plus,
 } from 'lucide-react';
 import type { LoreEntity } from '../../types/domain';
 import { useNominaStore } from '../../store/useNominaStore';
@@ -66,6 +67,9 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
     entity.originalName !== entity.name;
 
   const availableSubtypes = LineageBranchingEngine.getAvailableBranchSubtypes(entity);
+  const [lastBranchSubtype, setLastBranchSubtype] = useState<string>(
+    () => availableSubtypes[0] || 'auto'
+  );
 
   // Close branch dropdown on outside click or Escape key
   useEffect(() => {
@@ -123,8 +127,15 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   // Branch handler
   const handleBranchSubtype = (subtype: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    setLastBranchSubtype(subtype);
     setIsBranchMenuOpen(false);
     branchEntity(entity.id, subtype, 1);
+  };
+
+  // Quick repeat last branch handler
+  const handleRepeatBranch = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    branchEntity(entity.id, lastBranchSubtype, 1);
   };
 
   // Pin handler
@@ -295,60 +306,74 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
 
       {/* Footer Action Toolbar */}
       <div className="flex items-center justify-between gap-1 pt-2 border-t border-charcoal-800/80 mt-1">
-        {/* Left Actions: Branch Dropdown */}
-        <div className="relative" ref={branchMenuRef}>
-          <button
-            type="button"
-            data-testid="branch-button"
-            aria-label="Branch hierarchical child or subdivision"
-            aria-haspopup="true"
-            aria-expanded={isBranchMenuOpen}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsBranchMenuOpen(!isBranchMenuOpen);
-            }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
-            title="Branch hierarchical child or subdivision"
-          >
-            <GitBranch className="w-3.5 h-3.5" />
-            <span>+ Branch</span>
-            <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
-          </button>
-
-          {/* Subtype Dropdown Menu */}
-          {isBranchMenuOpen && (
-            <div
-              data-testid="branch-dropdown"
-              role="menu"
-              className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md"
+        {/* Left Actions: Branch Dropdown & Repeat Last Branch */}
+        <div className="flex items-center gap-1">
+          <div className="relative" ref={branchMenuRef}>
+            <button
+              type="button"
+              data-testid="branch-button"
+              aria-label="Branch hierarchical child or subdivision"
+              aria-haspopup="true"
+              aria-expanded={isBranchMenuOpen}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsBranchMenuOpen(!isBranchMenuOpen);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
+              title="Branch hierarchical child or subdivision"
             >
-              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-charcoal-750">
-                Available Lineages
-              </div>
-              <button
-                type="button"
-                role="menuitem"
-                data-testid="branch-option-auto"
-                onClick={(e) => handleBranchSubtype('auto', e)}
-                className="w-full text-left px-3 py-1.5 text-xs text-gold-400 hover:bg-gold-500/15 flex items-center justify-between transition-colors"
+              <GitBranch className="w-3.5 h-3.5" />
+              <span>+ Branch</span>
+              <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+            </button>
+
+            {/* Subtype Dropdown Menu */}
+            {isBranchMenuOpen && (
+              <div
+                data-testid="branch-dropdown"
+                role="menu"
+                className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md"
               >
-                <span>Auto Subordinate</span>
-                <Sparkles className="w-3 h-3 text-gold-400" />
-              </button>
-              {availableSubtypes.map((st) => (
+                <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-charcoal-750">
+                  Available Lineages
+                </div>
                 <button
-                  key={st}
                   type="button"
                   role="menuitem"
-                  data-testid={`branch-option-${st.toLowerCase().replace(/\s+/g, '-')}`}
-                  onClick={(e) => handleBranchSubtype(st, e)}
-                  className="w-full text-left px-3 py-1.5 text-xs text-slate-300 hover:bg-charcoal-800 hover:text-gold-300 flex items-center justify-between transition-colors"
+                  data-testid="branch-option-auto"
+                  onClick={(e) => handleBranchSubtype('auto', e)}
+                  className="w-full text-left px-3 py-1.5 text-xs text-gold-400 hover:bg-gold-500/15 flex items-center justify-between transition-colors"
                 >
-                  <span>{st}</span>
+                  <span>Auto Subordinate</span>
+                  <Sparkles className="w-3 h-3 text-gold-400" />
                 </button>
-              ))}
-            </div>
-          )}
+                {availableSubtypes.map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    role="menuitem"
+                    data-testid={`branch-option-${st.toLowerCase().replace(/\s+/g, '-')}`}
+                    onClick={(e) => handleBranchSubtype(st, e)}
+                    className="w-full text-left px-3 py-1.5 text-xs text-slate-300 hover:bg-charcoal-800 hover:text-gold-300 flex items-center justify-between transition-colors"
+                  >
+                    <span>{st}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Quick Repeat Branch Button */}
+          <button
+            type="button"
+            data-testid="branch-repeat-button"
+            aria-label={`Create another ${lastBranchSubtype}`}
+            title={`Create another ${lastBranchSubtype}`}
+            onClick={handleRepeatBranch}
+            className="flex items-center justify-center p-1.5 rounded-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Right Actions: Re-roll, Anglicize, Copy, Inspect Tree */}

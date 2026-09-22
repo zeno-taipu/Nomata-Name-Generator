@@ -143,6 +143,7 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('root: Novi');
       expect(html).toContain('New City / Stronghold');
       expect(html).toContain('+ Branch');
+      expect(html).toContain('data-testid="branch-repeat-button"');
     });
 
     it('renders dual display when Anglicization and dual display are active', () => {
@@ -411,7 +412,7 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
 
       // Hierarchy visual connector line classes
       expect(html).toContain('border-l-2 border-gold-500/30');
-      expect(html).toContain('+ Add Subordinate Subdivision');
+      expect(html).not.toContain('+ Add Subordinate Subdivision');
     });
 
     it('renders breadcrumb navigation when activeEntityId is set', () => {

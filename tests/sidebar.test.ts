@@ -280,27 +280,24 @@ describe('Sidebar Components & Store Integration', () => {
   });
 
   describe('LeftSidebar Container Component', () => {
-    it('renders complete sidebar structure with branding, nav, cultures, and buttons', () => {
+    it('renders sidebar structure with nav, cultures, and custom vocabulary', () => {
       const html = renderToString(React.createElement(LeftSidebar));
 
-      expect(html).toContain('Nomata');
-      expect(html).toContain('v1.0');
       expect(html).toContain('data-testid="left-sidebar"');
-      expect(html).toContain('data-testid="sidebar-collapse-toggle"');
       expect(html).toContain('data-testid="open-custom-vocab-button"');
       expect(html).toContain('People &amp; Characters');
       expect(html).toContain('Origins &amp; Cultures');
       expect(html).toContain('Custom Vocabulary');
       expect(html).toContain('w-80');
+      expect(html).not.toContain('Lore &amp; Anthroponymy Engine');
     });
 
-    it('renders in collapsed state with w-16 class and expand toggle button', () => {
+    it('renders in collapsed state with w-16 class', () => {
       const html = renderToString(
         React.createElement(LeftSidebar, { isCollapsed: true })
       );
 
       expect(html).toContain('w-16');
-      expect(html).toContain('data-testid="sidebar-expand-toggle"');
       expect(html).not.toContain('Lore &amp; Anthroponymy Engine');
     });
 

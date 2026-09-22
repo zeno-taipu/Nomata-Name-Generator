@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
   BookOpen,
   Sliders,
   Layers,
@@ -23,24 +20,13 @@ export interface LeftSidebarProps {
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   defaultCollapsed = false,
   isCollapsed: controlledIsCollapsed,
-  onToggleCollapse,
   className,
 }) => {
-  const [internalCollapsed, setInternalCollapsed] = useState<boolean>(defaultCollapsed);
+  const [internalCollapsed] = useState<boolean>(defaultCollapsed);
   const [isVocabModalOpen, setIsVocabModalOpen] = useState<boolean>(false);
 
   const isCollapsed =
     controlledIsCollapsed !== undefined ? controlledIsCollapsed : internalCollapsed;
-
-  const handleToggle = () => {
-    const next = !isCollapsed;
-    if (controlledIsCollapsed === undefined) {
-      setInternalCollapsed(next);
-    }
-    if (onToggleCollapse) {
-      onToggleCollapse(next);
-    }
-  };
 
   const customVocabulary = useNominaStore((state) => state.customVocabulary);
   const activeCultureIds = useNominaStore((state) => state.activeCultureIds);
@@ -63,64 +49,6 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
           className
         )}
       >
-        {/* Header Branding */}
-        <div className="flex items-center justify-between px-3.5 py-4 border-b border-charcoal-750/80 bg-charcoal-950/40 min-h-[64px]">
-          {!isCollapsed && (
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500/20 to-gold-600/10 border border-gold-500/40 flex items-center justify-center text-gold-400 shrink-0 shadow-[0_0_10px_rgba(208,185,51,0.15)]">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold tracking-wider text-sm text-slate-100 uppercase font-serif">
-                    Nomata
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.2 font-mono rounded bg-gold-500/10 text-gold-400 border border-gold-500/30">
-                    v1.0
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 truncate">
-                  Lore & Anthroponymy Engine
-                </p>
-              </div>
-            </div>
-          )}
-
-          {isCollapsed && (
-            <div className="mx-auto text-gold-400">
-              <Sparkles className="w-5 h-5" />
-            </div>
-          )}
-
-          {/* Collapse Toggle Button */}
-          <button
-            type="button"
-            data-testid="sidebar-collapse-toggle"
-            onClick={handleToggle}
-            aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            className={cn(
-              'p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-charcoal-800 transition-colors shrink-0',
-              isCollapsed && 'hidden'
-            )}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Floating Expand Toggle when collapsed */}
-        {isCollapsed && (
-          <button
-            type="button"
-            data-testid="sidebar-expand-toggle"
-            onClick={handleToggle}
-            aria-label="Expand Sidebar"
-            title="Expand Sidebar"
-            className="w-8 h-8 mx-auto my-2 rounded-lg text-slate-400 hover:text-gold-400 hover:bg-charcoal-800 flex items-center justify-center transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
 
         {/* Scrollable Navigation Body */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin scrollbar-thumb-charcoal-700">

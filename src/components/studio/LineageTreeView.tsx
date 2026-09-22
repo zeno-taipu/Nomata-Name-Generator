@@ -3,7 +3,6 @@ import {
   GitBranch,
   Network,
   ChevronRight,
-  Plus,
   CornerDownRight,
   X,
 } from 'lucide-react';
@@ -44,7 +43,6 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
   const pinnedEntities = useNominaStore((s) => s.pinnedEntities);
   const activeEntityId = useNominaStore((s) => s.activeEntityId);
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
-  const branchEntity = useNominaStore((s) => s.branchEntity);
 
   // Combine batch and pinned entities for lineage inspection
   const allEntities = [...generatedBatch, ...pinnedEntities];
@@ -129,20 +127,6 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
               isTarget && 'ring-2 ring-gold-400/50 shadow-[0_0_20px_rgba(208,185,51,0.25)]'
             )}
           />
-
-          {/* Quick "+ Add Subordinate Subdivision" Action Button */}
-          <div className="flex items-center gap-2 mt-1">
-            <button
-              type="button"
-              data-testid={`add-subdivision-${node.id}`}
-              onClick={() => branchEntity(node.id, 'auto', 1)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-gold-300 bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700/80 hover:border-gold-500/40 transition-colors shadow-sm"
-              title="Quickly branch a subordinate subdivision"
-            >
-              <Plus className="w-3.5 h-3.5 text-gold-400" />
-              <span>+ Add Subordinate Subdivision</span>
-            </button>
-          </div>
         </div>
 
         {/* Recursive Children Lineage Rendering with Connecting Line */}

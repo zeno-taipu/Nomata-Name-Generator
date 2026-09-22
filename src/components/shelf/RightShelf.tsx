@@ -5,8 +5,6 @@ import {
   Trash2,
   Search,
   X,
-  ChevronRight,
-  ChevronLeft,
   Pin,
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
@@ -140,17 +138,6 @@ export const RightShelf: React.FC<RightShelfProps> = ({
           className
         )}
       >
-        {/* Toggle Collapse Button on Left Edge */}
-        <button
-          type="button"
-          data-testid="right-shelf-toggle-btn"
-          aria-label={isCollapsed ? 'Expand World Bible shelf' : 'Collapse World Bible shelf'}
-          onClick={handleToggle}
-          className="absolute -left-3 top-5 z-30 flex items-center justify-center w-6 h-6 rounded-full bg-charcoal-800 border border-charcoal-700 text-slate-400 hover:text-gold-400 hover:border-gold-500/50 shadow-md transition-all"
-        >
-          {isCollapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-        </button>
-
         {/* Collapsed Vertical Bar View */}
         {isCollapsed ? (
           <div className="flex flex-col items-center py-6 h-full space-y-6">

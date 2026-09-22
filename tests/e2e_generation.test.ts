@@ -571,7 +571,6 @@ describe('End-to-End Desktop User Journey & Generation Workflow', () => {
     expect(html).toContain('data-testid="left-sidebar"');
     expect(html).toContain('People &amp; Characters');
     expect(html).toContain('Origins &amp; Cultures');
-    expect(html).toContain('data-testid="sidebar-collapse-toggle"');
     expect(html).toContain('data-testid="open-custom-vocab-button"');
 
     // Center Column: CenterStudio
