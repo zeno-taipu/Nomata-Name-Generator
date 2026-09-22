@@ -96,10 +96,57 @@ describe('RecursiveGrammarEngine', () => {
     expect(gaelicResult.length).toBeGreaterThan(3);
     expect(slavicResult.length).toBeGreaterThan(3);
 
-    // Verify cache stores separate Markov models keyed by culture ID and category
+    // Distinct seed contents must retain distinct models.
     const cache = (multiCultureEngine as unknown as { cultureMarkovCache: Map<string, unknown> }).cultureMarkovCache;
-    expect(cache.has('celtic_gaelic:settlement')).toBe(true);
-    expect(cache.has('danubian_slavic:settlement')).toBe(true);
+    expect(cache.size).toBe(2);
+  });
+
+  describe('Grammar cache and RNG regressions', () => {
+    it('refreshes same-ID seed contents and separates gender, multiplicity and order', () => {
+      const engine = new RecursiveGrammarEngine({ randomFn: () => 0 });
+      const culture = structuredClone(cultures.danubian_slavic);
+      culture.seeds.given_names_masculine = ['Amber'];
+      culture.seeds.given_names_feminine = ['Elora'];
+      expect(engine.resolve('{Markov:Person}', { culture, gender: 'masculine' })).toBe('Amber');
+      expect(engine.resolve('{Markov:Person}', { culture, gender: 'feminine' })).toBe('Elora');
+      culture.seeds.given_names_masculine = ['Orina'];
+      expect(engine.resolve('{Markov:Person}', { culture, gender: 'masculine' })).toBe('Orina');
+      culture.seeds.given_names_masculine.push('Orina');
+      engine.resolve('{Markov:Person}', { culture, gender: 'masculine' });
+      engine.resolve('{Markov:Person}', { culture, gender: 'masculine', markovOrder: 3 });
+      const cache = (engine as unknown as { cultureMarkovCache: Map<string, MarkovNameGenerator> }).cultureMarkovCache;
+      expect(cache.size).toBe(5);
+      expect([...cache.values()].some((model) => model.order === 2 && model.transitions.get('^^')?.get('o') === 2)).toBe(true);
+      expect([...cache.values()].some((model) => model.order === 3)).toBe(true);
+      for (let i = 0; i < 80; i++) {
+        culture.seeds.given_names_masculine = [`Amber${i}`];
+        engine.resolve('{Markov:Person}', { culture });
+      }
+      expect(cache.size).toBeLessThanOrEqual(64);
+    });
+
+    it('uses the injected RNG for all Markov hooks and lexical innovation', () => {
+      const seeds = ['Amber', 'Elora'];
+      const markov = new MarkovNameGenerator(seeds, { randomFn: () => 0 });
+      const engine = new RecursiveGrammarEngine({ randomFn: () => 0.999, markov });
+      expect(engine.resolve('{Markov}')).toBe('Elora');
+      expect(engine.resolve('{Markov}', { randomFn: () => 0 })).toBe('Amber');
+      const innovative = new RecursiveGrammarEngine({ randomFn: () => 0 });
+      expect(innovative.resolve('{given}', {
+        culture: cultures.danubian_slavic, markov, temperature: 1,
+      })).toBe('Amber');
+      expect(innovative.resolve('{Markov:Person}', {
+        markovGenerators: { person: markov }, randomFn: () => 0.999,
+      })).toBe('Elora');
+    });
+
+    it('does not swallow unexpected errors from injected generators', () => {
+      class BrokenGenerator extends MarkovNameGenerator {
+        override generate(): string { throw new TypeError('broken implementation'); }
+      }
+      const engine = new RecursiveGrammarEngine({ markov: new BrokenGenerator() });
+      expect(() => engine.resolve('{Markov}')).toThrow('broken implementation');
+    });
   });
 
   it('collapses duplicate consecutive articles like the the into a single article', () => {

@@ -1,8 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useNominaStore } from '../src/store/useNominaStore';
 
 describe('Interactive Controls, Culture Mashup Weights & Real-Time Anglicization', () => {
   beforeEach(() => {
+    let seed = 20260923;
+    vi.spyOn(Math, 'random').mockImplementation(() => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 0x100000000;
+    });
     useNominaStore.getState().clearBatch();
     useNominaStore.getState().clearPinned();
     useNominaStore.getState().setActiveCategory('character');
@@ -23,6 +28,8 @@ describe('Interactive Controls, Culture Mashup Weights & Real-Time Anglicization
       customSuffixes: [],
     });
   });
+
+  afterEach(() => vi.restoreAllMocks());
 
   it('biases batch generation proportionally according to culture mashup weights', () => {
     const store = useNominaStore.getState();

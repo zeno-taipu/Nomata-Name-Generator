@@ -11,6 +11,43 @@ describe('AnglicizationEngine', () => {
     expect(result.anglicizedName).toBe('Schepan');
   });
 
+  describe('Lossless overlay and culture title regressions', () => {
+    const engine = new AnglicizationEngine();
+    const entity: LoreEntity = {
+      id: 'ban', category: 'character', cultureId: 'danubian_slavic',
+      name: 'Ban Jan', originalName: 'Ban Jan', originalRoot: 'Jan', originalTitle: 'Ban',
+      metadata: { retained: true },
+    };
+
+    it('localizes Slavic Ban as an office, while retaining Gaelic Ban as an epithet', () => {
+      expect(engine.anglicizeEntity(entity, { mode: 'full' }).name).toBe('Governor Yan');
+      expect(engine.anglicize('Fionn Ban', { mode: 'full', cultureId: 'celtic_gaelic', title: 'Ban' }).anglicizedTitle).toBe('the Fair');
+      expect(engine.anglicize('Urban', { title: 'Urban', cultureId: 'danubian_slavic' }).anglicizedTitle).toBe('Urban');
+    });
+
+    it('preserves absent epithets across repeated overlays, mode changes and serialization', () => {
+      const first = engine.anglicizeEntity(entity, { mode: 'full' });
+      const second = engine.anglicizeEntity(first, { mode: 'full' });
+      expect(second).toEqual(first);
+      const phonetic = engine.anglicizeEntity(second, { mode: 'phonetic' });
+      const restored = engine.revert(JSON.parse(JSON.stringify(phonetic)));
+      expect(restored.name).toBe('Ban Jan');
+      expect(restored.originalName).toBe('Ban Jan');
+      expect(restored).not.toHaveProperty('epithet');
+      expect(restored.metadata).toEqual({ retained: true });
+      expect(engine.anglicizeEntity(restored, { mode: 'full' })).toEqual(first);
+    });
+
+    it('preserves a present epithet independently from a separately translated title', () => {
+      const original = { ...entity, epithet: 'cel viteaz' };
+      const overlaid = engine.anglicizeEntity(original);
+      expect(engine.anglicizeEntity(overlaid)).toEqual(overlaid);
+      expect(engine.revert(overlaid).epithet).toBe('cel viteaz');
+      const empty = engine.anglicizeEntity({ ...entity, epithet: '' });
+      expect(engine.revert(empty).epithet).toBe('');
+    });
+  });
+
   it('smooths various cultural consonant clusters into English equivalents', () => {
     // Slavic / Nordic / Celtic / Semitic clusters
     expect(engine.anglicize('Czcibor', { mode: 'phonetic' }).anglicizedName).toBe('Chcibor');
@@ -244,4 +281,3 @@ describe('AnglicizationEngine', () => {
     expect(result2.anglicizedName).toBe('Vladislav the Brave');
   });
 });
-

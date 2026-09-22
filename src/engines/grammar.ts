@@ -9,7 +9,8 @@
  * and recursive resolution up to maxDepth (default 5) with cycle protection.
  */
 
-import { MarkovNameGenerator } from './markov';
+import { MarkovNameGenerator, MarkovGenerationError } from './markov';
+import { cacheModel } from './modelCache';
 import type {
   CultureProfile,
   CultureLexicon,
@@ -165,7 +166,10 @@ export class RecursiveGrammarEngine {
     const cleanCategory = category.trim();
     const lowerCat = cleanCategory.toLowerCase();
 
-    const tempOpts = context?.temperature !== undefined ? { temperature: context.temperature } : undefined;
+    const tempOpts = {
+      ...(context?.temperature !== undefined ? { temperature: context.temperature } : {}),
+      randomFn: context?.randomFn ?? this.randomFn,
+    };
 
     // 1. Check context-specific markovGenerators
     if (context?.markovGenerators) {
@@ -173,7 +177,8 @@ export class RecursiveGrammarEngine {
         if (k.toLowerCase() === lowerCat) {
           try {
             return gen.generate(tempOpts);
-          } catch {
+          } catch (error) {
+            if (!(error instanceof MarkovGenerationError)) throw error;
             // fallback
           }
         }
@@ -185,7 +190,8 @@ export class RecursiveGrammarEngine {
     if (engineGen) {
       try {
         return engineGen.generate(tempOpts);
-      } catch {
+      } catch (error) {
+        if (!(error instanceof MarkovGenerationError)) throw error;
         // fallback
       }
     }
@@ -195,7 +201,8 @@ export class RecursiveGrammarEngine {
     if (defaultGen) {
       try {
         return defaultGen.generate(tempOpts);
-      } catch {
+      } catch (error) {
+        if (!(error instanceof MarkovGenerationError)) throw error;
         // fallback to seeds
       }
     }
@@ -204,21 +211,18 @@ export class RecursiveGrammarEngine {
     if (culture) {
       const seeds = this.extractCultureSeedsForCategory(cleanCategory, culture, context);
       if (seeds && seeds.length > 0) {
-        const cultureKey = (culture as CultureProfile)?.id ?? 'default';
-        const cacheKey = `${cultureKey}:${lowerCat}`;
+        const order = context?.markovOrder ?? 2;
+        const cacheKey = JSON.stringify([lowerCat, context?.gender, order, seeds]);
         let cached = this.cultureMarkovCache.get(cacheKey);
         if (!cached) {
-          try {
-            cached = new MarkovNameGenerator(seeds, { order: context?.markovOrder ?? 2 });
-            this.cultureMarkovCache.set(cacheKey, cached);
-          } catch {
-            // training failed
-          }
+          cached = new MarkovNameGenerator(seeds, { order });
+          cacheModel(this.cultureMarkovCache, cacheKey, cached);
         }
         if (cached) {
           try {
             return cached.generate(tempOpts);
-          } catch {
+          } catch (error) {
+            if (!(error instanceof MarkovGenerationError)) throw error;
             // generation failed, pick random seed
             const pick = this.chooseRandom(seeds, context);
             if (pick) return pick;
@@ -312,15 +316,17 @@ export class RecursiveGrammarEngine {
       Boolean(context?.markov) &&
       context?.temperature !== undefined &&
       context.temperature > 0.4 &&
-      (context?.randomFn ? context.randomFn() : Math.random()) < (context.temperature - 0.35) * 0.7;
+      this.getRandom(context) < (context.temperature - 0.35) * 0.7;
 
     // 1. Shorthand mappings
     if (lowerToken === 'given' || lowerToken === 'given_name') {
-      if (shouldInnovate && context?.markov) {
+      // A generic/blended model has no gender guarantee; explicit gender stays typed.
+      if (shouldInnovate && context?.markov && (!context.gender || context.gender === 'any')) {
         try {
-          const gen = context.markov.generate({ temperature: temp });
+          const gen = context.markov.generate({ temperature: temp, randomFn: context.randomFn ?? this.randomFn });
           if (gen && gen.length >= 3 && !gen.includes('{')) return gen;
-        } catch {
+        } catch (error) {
+          if (!(error instanceof MarkovGenerationError)) throw error;
           // fallback to static seeds
         }
       }
@@ -340,9 +346,10 @@ export class RecursiveGrammarEngine {
     if (lowerToken === 'surname') {
       if (shouldInnovate && context?.markov) {
         try {
-          const gen = context.markov.generate({ temperature: temp });
+          const gen = context.markov.generate({ temperature: temp, randomFn: context.randomFn ?? this.randomFn });
           if (gen && gen.length >= 3 && !gen.includes('{')) return gen;
-        } catch {
+        } catch (error) {
+          if (!(error instanceof MarkovGenerationError)) throw error;
           // fallback to static seeds
         }
       }
@@ -353,9 +360,10 @@ export class RecursiveGrammarEngine {
     if (lowerToken === 'settlement' || lowerToken === 'settlement_root') {
       if (shouldInnovate && context?.markov) {
         try {
-          const gen = context.markov.generate({ temperature: temp });
+          const gen = context.markov.generate({ temperature: temp, randomFn: context.randomFn ?? this.randomFn });
           if (gen && gen.length >= 3 && !gen.includes('{')) return gen;
-        } catch {
+        } catch (error) {
+          if (!(error instanceof MarkovGenerationError)) throw error;
           // fallback to static seeds
         }
       }
@@ -477,6 +485,22 @@ export class RecursiveGrammarEngine {
 
       // 1. User custom variables have highest priority
       if (context?.customVariables) {
+        const lowerToken = token.toLowerCase();
+        // Semantic aliases select typed custom pools without erasing gender/domain.
+        const typedKeys = lowerToken === 'given' || lowerToken === 'given_name'
+          ? context.gender && context.gender !== 'any'
+            ? [`given_names_${context.gender}`]
+            : ['given_names_masculine', 'given_names_feminine']
+          : lowerToken === 'stem'
+            ? context.featureSubtype ? [context.featureSubtype] : ['orogeny', 'hydrology', 'wilds']
+            : [];
+        const typedValues = typedKeys.flatMap((key) => {
+          const value = context.customVariables?.[key];
+          return Array.isArray(value) ? value : [];
+        });
+        if (typedValues.length && !Object.keys(context.customVariables).some((key) => key.toLowerCase() === lowerToken)) {
+          return this.chooseRandom(typedValues, context) ?? '';
+        }
         if (token in context.customVariables) {
           const val = context.customVariables[token];
           if (Array.isArray(val)) {

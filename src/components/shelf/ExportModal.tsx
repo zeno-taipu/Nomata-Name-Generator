@@ -21,6 +21,8 @@ import {
 } from '../../utils/export';
 import type { LoreEntity } from '../../types/domain';
 import { cn } from '../../utils/cn';
+import { Dialog } from '../Dialog';
+import { copyTextToClipboard } from '../../utils/clipboard';
 
 export type ExportFormat = 'markdown' | 'json' | 'csv' | 'nomina';
 export type ExportScope = 'pinned' | 'all';
@@ -39,13 +41,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(initialFormat);
   const [exportScope, setExportScope] = useState<ExportScope>('pinned');
   const [copied, setCopied] = useState<boolean>(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const [importStatus, setImportStatus] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -60,21 +62,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const generatedBatch = useNominaStore((s) => s.generatedBatch);
   const saveProjectBible = useNominaStore((s) => s.saveProjectBible);
   const loadProjectBible = useNominaStore((s) => s.loadProjectBible);
-
-  // Close on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
 
   // Compute entities based on selected scope
   const targetEntities = useMemo<LoreEntity[]>(() => {
@@ -161,16 +148,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   // Copy output to clipboard
   const handleCopy = async () => {
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(formattedContent);
-      }
-    } catch {
-      // Fallback in headless / unsupported environments
-    }
-    setCopied(true);
+    setCopied(false);
+    setCopyError(null);
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-    copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    try {
+      await copyTextToClipboard(formattedContent);
+      setCopied(true);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      setCopyError((error as Error).message);
+    }
   };
 
   // Download or Save File
@@ -223,9 +210,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
-        document.body.appendChild(a);
+        // Keep programmatic downloads inside the active dialog's interaction boundary.
+        const downloadHost = fileInputRef.current?.parentElement ?? document.body;
+        downloadHost.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        downloadHost.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
 
         setImportStatus({
@@ -316,20 +305,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
+    <Dialog
       data-testid="export-modal"
-      role="dialog"
-      aria-modal="true"
       aria-labelledby="export-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClose={onClose}
     >
       <div
-        ref={modalRef}
         className="relative flex flex-col w-full max-w-2xl max-h-[90vh] bg-charcoal-900 border border-charcoal-700 rounded-2xl shadow-2xl overflow-hidden select-none"
       >
+        {copyError && <p role="alert" className="px-6 py-3 text-xs text-red-300">{copyError}</p>}
+        {copied && <span role="status" className="sr-only">Copied to clipboard</span>}
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-charcoal-800 bg-charcoal-950/60">
           <div className="flex items-center gap-2.5">
@@ -588,6 +574,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 };

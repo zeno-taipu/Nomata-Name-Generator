@@ -1,4 +1,5 @@
 import type { LoreEntity, NominaProjectBible } from '../types/domain';
+import { validateProjectBible } from './projectValidation';
 
 export interface MarkdownExportOptions {
   includeWikilinks?: boolean;
@@ -258,32 +259,18 @@ export function importFromProjectBible(jsonString: string): NominaProjectBible {
   try {
     parsed = JSON.parse(jsonString);
   } catch (err) {
-    throw new Error(`Failed to parse Nomina Project Bible JSON: ${(err as Error).message}`);
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to parse Nomina Project Bible JSON: ${message}`);
   }
 
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('Invalid project bible: root must be an object');
-  }
-
-  const bible = parsed as Partial<NominaProjectBible>;
-
-  if (!bible.version || typeof bible.version !== 'string') {
-    throw new Error('Invalid project bible: missing or invalid "version"');
-  }
-
-  if (!Array.isArray(bible.entities)) {
-    throw new Error('Invalid project bible: "entities" must be an array');
-  }
-
-  if (!bible.settings || typeof bible.settings !== 'object') {
-    throw new Error('Invalid project bible: missing or invalid "settings"');
-  }
+  validateProjectBible(parsed);
+  const bible = parsed;
 
   return {
     version: bible.version,
-    name: bible.name ?? 'Nomata World Bible',
+    name: bible.name,
     entities: bible.entities,
-    pinnedEntityIds: Array.isArray(bible.pinnedEntityIds) ? bible.pinnedEntityIds : [],
+    pinnedEntityIds: bible.pinnedEntityIds,
     customVocabulary: {
       honorifics: bible.customVocabulary?.honorifics ?? [],
       customSeeds: bible.customVocabulary?.customSeeds,
@@ -291,16 +278,14 @@ export function importFromProjectBible(jsonString: string): NominaProjectBible {
       customSuffixes: bible.customVocabulary?.customSuffixes ?? [],
     },
     settings: {
-      activeCultureIds: Array.isArray(bible.settings.activeCultureIds)
-        ? bible.settings.activeCultureIds
-        : ['danubian_slavic'],
+      activeCultureIds: bible.settings.activeCultureIds,
       cultureWeights: bible.settings.cultureWeights ?? {},
-      anglicize: Boolean(bible.settings.anglicize),
-      anglicizeMode: bible.settings.anglicizeMode ?? 'phonetic',
-      exonymDualDisplay: Boolean(bible.settings.exonymDualDisplay),
-      temperature: typeof bible.settings.temperature === 'number' ? bible.settings.temperature : 0.7,
-      markovOrder: typeof bible.settings.markovOrder === 'number' ? bible.settings.markovOrder : 2,
+      anglicize: bible.settings.anglicize,
+      anglicizeMode: bible.settings.anglicizeMode,
+      exonymDualDisplay: bible.settings.exonymDualDisplay,
+      temperature: bible.settings.temperature,
+      markovOrder: bible.settings.markovOrder,
     },
-    savedAt: typeof bible.savedAt === 'number' ? bible.savedAt : Date.now(),
+    savedAt: bible.savedAt,
   };
 }

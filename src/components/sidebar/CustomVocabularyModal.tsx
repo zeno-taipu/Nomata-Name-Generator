@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
   X,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
 import { cn } from '../../utils/cn';
+import { Dialog } from '../Dialog';
 
 export interface CustomVocabularyModalProps {
   isOpen: boolean;
@@ -44,17 +45,6 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
   const [suffixInput, setSuffixInput] = useState('');
   const [seedInput, setSeedInput] = useState('');
   const [epithetInput, setEpithetInput] = useState('');
-
-  // Handle ESC key to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -156,12 +146,10 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
   };
 
   return (
-    <div
+    <Dialog
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
-      role="dialog"
-      aria-modal="true"
       aria-labelledby="modal-vocab-title"
-      onClick={onClose}
+      onClose={onClose}
     >
       <div
         className={cn(
@@ -676,7 +664,7 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 };
 

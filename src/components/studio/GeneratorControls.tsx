@@ -6,7 +6,7 @@ import {
   Languages,
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
-import { normalizeEntityCategory } from '../../types/domain';
+import { getCategorySubtypes } from '../../config/entitySubtypes';
 import { cn } from '../../utils/cn';
 
 export interface GeneratorControlsProps {
@@ -14,14 +14,6 @@ export interface GeneratorControlsProps {
 }
 
 const BATCH_PILLS = [1, 5, 10, 25, 50] as const;
-
-const SUBTYPES_BY_CATEGORY: Record<string, string[]> = {
-  character: ['auto', 'Noble', 'Warrior', 'Scholar', 'Wanderer', 'Artisan'],
-  settlement: ['auto', 'Metropolis', 'Fortress', 'Town', 'Haven', 'Village'],
-  geography: ['auto', 'Mountain Range', 'River Basin', 'Primeval Woods'],
-  faction: ['auto', 'Order', 'Legion', 'Covenant', 'Guild', 'Syndicate'],
-  artifact: ['auto', 'Relic', 'Blade', 'Crown', 'Tome', 'Scepter'],
-};
 
 export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   className,
@@ -40,12 +32,12 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
   const isGenerating = useNominaStore((s) => s.isGenerating);
   const generateBatch = useNominaStore((s) => s.generateBatch);
 
-  const normalizedCat = normalizeEntityCategory(activeCategory);
-  const availableSubtypes = SUBTYPES_BY_CATEGORY[normalizedCat] || ['auto'];
+  const availableSubtypes = getCategorySubtypes(activeCategory);
 
   // Keyboard shortcut listener: Cmd/Ctrl + Enter triggers generateBatch
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || (e.target as HTMLElement | null)?.closest?.('[role="dialog"]')) return;
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
         if (!isGenerating) {

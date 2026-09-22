@@ -10,6 +10,7 @@ import type { LoreEntity } from '../../types/domain';
 import { useNominaStore } from '../../store/useNominaStore';
 import { getCultureById } from '../../data/cultures';
 import { cn } from '../../utils/cn';
+import { copyTextToClipboard } from '../../utils/clipboard';
 
 export interface PinnedItemCardProps {
   entity: LoreEntity;
@@ -27,6 +28,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
   className,
 }) => {
   const [copied, setCopied] = useState<boolean>(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -64,17 +66,16 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
       ? `${entity.name} (${entity.originalName})`
       : entity.name;
 
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
-      }
-    } catch {
-      // Fallback or ignore in headless/unsupported test environments
-    }
-
-    setCopied(true);
+    setCopied(false);
+    setCopyError(null);
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-    copyTimerRef.current = setTimeout(() => setCopied(false), 1800);
+    try {
+      await copyTextToClipboard(textToCopy);
+      setCopied(true);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      setCopyError((error as Error).message);
+    }
   };
 
   // Unpin handler
@@ -110,6 +111,8 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
         className
       )}
     >
+      {copyError && <p role="alert" className="text-xs text-red-300">{copyError}</p>}
+      {copied && <span role="status" className="sr-only">Copied to clipboard</span>}
       {/* Top Bar: Subtype Pill, Culture Tag, Lineage Badge & Action Buttons */}
       <div className="flex items-start justify-between gap-1.5">
         <div className="flex flex-wrap items-center gap-1.5 min-w-0">

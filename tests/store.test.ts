@@ -1,8 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useNominaStore } from '../src/store/useNominaStore';
+import { usePersistenceStatus } from '../src/store/persistenceStatus';
 import type { LoreEntity } from '../src/types/domain';
+import { cultures } from '../src/data/cultures';
+import { MarkovNameGenerator } from '../src/engines/markov';
+import { RecursiveGrammarEngine } from '../src/engines/grammar';
 
 describe('useNominaStore', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    usePersistenceStatus.setState({ error: null });
+  });
+
   beforeEach(() => {
     // Reset store state between tests
     useNominaStore.setState({
@@ -72,6 +82,7 @@ describe('useNominaStore', () => {
     });
 
     it('updates engine configuration', () => {
+      useNominaStore.getState().setActiveCategory('settlement');
       useNominaStore.getState().setEngineConfig({
         temperature: 0.9,
         markovOrder: 3,
@@ -82,6 +93,28 @@ describe('useNominaStore', () => {
       expect(state.temperature).toBe(0.9);
       expect(state.markovOrder).toBe(3);
       expect(state.targetSubtype).toBe('Metropolis');
+    });
+
+    it('resets an incompatible subtype atomically when the category changes', () => {
+      const store = useNominaStore.getState();
+      store.setEngineConfig({ targetSubtype: 'Warrior' });
+      store.setActiveCategory('settlement');
+      expect(useNominaStore.getState().targetSubtype).toBe('auto');
+      expect(store.generateBatch().every((entity) => entity.subtype !== 'Warrior')).toBe(true);
+    });
+
+    it('rejects invalid subtype configuration without mutating state', () => {
+      const store = useNominaStore.getState();
+      expect(() => store.setEngineConfig({ targetSubtype: 'Metropolis', temperature: 0.9 }))
+        .toThrow('Invalid subtype');
+      expect(useNominaStore.getState().temperature).toBe(0.7);
+      expect(useNominaStore.getState().targetSubtype).toBe('auto');
+    });
+
+    it('rejects stale invalid persisted subtypes before starting generation', () => {
+      useNominaStore.setState({ activeCategory: 'settlement', targetSubtype: 'Warrior' });
+      expect(() => useNominaStore.getState().generateBatch()).toThrow('Invalid subtype');
+      expect(useNominaStore.getState().isGenerating).toBe(false);
     });
 
     it('updates anglicization configuration', () => {
@@ -115,6 +148,16 @@ describe('useNominaStore', () => {
   });
 
   describe('generateBatch', () => {
+    it('clears the busy flag and preserves the batch if generation fails', () => {
+      const store = useNominaStore.getState();
+      const previous = store.generateBatch();
+      vi.spyOn(MarkovNameGenerator.prototype, 'trainWithWeights')
+        .mockImplementation(() => { throw new Error('Invalid training data'); });
+      expect(() => store.generateBatch()).toThrow('Invalid training data');
+      expect(useNominaStore.getState().isGenerating).toBe(false);
+      expect(useNominaStore.getState().generatedBatch).toBe(previous);
+    });
+
     it('generates requested number of entities for active category', () => {
       useNominaStore.getState().setBatchCount(5);
       const batch = useNominaStore.getState().generateBatch();
@@ -153,6 +196,46 @@ describe('useNominaStore', () => {
         expect(entity.category).toBe('geography');
         expect(['orogeny', 'hydrology', 'wilds']).toContain(entity.featureSubtype);
       }
+    });
+
+    it('uses feature-specific templates and training pools for generation and root rerolls', () => {
+      const store = useNominaStore.getState();
+      store.setActiveCategory('geography');
+      store.setEngineConfig({ targetSubtype: 'River Basin' });
+      store.setBatchCount(3);
+      const trainWeighted = vi.spyOn(MarkovNameGenerator.prototype, 'trainWithWeights');
+      const resolve = vi.spyOn(RecursiveGrammarEngine.prototype, 'resolve');
+      const culture = cultures.danubian_slavic;
+
+      const batch = store.generateBatch();
+      expect(trainWeighted.mock.calls[0][0][0].seeds).toEqual(culture.geographic_lexicon.hydrology.stems);
+      for (const [template] of resolve.mock.calls) {
+        expect(culture.grammar_templates.hydrology_name).toContain(template);
+      }
+
+      resolve.mockClear();
+      const train = vi.spyOn(MarkovNameGenerator.prototype, 'train');
+      store.reRollEntity(batch[0].id);
+      expect(train.mock.calls[0][0]).toEqual(culture.geographic_lexicon.hydrology.stems);
+      expect(culture.grammar_templates.hydrology_name).toContain(resolve.mock.calls[0][0]);
+    });
+
+    it('does not train river fallbacks with custom mountain or personal roots', () => {
+      const store = useNominaStore.getState();
+      store.setActiveCategory('geography');
+      store.setEngineConfig({ targetSubtype: 'River Basin' });
+      store.setCustomVocabulary({
+        customSeeds: {
+          hydrology_stems: ['Rillora'],
+          orogeny_stems: ['Cragora'],
+          given_names_masculine: ['Personora'],
+        },
+      });
+      const train = vi.spyOn(MarkovNameGenerator.prototype, 'trainWithWeights');
+      store.generateBatch();
+      const customSeeds = train.mock.calls[0][0].find((pool) => pool.weight === 3.5)?.seeds;
+      expect(customSeeds?.length).toBeGreaterThan(0);
+      expect(customSeeds?.some((seed) => /cragora|personora/i.test(seed))).toBe(false);
     });
 
     it('applies anglicization overlay when anglicize is true', () => {
@@ -279,6 +362,30 @@ describe('useNominaStore', () => {
   });
 
   describe('togglePinEntity', () => {
+    it('synchronizes nested pin flags in both trees and bulk pin operations', () => {
+      const store = useNominaStore.getState();
+      store.setBatchCount(1);
+      const [parent] = store.generateBatch();
+      const [child] = store.branchEntity(parent.id);
+      store.togglePinEntity(parent);
+      store.togglePinEntity(child);
+      const pinnedParent = () => useNominaStore.getState().pinnedEntities.find((p) => p.id === parent.id);
+      expect(pinnedParent()?.children?.[0].pinned).toBe(true);
+      expect(useNominaStore.getState().generatedBatch[0].children?.[0].pinned).toBe(true);
+
+      store.togglePinEntity(child);
+      expect(pinnedParent()?.children?.[0].pinned).toBe(false);
+      store.togglePinEntity(child);
+      store.pinAllBatch();
+      expect(useNominaStore.getState().generatedBatch[0].pinned).toBe(false);
+      expect(useNominaStore.getState().generatedBatch[0].children?.[0].pinned).toBe(true);
+      store.pinAllBatch();
+      store.clearBatch();
+      expect(pinnedParent()?.children?.[0].pinned).toBe(true);
+      store.togglePinEntity(child);
+      expect(pinnedParent()?.children?.[0].pinned).toBe(false);
+    });
+
     it('pins and unpins entities cleanly', () => {
       const entity: LoreEntity = {
         id: 'ent-1',
@@ -302,6 +409,41 @@ describe('useNominaStore', () => {
   });
 
   describe('saveProjectBible & loadProjectBible', () => {
+    it('keeps the project exportable when autosave fails', () => {
+      vi.stubGlobal('window', {
+        get localStorage() { throw new Error('Storage access denied'); },
+      });
+      useNominaStore.getState().setCustomVocabulary({ honorifics: ['Recovery Title'] });
+      expect(usePersistenceStatus.getState().error).toContain('Storage access denied');
+      expect(useNominaStore.getState().saveProjectBible().customVocabulary.honorifics)
+        .toEqual(['Recovery Title']);
+    });
+
+    it('rejects malformed imports before replacing or persisting the current project', () => {
+      const store = useNominaStore.getState();
+      store.setBatchCount(1);
+      store.generateBatch();
+      const before = useNominaStore.getState();
+      const valid = store.saveProjectBible();
+      const invalid = { ...valid, entities: [{ ...valid.entities[0], name: 42 }] };
+      expect(() => store.loadProjectBible(invalid)).toThrow(/name/);
+      expect(useNominaStore.getState()).toBe(before);
+    });
+
+    it('restores nested pin membership and detaches imported entity trees', () => {
+      const store = useNominaStore.getState();
+      store.setBatchCount(1);
+      const [parent] = store.generateBatch();
+      const [child] = store.branchEntity(parent.id);
+      const bible = store.saveProjectBible();
+      bible.pinnedEntityIds = [child.id];
+      store.loadProjectBible(bible);
+      expect(useNominaStore.getState().pinnedEntities[0].id).toBe(child.id);
+      expect(useNominaStore.getState().generatedBatch[0].children?.[0].pinned).toBe(true);
+      bible.entities[0].name = 'External mutation';
+      expect(useNominaStore.getState().generatedBatch[0].name).toBe(parent.name);
+    });
+
     it('saves and restores world bible state', () => {
       useNominaStore.getState().setActiveCategory('character');
       useNominaStore.getState().setActiveCultureIds(['greco_aegean']);

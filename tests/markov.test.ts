@@ -12,6 +12,32 @@ describe('MarkovNameGenerator', () => {
     expect(name[0]).toBe(name[0].toUpperCase());
   });
 
+  describe('Deterministic Markov sampling', () => {
+    it('supports constructor RNG and per-sample override, including seed fallback', () => {
+      const model = new MarkovNameGenerator(['Amber', 'Elora'], { randomFn: () => 0 });
+      expect(model.generate()).toBe('Amber');
+      expect(model.generate({ randomFn: () => 0.999 })).toBe('Elora');
+      expect(model.generate({ maxAttempts: 0 })).toBe('Amber');
+      expect(model.generate({ maxAttempts: 0, randomFn: () => 0.999 })).toBe('Elora');
+    });
+
+    it('replays weighted training with the same seeded RNG', () => {
+      const run = () => {
+        let state = 91;
+        const model = new MarkovNameGenerator([], {
+          randomFn: () => ((state = (state * 1664525 + 1013904223) >>> 0) / 2 ** 32),
+        });
+        model.trainWithWeights([
+          { seeds: ['Amber', 'Amara'], weight: 3 },
+          { seeds: ['Elora', 'Elena'], weight: 1 },
+        ]);
+        return Array.from({ length: 30 }, () => model.generate());
+      };
+      expect(run()).toEqual(run());
+      expect(new Set(run()).size).toBeGreaterThan(1);
+    });
+  });
+
   it('enforces phonotactic sanity check (no 3+ consecutive identical consonants)', () => {
     const generator = new MarkovNameGenerator(seeds, { order: 2 });
     for (let i = 0; i < 50; i++) {

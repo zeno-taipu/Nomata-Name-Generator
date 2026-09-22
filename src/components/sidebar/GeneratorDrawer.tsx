@@ -16,14 +16,6 @@ export interface GeneratorDrawerProps {
 
 const BATCH_PILLS = [1, 5, 10, 25, 50] as const;
 
-export const SUBTYPES_BY_CATEGORY: Record<string, string[]> = {
-  character: ['auto', 'Noble', 'Warrior', 'Scholar', 'Wanderer', 'Artisan'],
-  settlement: ['auto', 'Metropolis', 'Fortress', 'Town', 'Haven', 'Village'],
-  geography: ['auto', 'Mountain Range', 'River Basin', 'Primeval Woods'],
-  faction: ['auto', 'Order', 'Legion', 'Covenant', 'Guild', 'Syndicate'],
-  artifact: ['auto', 'Relic', 'Blade', 'Crown', 'Tome', 'Scepter'],
-};
-
 export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
   isCollapsed = false,
   className,
@@ -41,6 +33,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
   // Global Keyboard Shortcut: ⌘/Ctrl + Enter to trigger generation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || (e.target as HTMLElement | null)?.closest?.('[role="dialog"]')) return;
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
         if (!isGenerating) {
