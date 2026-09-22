@@ -116,7 +116,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {/* Subtype Badge */}
           <span
             data-testid="pinned-item-subtype"
-            className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-charcoal-800 border border-charcoal-700/80 text-slate-300 capitalize truncate max-w-[120px] theme-badge-font"
+            className="px-2 py-0.5 text-[10px] font-medium rounded-full pill-accent-secondary capitalize truncate max-w-[120px] theme-badge-font"
           >
             {entity.subtype || entity.category}
           </span>
@@ -124,7 +124,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {/* Culture Tag */}
           <span
             data-testid="pinned-item-culture"
-            className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 truncate max-w-[120px] theme-badge-font"
+            className="px-2 py-0.5 text-[10px] font-medium rounded-full pill-accent truncate max-w-[120px] theme-badge-font"
             title={`Origin: ${culture?.name || entity.cultureId}`}
           >
             {culture?.name || entity.cultureId}
@@ -134,7 +134,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {childrenCount > 0 && (
             <span
               data-testid="pinned-item-children"
-              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded bg-gold-500/10 border border-gold-500/30 text-gold-400 theme-badge-font"
+              className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono rounded pill-accent theme-badge-font"
               title={`${childrenCount} branched lineage children`}
             >
               <GitBranch size={10} />
@@ -155,11 +155,11 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
             className={cn(
               'p-1 rounded-md transition-colors border',
               copied
-                ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                ? 'pill-accent'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-750 border-transparent hover:border-charcoal-700'
             )}
           >
-            {copied ? <Check size={13} className="text-gold-400" /> : <Copy size={13} />}
+            {copied ? <Check size={13} className="theme-text-accent" /> : <Copy size={13} />}
           </button>
 
           {/* Quick Anglicize Toggle */}
@@ -176,8 +176,8 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
             className={cn(
               'p-1 rounded-md transition-colors border',
               isAnglicized
-                ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
-                : 'text-slate-400 hover:text-gold-400 hover:bg-charcoal-750 border-transparent hover:border-charcoal-700'
+                ? 'pill-accent'
+                : 'text-slate-400 hover:theme-text-accent hover:bg-charcoal-750 border-transparent hover:border-charcoal-700'
             )}
           >
             <Languages size={13} />
@@ -190,7 +190,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
             aria-label="Inspect entity lineage tree"
             title="View entity lineage in studio"
             onClick={handleInspectTree}
-            className="p-1 rounded-md text-slate-400 hover:text-gold-400 hover:bg-charcoal-750 border border-transparent hover:border-charcoal-700 transition-colors"
+            className="p-1 rounded-md text-slate-400 hover:theme-text-accent hover:bg-charcoal-750 border border-transparent hover:border-charcoal-700 transition-colors"
           >
             <GitBranch size={13} />
           </button>
@@ -223,7 +223,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
           {showDual && (
             <span
               data-testid="pinned-item-original-name"
-              className="text-xs text-gold-400/90 font-serif italic theme-subtitle-font"
+              className="text-xs theme-text-accent opacity-90 font-serif italic theme-subtitle-font"
               title={`Original historical form: ${entity.originalName}`}
             >
               {`(${entity.originalName})`}

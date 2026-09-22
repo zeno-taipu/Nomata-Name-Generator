@@ -210,7 +210,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {/* Subtype Badge */}
           <span
             data-testid="entity-subtype"
-            className="px-2 py-0.5 font-medium rounded-full bg-charcoal-800 border border-charcoal-700/80 text-slate-300 capitalize truncate max-w-[140px] theme-badge-font"
+            className="px-2 py-0.5 font-medium rounded-full pill-accent-secondary capitalize truncate max-w-[140px] theme-badge-font"
           >
             {entity.subtype || entity.category}
           </span>
@@ -218,7 +218,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {/* Culture Tag */}
           <span
             data-testid="entity-culture"
-            className="px-2 py-0.5 font-medium rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 truncate max-w-[140px] theme-badge-font"
+            className="px-2 py-0.5 font-medium rounded-full pill-accent truncate max-w-[140px] theme-badge-font"
             title={`Origin: ${culture?.name || entity.cultureId}`}
           >
             {culture?.name || entity.cultureId}
@@ -228,7 +228,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {childrenCount > 0 && (
             <span
               data-testid="entity-children-badge"
-              className="flex items-center gap-1 px-1.5 py-0.5 font-mono rounded bg-gold-500/10 border border-gold-500/30 text-gold-400 theme-badge-font"
+              className="flex items-center gap-1 px-1.5 py-0.5 font-mono rounded pill-accent theme-badge-font"
               title={`${childrenCount} subordinate descendant${childrenCount > 1 ? 's' : ''}`}
             >
               <GitBranch className="w-3 h-3" />
@@ -261,15 +261,15 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
             className={cn(
               'p-1.5 rounded-lg border transition-colors shrink-0',
               entity.pinned
-                ? 'bg-gold-500/20 border-gold-500/40 text-gold-400'
-                : 'border-transparent text-slate-400 hover:text-gold-400 hover:bg-charcoal-800'
+                ? 'pill-accent'
+                : 'border-transparent text-slate-400 hover:theme-text-accent hover:bg-charcoal-800'
             )}
             title={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
           >
             <Pin
               className={cn(
                 'w-4 h-4',
-                entity.pinned ? 'fill-gold-400 text-gold-400' : 'text-slate-400'
+                entity.pinned ? 'fill-current fill-gold-400 theme-text-accent' : 'text-slate-400'
               )}
             />
           </button>
@@ -502,12 +502,12 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
               data-testid="inspect-tree-button"
               aria-label="Inspect Lineage Tree"
               onClick={handleInspectTree}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gold-400 hover:text-gold-300 bg-gold-500/15 hover:bg-gold-500/25 border border-gold-500/40 hover:border-gold-500/60 shadow-sm hover:shadow-[0_0_10px_rgba(var(--color-accent-rgb),0.2)] transition-all ml-1 select-none"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold pill-accent-btn transition-all ml-1 select-none"
               title="Inspect Lineage Tree for this entity"
             >
-              <GitBranch className="w-3 h-3 text-gold-400" />
+              <GitBranch className="w-3 h-3 theme-text-accent" />
               <span>Tree</span>
-              <ChevronRight className="w-3 h-3 text-gold-400/80" />
+              <ChevronRight className="w-3 h-3 opacity-75" />
             </button>
           )}
         </div>

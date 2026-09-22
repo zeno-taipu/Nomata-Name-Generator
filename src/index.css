@@ -147,3 +147,73 @@
   --tw-ring-color: rgba(var(--color-accent-rgb), 0.5);
 }
 
+/* Dynamic Accent Text, Background & Border Utilities */
+.theme-text-accent {
+  color: var(--color-accent) !important;
+}
+
+.theme-text-accent-secondary {
+  color: var(--color-accent-secondary) !important;
+}
+
+.theme-bg-accent {
+  background-color: var(--color-accent) !important;
+}
+
+.theme-border-accent {
+  border-color: rgba(var(--color-accent-rgb), 0.45) !important;
+}
+
+/* Dynamic Accent Pills & Badges */
+.pill-accent {
+  background-color: rgba(var(--color-accent-rgb), 0.16) !important;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.4) !important;
+  color: var(--color-accent) !important;
+}
+
+.pill-accent-subtle {
+  background-color: rgba(var(--color-accent-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.25) !important;
+  color: var(--color-accent) !important;
+}
+
+.pill-accent-secondary {
+  background-color: rgba(var(--color-accent-secondary-rgb), 0.16) !important;
+  border: 1px solid rgba(var(--color-accent-secondary-rgb), 0.4) !important;
+  color: var(--color-accent-secondary) !important;
+}
+
+/* Dynamic Accent Interactive Pill Buttons (Tree button, active toggles) */
+.pill-accent-btn {
+  background-color: rgba(var(--color-accent-rgb), 0.16) !important;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.45) !important;
+  color: var(--color-accent) !important;
+  box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.2) !important;
+  transition: all 0.15s ease;
+}
+
+.pill-accent-btn:hover {
+  background-color: rgba(var(--color-accent-rgb), 0.28) !important;
+  border-color: rgba(var(--color-accent-rgb), 0.65) !important;
+  color: var(--color-accent-secondary) !important;
+  box-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.35) !important;
+}
+
+.pill-accent-btn:active {
+  transform: scale(0.97);
+}
+
+/* Dynamic Active Item Highlight (Domain Category, Origins Culture) */
+.theme-active-item {
+  background-color: rgba(var(--color-accent-rgb), 0.12) !important;
+  border-color: rgba(var(--color-accent-rgb), 0.45) !important;
+  color: var(--color-accent) !important;
+  box-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.2) !important;
+}
+
+.theme-active-item:hover {
+  background-color: rgba(var(--color-accent-rgb), 0.18) !important;
+  border-color: rgba(var(--color-accent-rgb), 0.6) !important;
+}
+
+

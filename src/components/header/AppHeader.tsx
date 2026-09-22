@@ -63,8 +63,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className={cn(
             'p-1.5 rounded-lg border transition-colors',
             leftCollapsed
-              ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
-              : 'text-gold-400 bg-gold-500/10 border-gold-500/30 hover:bg-gold-500/20'
+              ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:theme-text-accent hover:border-charcoal-600'
+              : 'pill-accent'
           )}
         >
           <PanelLeft size={16} />
@@ -72,15 +72,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
         {/* Logo Icon and Title */}
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/30 text-gold-400 shadow-sm shadow-gold-500/10">
-            <Compass size={18} className="animate-pulse" style={{ animationDuration: '3s' }} />
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg pill-accent shadow-sm">
+            <Compass size={18} className="theme-text-accent animate-pulse" style={{ animationDuration: '3s' }} />
           </div>
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span
                 data-testid="header-title"
-                className="text-sm font-bold tracking-widest text-gold-400 font-serif"
+                className="text-sm font-bold tracking-widest theme-text-accent font-serif"
               >
                 NOMATA
               </span>
@@ -111,15 +111,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className={cn(
             'flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-all select-none',
             isCollectionsView
-              ? 'bg-gold-500/20 border-gold-500/50 text-gold-300 shadow-[0_0_10px_rgba(var(--color-accent-rgb),0.2)]'
-              : 'bg-charcoal-900 border-charcoal-750 text-slate-300 hover:border-gold-500/40 hover:text-gold-400'
+              ? 'pill-accent shadow-[0_0_10px_rgba(var(--color-accent-rgb),0.2)]'
+              : 'bg-charcoal-900 border-charcoal-750 text-slate-300 hover:theme-border-accent hover:theme-text-accent'
           )}
         >
-          <BookOpen size={14} className="text-gold-400" />
+          <BookOpen size={14} className="theme-text-accent" />
           <span className="hidden sm:inline text-slate-400">Collections:</span>
           <span
             data-testid="header-collections-count"
-            className="font-mono font-semibold text-gold-400"
+            className="font-mono font-semibold theme-text-accent"
           >
             <span data-testid="header-bible-count">{pinnedEntities.length}</span>
           </span>
@@ -145,9 +145,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           aria-label="Settings & Appearance"
           title="Settings & Appearance (Cmd+,)"
           onClick={onOpenSettings}
-          className="p-1.5 rounded-lg border border-charcoal-750 bg-charcoal-900 text-slate-300 hover:text-gold-400 hover:border-gold-500/40 transition-colors"
+          className="group p-1.5 rounded-lg border border-charcoal-750 bg-charcoal-900 text-slate-300 hover:theme-text-accent hover:theme-border-accent transition-colors"
         >
-          <Settings size={15} />
+          <Settings size={15} className="group-hover:rotate-45 transition-transform duration-200" />
         </button>
 
         {/* Right Shelf Toggle Button (only rendered if onToggleRightShelf is provided) */}
@@ -161,8 +161,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             className={cn(
               'p-1.5 rounded-lg border transition-colors',
               rightCollapsed
-                ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
-                : 'text-gold-400 bg-gold-500/10 border-gold-500/30 hover:bg-gold-500/20'
+                ? 'text-slate-400 bg-charcoal-900 border-charcoal-700 hover:theme-text-accent hover:theme-border-accent'
+                : 'pill-accent'
             )}
           >
             <PanelRight size={16} />

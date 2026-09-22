@@ -110,14 +110,14 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                 ? 'justify-center p-2.5 mx-auto w-10 h-10'
                 : 'px-3 py-2.5 gap-3 w-full border',
               isActive
-                ? 'bg-gold-500/10 text-gold-400 border-gold-500/30 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.15)] font-medium'
+                ? 'theme-active-item text-gold-400 font-medium'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800/60 border-transparent'
             )}
           >
             {/* Active Indicator Bar on Left */}
             {isActive && !isCollapsed && (
               <span
-                className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gold-400 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.8)]"
+                className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full theme-bg-accent shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.8)]"
                 aria-hidden="true"
               />
             )}
@@ -125,7 +125,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
             <span
               className={cn(
                 'flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110',
-                isActive ? 'text-gold-400' : 'text-slate-400 group-hover:text-slate-300'
+                isActive ? 'theme-text-accent text-gold-400' : 'text-slate-400 group-hover:text-slate-300'
               )}
             >
               <Icon className="w-4 h-4" />
@@ -137,13 +137,13 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                   <span
                     className={cn(
                       'text-sm truncate leading-tight',
-                      isActive ? 'text-gold-300 font-semibold' : 'text-slate-200'
+                      isActive ? 'theme-text-accent font-semibold' : 'text-slate-200'
                     )}
                   >
                     {cat.label}
                   </span>
                   {isActive && (
-                    <span className="ml-2 inline-flex items-center px-1.5 py-0.2 text-[10px] font-medium rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/40">
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.2 text-[10px] font-medium rounded-full pill-accent">
                       Active
                     </span>
                   )}

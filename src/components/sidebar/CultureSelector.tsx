@@ -94,7 +94,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
           className={cn(
             'w-10 h-10 rounded-lg flex items-center justify-center transition-colors',
             isMashupMode
-              ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40'
+              ? 'pill-accent shadow-sm'
               : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
           )}
         >
@@ -123,7 +123,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
                 className={cn(
                   'w-8 h-8 rounded text-[11px] font-bold tracking-wider flex items-center justify-center transition-all',
                   isActive
-                    ? 'bg-gold-500/20 text-gold-300 border border-gold-500/40 shadow-sm'
+                    ? 'pill-accent shadow-sm'
                     : 'text-slate-500 hover:text-slate-300 hover:bg-charcoal-800/60'
                 )}
               >
@@ -141,7 +141,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
       {/* Header with Mashup Toggle */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Globe className="w-4 h-4 text-gold-400" />
+          <Globe className="w-4 h-4 theme-text-accent" />
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
             Origins & Cultures
           </span>
@@ -154,18 +154,18 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
           className={cn(
             'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 border select-none',
             isMashupMode
-              ? 'bg-gold-500/20 text-gold-300 border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
+              ? 'pill-accent shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
               : 'bg-charcoal-800/80 text-slate-400 border-charcoal-700 hover:text-slate-200 hover:border-charcoal-600'
           )}
           title="Toggle Multi-Culture Mashup to blend phonetics from multiple cultures"
         >
-          <Sparkles className={cn('w-3 h-3', isMashupMode ? 'text-gold-400' : 'text-slate-400')} />
+          <Sparkles className={cn('w-3 h-3', isMashupMode ? 'theme-text-accent' : 'text-slate-400')} />
           <span>Mashup</span>
           <span
             className={cn(
               'ml-0.5 px-1 py-0.2 text-[9px] uppercase tracking-wider rounded font-bold',
               isMashupMode
-                ? 'bg-gold-500/30 text-gold-200'
+                ? 'theme-bg-accent text-charcoal-950'
                 : 'bg-charcoal-700 text-slate-400'
             )}
           >
@@ -175,8 +175,8 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
       </div>
 
       {isMashupMode && (
-        <div className="text-[11px] text-gold-300/80 bg-gold-500/5 border border-gold-500/20 rounded-lg p-2 leading-relaxed">
-          <span className="font-semibold text-gold-300">Culture Mashup Active:</span> Select multiple traditions and balance their lexical weights.
+        <div className="text-[11px] pill-accent-subtle rounded-lg p-2 leading-relaxed">
+          <span className="font-semibold theme-text-accent">Culture Mashup Active:</span> Select multiple traditions and balance their lexical weights.
         </div>
       )}
 
@@ -193,7 +193,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
               className={cn(
                 'rounded-lg border transition-all duration-200 overflow-hidden',
                 isActive
-                  ? 'bg-charcoal-800/80 border-gold-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3)]'
+                  ? 'theme-active-item'
                   : 'bg-charcoal-850/50 border-charcoal-700/60 hover:border-charcoal-600'
               )}
             >
@@ -227,7 +227,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
                       'w-4 h-4 rounded flex items-center justify-center transition-colors shrink-0',
                       isMashupMode ? 'rounded' : 'rounded-full',
                       isActive
-                        ? 'bg-gold-500 text-charcoal-950 font-bold'
+                        ? 'theme-bg-accent text-charcoal-950 font-bold'
                         : 'border border-charcoal-600 group-hover:border-slate-400'
                     )}
                   >
@@ -239,7 +239,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
                       <span
                         className={cn(
                           'text-xs font-medium truncate',
-                          isActive ? 'text-gold-200 font-semibold' : 'text-slate-300'
+                          isActive ? 'theme-text-accent font-semibold' : 'text-slate-300'
                         )}
                       >
                         {culture.name}
@@ -271,10 +271,10 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
                 <div className="px-3 pb-2.5 pt-1 border-t border-charcoal-700/60 bg-charcoal-900/40">
                   <div className="flex items-center justify-between text-[11px] mb-1">
                     <span className="text-slate-400 flex items-center gap-1">
-                      <Sliders className="w-3 h-3 text-gold-400" />
+                      <Sliders className="w-3 h-3 theme-text-accent" />
                       Weight
                     </span>
-                    <span className="font-mono text-gold-300 font-semibold">
+                    <span className="font-mono theme-text-accent font-semibold">
                       {`${Math.round(weight * 100)}% (${weight.toFixed(1)}x)`}
                     </span>
                   </div>

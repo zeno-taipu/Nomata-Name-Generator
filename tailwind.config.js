@@ -1,3 +1,12 @@
+function withOpacity(rgbVar, hexVar) {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgba(var(${rgbVar}), ${opacityValue})`;
+    }
+    return `var(${hexVar})`;
+  };
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -16,31 +25,31 @@ export default {
           400: '#8c92a9',
           500: '#6d738d',
           600: '#565b72',
-          700: 'rgba(var(--color-border-rgb), <alpha-value>)',
-          750: 'rgba(var(--color-border-rgb), <alpha-value>)',
-          800: 'rgba(var(--bg-card-rgb), <alpha-value>)',
-          850: 'rgba(var(--bg-panel-rgb), <alpha-value>)',
-          900: 'rgba(var(--bg-panel-rgb), <alpha-value>)',
-          950: 'rgba(var(--bg-app-rgb), <alpha-value>)',
+          700: withOpacity('--color-border-rgb', '--color-border'),
+          750: withOpacity('--color-border-rgb', '--color-border'),
+          800: withOpacity('--bg-card-rgb', '--bg-card'),
+          850: withOpacity('--bg-panel-rgb', '--bg-panel'),
+          900: withOpacity('--bg-panel-rgb', '--bg-panel'),
+          950: withOpacity('--bg-app-rgb', '--bg-app'),
         },
         gold: {
           50: '#fbf9eb',
           100: '#f6f1cd',
-          200: 'rgba(var(--color-accent-secondary-rgb), <alpha-value>)',
-          300: 'rgba(var(--color-accent-secondary-rgb), <alpha-value>)',
-          400: 'rgba(var(--color-accent-rgb), <alpha-value>)',
-          500: 'rgba(var(--color-accent-rgb), <alpha-value>)',
-          600: 'rgba(var(--color-accent-rgb), <alpha-value>)',
+          200: withOpacity('--color-accent-secondary-rgb', '--color-accent-secondary'),
+          300: withOpacity('--color-accent-secondary-rgb', '--color-accent-secondary'),
+          400: withOpacity('--color-accent-rgb', '--color-accent'),
+          500: withOpacity('--color-accent-rgb', '--color-accent'),
+          600: withOpacity('--color-accent-rgb', '--color-accent'),
           700: '#7e5d1a',
           800: '#684a1b',
           900: '#583e1b',
         },
         amber: {
-          200: 'rgba(var(--color-accent-secondary-rgb), <alpha-value>)',
-          300: 'rgba(var(--color-accent-secondary-rgb), <alpha-value>)',
-          400: 'rgba(var(--color-accent-rgb), <alpha-value>)',
-          500: 'rgba(var(--color-accent-rgb), <alpha-value>)',
-          600: 'rgba(var(--color-accent-rgb), <alpha-value>)',
+          200: withOpacity('--color-accent-secondary-rgb', '--color-accent-secondary'),
+          300: withOpacity('--color-accent-secondary-rgb', '--color-accent-secondary'),
+          400: withOpacity('--color-accent-rgb', '--color-accent'),
+          500: withOpacity('--color-accent-rgb', '--color-accent'),
+          600: withOpacity('--color-accent-rgb', '--color-accent'),
         },
         slate: {
           100: 'rgba(var(--color-text-primary-rgb), <alpha-value>)',
