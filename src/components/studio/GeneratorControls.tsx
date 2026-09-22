@@ -82,7 +82,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               'relative group flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-200 select-none shadow-sm',
               isGenerating
                 ? 'bg-gold-500/50 text-charcoal-950 cursor-not-allowed'
-                : 'bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-charcoal-950 shadow-md shadow-gold-500/25 hover:shadow-lg hover:shadow-gold-500/40 active:scale-[0.98]'
+                : 'btn-accent-primary'
             )}
             title="Generate names based on current parameters (⌘ + Enter)"
           >
@@ -113,7 +113,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
                   className={cn(
                     'px-2.5 py-1 text-xs font-mono font-medium rounded transition-colors',
                     isActive
-                      ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+                      ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
                   )}
                 >
@@ -194,7 +194,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               className={cn(
                 'px-2 py-1 rounded font-medium text-xs transition-colors',
                 markovOrder === 2
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
                   : 'text-slate-400 hover:text-slate-200'
               )}
             >
@@ -207,7 +207,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               className={cn(
                 'px-2 py-1 rounded font-medium text-xs transition-colors',
                 markovOrder === 3
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
                   : 'text-slate-400 hover:text-slate-200'
               )}
             >

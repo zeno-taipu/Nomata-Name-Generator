@@ -47,7 +47,7 @@ export const PresetsTab: React.FC = () => {
               data-testid={`preset-card-${preset.id}`}
               className={`p-4 rounded-xl border transition-all flex flex-col justify-between ${
                 isActive
-                  ? 'bg-charcoal-850 border-gold-500/60 shadow-[0_0_15px_rgba(208,185,51,0.15)] ring-1 ring-gold-500/40'
+                  ? 'bg-charcoal-850 border-gold-500/60 shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.25)] ring-1 ring-gold-500/40'
                   : 'bg-charcoal-850/80 border-charcoal-750 hover:border-charcoal-600 hover:bg-charcoal-800'
               }`}
             >

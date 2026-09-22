@@ -154,7 +154,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
           className={cn(
             'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 border select-none',
             isMashupMode
-              ? 'bg-gold-500/20 text-gold-300 border-gold-500/40 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+              ? 'bg-gold-500/20 text-gold-300 border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
               : 'bg-charcoal-800/80 text-slate-400 border-charcoal-700 hover:text-slate-200 hover:border-charcoal-600'
           )}
           title="Toggle Multi-Culture Mashup to blend phonetics from multiple cultures"

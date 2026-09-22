@@ -67,7 +67,7 @@ export const DataImportTab: React.FC = () => {
               : 'border-charcoal-700 bg-charcoal-850 hover:border-gold-500/40 hover:bg-charcoal-800/80'
           }`}
         >
-          <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 mx-auto mb-3 shadow-[0_0_15px_rgba(208,185,51,0.15)]">
+          <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 mx-auto mb-3 shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.2)]">
             <Upload className="w-6 h-6" />
           </div>
           <p className="text-sm font-medium text-slate-200 mb-1">

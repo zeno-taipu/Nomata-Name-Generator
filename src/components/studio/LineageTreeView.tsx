@@ -145,7 +145,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             onSelect={(ent) => setActiveEntityId(ent.id)}
             className={cn(
               'w-full shadow-md',
-              isTarget && 'ring-2 ring-gold-400/50 shadow-[0_0_20px_rgba(208,185,51,0.25)]'
+              isTarget && 'ring-2 ring-gold-400/50 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.25)]'
             )}
           />
         </div>
@@ -264,7 +264,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             className={cn(
               'flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-charcoal-900/90 border shadow-lg backdrop-blur-md transition-all',
               isTempOpen
-                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(208,185,51,0.25)] bg-charcoal-800'
+                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-800'
                 : 'border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/50 hover:bg-charcoal-800'
             )}
           >
@@ -360,7 +360,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             className={cn(
               'relative flex items-center justify-center w-10 h-10 rounded-xl bg-charcoal-900/90 border shadow-lg backdrop-blur-md transition-all',
               isAnglicizeOpen || anglicize
-                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(208,185,51,0.25)] bg-charcoal-800'
+                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-800'
                 : 'border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/50 hover:bg-charcoal-800'
             )}
           >

@@ -198,7 +198,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none focus-visible:ring-1 focus-visible:ring-gold-500/50',
         'theme-card-surface border',
         isSelected
-          ? 'border-gold-500/60 shadow-[0_0_15px_rgba(208,185,51,0.2)] bg-charcoal-850'
+          ? 'border-gold-500/60 shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-850'
           : 'border-charcoal-700/70 hover:border-gold-500/30 hover:shadow-lg',
         isCompact ? 'p-3' : 'p-4',
         className

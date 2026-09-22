@@ -65,6 +65,12 @@ export default {
           muted: 'rgba(var(--color-text-muted-rgb), <alpha-value>)',
         },
       },
+      boxShadow: {
+        'accent-sm': '0 0 8px rgba(var(--color-accent-rgb), 0.25)',
+        'accent-md': '0 0 15px rgba(var(--color-accent-rgb), 0.3)',
+        'accent-lg': '0 0 25px rgba(var(--color-accent-rgb), 0.45)',
+        'accent-glow': '0 0 20px rgba(var(--color-accent-rgb), 0.35)',
+      },
     },
   },
   plugins: [],

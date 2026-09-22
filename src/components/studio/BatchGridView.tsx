@@ -210,7 +210,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               className={cn(
                 'p-1 rounded-md border transition-colors relative flex items-center justify-center',
                 isAnglicizeOpen
-                  ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+                  ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
                   : 'bg-charcoal-800/80 text-slate-300 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
               )}
             >
@@ -450,7 +450,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               data-testid="empty-generate-button"
               disabled={isGenerating}
               onClick={() => generateBatch()}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-gold-400 to-gold-300 hover:from-gold-300 hover:to-gold-200 text-charcoal-950 shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.25)] hover:shadow-[0_0_25px_rgba(var(--color-accent-rgb),0.35)] transition-all active:scale-[0.98]"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm btn-accent-primary"
             >
               <Sparkles className="w-4 h-4" />
               <span>Generate First Batch</span>

@@ -580,7 +580,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               type="button"
               data-testid="export-save-btn"
               onClick={handleDownload}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-charcoal-950 bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 rounded-lg shadow-md shadow-gold-500/10 transition-all active:scale-[0.98]"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg btn-accent-primary"
             >
               <Download size={14} />
               <span>Download File</span>

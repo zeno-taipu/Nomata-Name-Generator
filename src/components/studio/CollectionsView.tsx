@@ -147,7 +147,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
               aria-label="Export Collections"
               title="Export Collections to Markdown, JSON, CSV, or Project Bible"
               onClick={onOpenExport}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-charcoal-950 bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 rounded-lg shadow-sm shadow-gold-500/20 transition-all active:scale-[0.98]"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg btn-accent-primary"
             >
               <Download size={13} />
               <span>Export Collections</span>
@@ -279,7 +279,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                 type="button"
                 data-testid="collections-go-generate-btn"
                 onClick={onBackToGrid}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-xs tracking-wide bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-charcoal-950 shadow-md shadow-gold-500/20 active:scale-[0.98] transition-all"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-xs tracking-wide btn-accent-primary"
               >
                 <span>Go to Generator Grid</span>
               </button>

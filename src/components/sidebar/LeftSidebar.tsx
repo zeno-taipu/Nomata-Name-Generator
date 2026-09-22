@@ -121,7 +121,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               >
                 <BookOpen className="w-4 h-4" />
                 {customItemsCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-gold-400 shadow-[0_0_6px_rgba(208,185,51,0.8)]" />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-gold-400 shadow-[0_0_6px_rgba(var(--color-accent-rgb),0.8)]" />
                 )}
               </button>
             </div>

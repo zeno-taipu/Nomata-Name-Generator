@@ -119,4 +119,23 @@ describe('Theme Engine & DOM CSS Injection', () => {
       expect(preset.preview.bg).toBeDefined();
     }
   });
+
+  it('correctly maps both primaryAccent and secondaryAccent to CSS variables and RGB channels', () => {
+    const dualAccentTheme: ThemeSettings = {
+      ...DEFAULT_THEME_SETTINGS,
+      primaryAccent: '#f43f5e',
+      secondaryAccent: '#fb7185',
+    };
+
+    applyThemeToDOM(dualAccentTheme);
+
+    const doc = (globalThis as unknown as { document: { documentElement: { style: { getPropertyValue: (k: string) => string } } } }).document;
+    const style = doc.documentElement.style;
+
+    expect(style.getPropertyValue('--color-accent')).toBe('#f43f5e');
+    expect(style.getPropertyValue('--color-accent-rgb')).toBe('244, 63, 94');
+    expect(style.getPropertyValue('--color-accent-secondary')).toBe('#fb7185');
+    expect(style.getPropertyValue('--color-accent-secondary-rgb')).toBe('251, 113, 133');
+  });
 });
+

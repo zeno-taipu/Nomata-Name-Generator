@@ -110,14 +110,14 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                 ? 'justify-center p-2.5 mx-auto w-10 h-10'
                 : 'px-3 py-2.5 gap-3 w-full border',
               isActive
-                ? 'bg-gold-500/10 text-gold-400 border-gold-500/30 shadow-[0_0_12px_rgba(208,185,51,0.08)] font-medium'
+                ? 'bg-gold-500/10 text-gold-400 border-gold-500/30 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.15)] font-medium'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800/60 border-transparent'
             )}
           >
             {/* Active Indicator Bar on Left */}
             {isActive && !isCollapsed && (
               <span
-                className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gold-400 shadow-[0_0_8px_rgba(208,185,51,0.8)]"
+                className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gold-400 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.8)]"
                 aria-hidden="true"
               />
             )}

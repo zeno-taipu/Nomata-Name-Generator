@@ -669,7 +669,7 @@ export const CustomVocabularyModal: React.FC<CustomVocabularyModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium rounded-lg bg-gold-500 text-charcoal-950 font-semibold hover:bg-gold-400 active:bg-gold-600 shadow-md transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg btn-accent-primary"
           >
             <Check className="w-3.5 h-3.5 stroke-[3]" />
             Done

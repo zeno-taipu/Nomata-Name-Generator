@@ -67,7 +67,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
             'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 shadow-md',
             isGenerating
               ? 'bg-gold-500/40 text-charcoal-950 cursor-not-allowed'
-              : 'bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-charcoal-950 shadow-gold-500/20 active:scale-95'
+              : 'btn-accent-primary'
           )}
         >
           {isGenerating ? (
@@ -97,10 +97,10 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           onClick={() => !isGenerating && generateBatch()}
           disabled={isGenerating}
           className={cn(
-            'flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg font-semibold text-xs tracking-wide transition-all duration-200 shadow-md select-none',
+            'flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg font-semibold text-xs tracking-wide transition-all duration-200 select-none',
             isGenerating
               ? 'bg-gold-500/40 text-charcoal-950 cursor-not-allowed'
-              : 'bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-charcoal-950 shadow-gold-500/20 active:scale-[0.98]'
+              : 'btn-accent-primary'
           )}
           title="Generate names based on current parameters (⌘⏎)"
         >
@@ -126,7 +126,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           className={cn(
             'p-2 rounded-lg border transition-colors flex items-center justify-center',
             isOptionsOpen
-              ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
+              ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
               : 'bg-charcoal-900 text-slate-300 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40 hover:bg-charcoal-850'
           )}
         >

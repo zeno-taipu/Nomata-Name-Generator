@@ -62,7 +62,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Modal Top Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-charcoal-800 bg-charcoal-950/60 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500/20 to-gold-600/10 border border-gold-500/40 flex items-center justify-center text-gold-400 shrink-0 shadow-[0_0_12px_rgba(208,185,51,0.15)]">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500/20 to-gold-600/10 border border-gold-500/40 flex items-center justify-center text-gold-400 shrink-0 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)]">
               <Settings className="w-4 h-4" />
             </div>
             <div>
@@ -134,7 +134,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             type="button"
             data-testid="done-settings-button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold text-charcoal-950 bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 transition-all shadow-sm active:scale-[0.98]"
+            className="px-4 py-1.5 rounded-lg text-xs font-semibold btn-accent-primary"
           >
             Done
           </button>
