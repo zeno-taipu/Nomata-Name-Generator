@@ -54,8 +54,6 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('Suffix');
       expect(html).toContain('Archaic');
       expect(html).toContain('Dual');
-      expect(html).toContain('Grid');
-      expect(html).toContain('Tree');
     });
 
     it('synchronizes batch count pill selection with store', () => {
@@ -103,16 +101,10 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('cursor-not-allowed');
     });
 
-    it('renders view mode switcher with active tree or grid state', () => {
-      const gridHtml = renderToString(
-        React.createElement(GeneratorControls, { viewMode: 'grid' })
-      );
-      expect(gridHtml).toContain('Grid');
-
-      const treeHtml = renderToString(
-        React.createElement(GeneratorControls, { viewMode: 'tree' })
-      );
-      expect(treeHtml).toContain('Tree');
+    it('does not render grid/tree mode switcher in generator bar', () => {
+      const html = renderToString(React.createElement(GeneratorControls));
+      expect(html).not.toContain('data-testid="view-mode-grid"');
+      expect(html).not.toContain('data-testid="view-mode-tree"');
     });
   });
 
@@ -132,9 +124,9 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       createdAt: Date.now(),
     };
 
-    it('renders entity name, subtype, culture, root, and meaning', () => {
+    it('renders entity name, subtype, culture, root, and meaning with tree pill button in grid mode', () => {
       const html = renderToString(
-        React.createElement(EntityNodeCard, { entity: mockEntity })
+        React.createElement(EntityNodeCard, { entity: mockEntity, mode: 'grid' })
       );
 
       expect(html).toContain('Novigrad');
@@ -142,8 +134,22 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('Danubian Slavic');
       expect(html).toContain('root: Novi');
       expect(html).toContain('New City / Stronghold');
-      expect(html).toContain('+ Branch');
-      expect(html).toContain('data-testid="branch-repeat-button"');
+      // Grid mode has pill Tree button, but no branch buttons
+      expect(html).toContain('data-testid="inspect-tree-button"');
+      expect(html).toContain('Tree');
+      expect(html).not.toContain('data-testid="branch-button"');
+      expect(html).not.toContain('data-testid="branch-repeat-button"');
+    });
+
+    it('renders branch and repeat buttons in tree mode, with no tree button', () => {
+      const treeHtml = renderToString(
+        React.createElement(EntityNodeCard, { entity: mockEntity, mode: 'tree' })
+      );
+
+      expect(treeHtml).toContain('+ Branch');
+      expect(treeHtml).toContain('data-testid="branch-button"');
+      expect(treeHtml).toContain('data-testid="branch-repeat-button"');
+      expect(treeHtml).not.toContain('data-testid="inspect-tree-button"');
     });
 
     it('renders dual display when Anglicization and dual display are active', () => {
@@ -210,14 +216,14 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('1');
     });
 
-    it('displays persistent subtype name on branch button and repeat button creates that subtype', () => {
+    it('displays persistent subtype name on branch button and repeat button creates that subtype in tree mode', () => {
       const entityWithSelection: LoreEntity = {
         ...mockEntity,
         lastBranchSubtype: 'City Ward',
       };
 
       const html = renderToString(
-        React.createElement(EntityNodeCard, { entity: entityWithSelection })
+        React.createElement(EntityNodeCard, { entity: entityWithSelection, mode: 'tree' })
       );
 
       expect(html).toContain('+ City Ward');
@@ -426,9 +432,19 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('High Iron Gate');
       expect(html).toContain('Tier 3 (Subdivision)');
 
-      // Hierarchy visual connector line classes
-      expect(html).toContain('border-l-2 border-gold-500/30');
+      // Hierarchy visual connector line classes with increased 32px offset
+      expect(html).toContain('border-l-2 border-gold-500/30 pl-8 ml-8');
       expect(html).not.toContain('+ Add Subordinate Subdivision');
+    });
+
+    it('renders back to grid button with chevron when onBackToGrid is provided', () => {
+      const html = renderToString(
+        React.createElement(LineageTreeView, { onBackToGrid: () => {} })
+      );
+
+      expect(html).toContain('data-testid="back-to-grid-button"');
+      expect(html).toContain('Back to Card Grid View');
+      expect(html).toContain('Grid');
     });
 
     it('renders breadcrumb navigation when activeEntityId is set', () => {

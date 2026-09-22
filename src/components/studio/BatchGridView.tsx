@@ -152,6 +152,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               <EntityNodeCard
                 key={entity.id}
                 entity={entity}
+                mode="grid"
                 isSelected={activeEntityId === entity.id}
                 onSelect={(ent) => setActiveEntityId(ent.id)}
                 onInspectTree={onInspectTree}

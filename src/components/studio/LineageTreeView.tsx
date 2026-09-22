@@ -3,6 +3,7 @@ import {
   GitBranch,
   Network,
   ChevronRight,
+  ChevronLeft,
   CornerDownRight,
   X,
 } from 'lucide-react';
@@ -12,6 +13,7 @@ import { EntityNodeCard } from './EntityNodeCard';
 import { cn } from '../../utils/cn';
 
 export interface LineageTreeViewProps {
+  onBackToGrid?: () => void;
   className?: string;
 }
 
@@ -38,7 +40,10 @@ function findEntityWithAncestors(
   return null;
 }
 
-export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) => {
+export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
+  onBackToGrid,
+  className,
+}) => {
   const generatedBatch = useNominaStore((s) => s.generatedBatch);
   const pinnedEntities = useNominaStore((s) => s.pinnedEntities);
   const activeEntityId = useNominaStore((s) => s.activeEntityId);
@@ -86,11 +91,11 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
         data-testid={`tree-node-${node.id}`}
         className="relative group/node flex flex-col"
       >
-        {/* Horizontal connector line for non-root nodes */}
+        {/* Horizontal connector line for non-root nodes (aligned with 32px offset: -left-8 w-8) */}
         {depth > 0 && (
           <div
             data-testid="tree-connector"
-            className="absolute -left-4 top-7 w-4 h-0.5 bg-gold-500/40"
+            className="absolute -left-8 top-7 w-8 h-0.5 bg-gold-500/40"
           />
         )}
 
@@ -117,9 +122,10 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
             )}
           </div>
 
-          {/* Entity Card */}
+          {/* Entity Card in Tree Mode (branch and plus buttons present, no tree pill button) */}
           <EntityNodeCard
             entity={node}
+            mode="tree"
             isSelected={isTarget}
             onSelect={(ent) => setActiveEntityId(ent.id)}
             className={cn(
@@ -129,11 +135,11 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
           />
         </div>
 
-        {/* Recursive Children Lineage Rendering with Connecting Line */}
+        {/* Recursive Children Lineage Rendering with Connecting Line (Increased offset by 16px: pl-8 ml-8 / 32px offset) */}
         {node.children && node.children.length > 0 && (
           <div
             data-testid={`children-container-${node.id}`}
-            className="border-l-2 border-gold-500/30 pl-4 ml-4 space-y-4 mt-3 relative"
+            className="border-l-2 border-gold-500/30 pl-8 ml-8 space-y-4 mt-3 relative"
           >
             {node.children.map((child) => renderTreeNode(child, depth + 1))}
           </div>
@@ -149,11 +155,28 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
     >
       {/* Tree View Header & Breadcrumb Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b border-charcoal-800 bg-charcoal-950/40">
-        <div className="flex items-center gap-2">
-          <Network className="w-4 h-4 text-gold-400" />
-          <h2 className="text-sm font-semibold tracking-wide text-slate-200">
-            Interactive Lineage Tree
-          </h2>
+        <div className="flex items-center gap-2.5">
+          {/* Back to Grid Chevron Button */}
+          {onBackToGrid && (
+            <button
+              type="button"
+              data-testid="back-to-grid-button"
+              aria-label="Back to Card Grid View"
+              title="Back to Card Grid View"
+              onClick={onBackToGrid}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:text-gold-400 bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700 hover:border-gold-500/40 transition-colors shadow-sm select-none"
+            >
+              <ChevronLeft className="w-4 h-4 text-gold-400" />
+              <span>Grid</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-2">
+            <Network className="w-4 h-4 text-gold-400" />
+            <h2 className="text-sm font-semibold tracking-wide text-slate-200">
+              Interactive Lineage Tree
+            </h2>
+          </div>
         </div>
 
         {/* Breadcrumb Navigation Trail */}

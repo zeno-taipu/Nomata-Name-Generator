@@ -21,6 +21,7 @@ export interface EntityNodeCardProps {
   entity: LoreEntity;
   isCompact?: boolean;
   isSelected?: boolean;
+  mode?: 'grid' | 'tree';
   onSelect?: (entity: LoreEntity) => void;
   onInspectTree?: (entity: LoreEntity) => void;
   className?: string;
@@ -30,6 +31,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   entity,
   isCompact = false,
   isSelected = false,
+  mode = 'grid',
   onSelect,
   onInspectTree,
   className,
@@ -310,101 +312,107 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
 
       {/* Footer Action Toolbar */}
       <div className="flex items-center justify-between gap-1 pt-2 border-t border-charcoal-800/80 mt-1">
-        {/* Left Actions: Branch Dropdown & Repeat Last Branch */}
+        {/* Left Actions: In Tree View -> Branch Dropdown & Repeat Last Branch; In Grid View -> empty placeholder or spacer */}
         <div className="flex items-center gap-1">
-          <div className="relative flex items-center" ref={branchMenuRef}>
-            <button
-              type="button"
-              data-testid="branch-button"
-              aria-label={activeSubtype ? `Branch ${activeSubtype}` : 'Branch hierarchical child or subdivision'}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (activeSubtype) {
-                  branchEntity(entity.id, effectiveBranchTarget, 1);
-                } else {
-                  setIsBranchMenuOpen(!isBranchMenuOpen);
-                }
-              }}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-l-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
-              title={activeSubtype ? `Create another ${activeSubtype}` : 'Branch hierarchical child or subdivision'}
-            >
-              <GitBranch className="w-3.5 h-3.5" />
-              <span>{buttonLabel}</span>
-            </button>
-
-            {/* Dropdown chevron trigger to choose/change subtype */}
-            <button
-              type="button"
-              data-testid="branch-dropdown-toggle"
-              aria-label="Select subdivision lineage type"
-              aria-haspopup="true"
-              aria-expanded={isBranchMenuOpen}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsBranchMenuOpen(!isBranchMenuOpen);
-              }}
-              className="px-1.5 py-1 rounded-r-md text-xs text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-l-0 border-gold-500/30 transition-colors flex items-center justify-center self-stretch"
-              title="Choose subdivision type"
-            >
-              <ChevronDown className="w-3 h-3 opacity-75" />
-            </button>
-
-            {/* Subtype Dropdown Menu */}
-            {isBranchMenuOpen && (
-              <div
-                data-testid="branch-dropdown"
-                role="menu"
-                className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md"
-              >
-                <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-charcoal-750">
-                  Available Lineages
-                </div>
+          {mode === 'tree' ? (
+            <>
+              <div className="relative flex items-center" ref={branchMenuRef}>
                 <button
                   type="button"
-                  role="menuitem"
-                  data-testid="branch-option-auto"
-                  onClick={(e) => handleBranchSubtype('auto', e)}
-                  className="w-full text-left px-3 py-1.5 text-xs text-gold-400 hover:bg-gold-500/15 flex items-center justify-between transition-colors"
+                  data-testid="branch-button"
+                  aria-label={activeSubtype ? `Branch ${activeSubtype}` : 'Branch hierarchical child or subdivision'}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (activeSubtype) {
+                      branchEntity(entity.id, effectiveBranchTarget, 1);
+                    } else {
+                      setIsBranchMenuOpen(!isBranchMenuOpen);
+                    }
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-l-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
+                  title={activeSubtype ? `Create another ${activeSubtype}` : 'Branch hierarchical child or subdivision'}
                 >
-                  <span>Auto Subordinate</span>
-                  <Sparkles className="w-3 h-3 text-gold-400" />
+                  <GitBranch className="w-3.5 h-3.5" />
+                  <span>{buttonLabel}</span>
                 </button>
-                {availableSubtypes.map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    role="menuitem"
-                    data-testid={`branch-option-${st.toLowerCase().replace(/\s+/g, '-')}`}
-                    onClick={(e) => handleBranchSubtype(st, e)}
-                    className={cn(
-                      'w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between',
-                      activeSubtype === st
-                        ? 'bg-gold-500/20 text-gold-300 font-semibold'
-                        : 'text-slate-300 hover:bg-charcoal-800 hover:text-gold-300'
-                    )}
-                  >
-                    <span>{st}</span>
-                    {activeSubtype === st && <Check className="w-3 h-3 text-gold-400" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* Quick Repeat Branch Button */}
-          <button
-            type="button"
-            data-testid="branch-repeat-button"
-            aria-label={`Create another ${effectiveBranchTarget}`}
-            title={`Create another ${effectiveBranchTarget}`}
-            onClick={handleRepeatBranch}
-            className="flex items-center justify-center p-1.5 rounded-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
+                {/* Dropdown chevron trigger to choose/change subtype */}
+                <button
+                  type="button"
+                  data-testid="branch-dropdown-toggle"
+                  aria-label="Select subdivision lineage type"
+                  aria-haspopup="true"
+                  aria-expanded={isBranchMenuOpen}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsBranchMenuOpen(!isBranchMenuOpen);
+                  }}
+                  className="px-1.5 py-1 rounded-r-md text-xs text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-l-0 border-gold-500/30 transition-colors flex items-center justify-center self-stretch"
+                  title="Choose subdivision type"
+                >
+                  <ChevronDown className="w-3 h-3 opacity-75" />
+                </button>
+
+                {/* Subtype Dropdown Menu */}
+                {isBranchMenuOpen && (
+                  <div
+                    data-testid="branch-dropdown"
+                    role="menu"
+                    className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md"
+                  >
+                    <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-charcoal-750">
+                      Available Lineages
+                    </div>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      data-testid="branch-option-auto"
+                      onClick={(e) => handleBranchSubtype('auto', e)}
+                      className="w-full text-left px-3 py-1.5 text-xs text-gold-400 hover:bg-gold-500/15 flex items-center justify-between transition-colors"
+                    >
+                      <span>Auto Subordinate</span>
+                      <Sparkles className="w-3 h-3 text-gold-400" />
+                    </button>
+                    {availableSubtypes.map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        role="menuitem"
+                        data-testid={`branch-option-${st.toLowerCase().replace(/\s+/g, '-')}`}
+                        onClick={(e) => handleBranchSubtype(st, e)}
+                        className={cn(
+                          'w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between',
+                          activeSubtype === st
+                            ? 'bg-gold-500/20 text-gold-300 font-semibold'
+                            : 'text-slate-300 hover:bg-charcoal-800 hover:text-gold-300'
+                        )}
+                      >
+                        <span>{st}</span>
+                        {activeSubtype === st && <Check className="w-3 h-3 text-gold-400" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Repeat Branch Button */}
+              <button
+                type="button"
+                data-testid="branch-repeat-button"
+                aria-label={`Create another ${effectiveBranchTarget}`}
+                title={`Create another ${effectiveBranchTarget}`}
+                onClick={handleRepeatBranch}
+                className="flex items-center justify-center p-1.5 rounded-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </>
+          ) : (
+            <div />
+          )}
         </div>
 
-        {/* Right Actions: Re-roll, Anglicize, Copy, Inspect Tree */}
+        {/* Right Actions: Re-roll, Anglicize, Copy, and Tree Pill (in Grid mode) */}
         <div className="flex items-center gap-1 text-slate-400">
           {/* Re-roll */}
           <button
@@ -457,18 +465,21 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
             )}
           </button>
 
-          {/* Inspect Tree */}
-          <button
-            type="button"
-            data-testid="inspect-tree-button"
-            aria-label="Inspect Lineage Tree"
-            onClick={handleInspectTree}
-            className="flex items-center gap-0.5 px-1.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-gold-400 hover:bg-charcoal-800 transition-colors"
-            title="Inspect Lineage Tree"
-          >
-            <span className="hidden sm:inline">Tree</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          {/* Inspect Tree Pill Button: Only shown in Grid View */}
+          {mode === 'grid' && (
+            <button
+              type="button"
+              data-testid="inspect-tree-button"
+              aria-label="Inspect Lineage Tree"
+              onClick={handleInspectTree}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gold-400 hover:text-gold-300 bg-gold-500/15 hover:bg-gold-500/25 border border-gold-500/40 hover:border-gold-500/60 shadow-sm hover:shadow-[0_0_10px_rgba(var(--color-accent-rgb),0.2)] transition-all ml-1 select-none"
+              title="Inspect Lineage Tree for this entity"
+            >
+              <GitBranch className="w-3 h-3 text-gold-400" />
+              <span>Tree</span>
+              <ChevronRight className="w-3 h-3 text-gold-400/80" />
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -56,10 +56,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
       style={{ backgroundColor: 'var(--bg-app)' }}
     >
       {/* Top Sticky Toolbar */}
-      <GeneratorControls
-        viewMode={viewMode}
-        onViewModeChange={handleViewModeChange}
-      />
+      <GeneratorControls />
 
       {/* Central Viewport */}
       <main className="flex-1 overflow-hidden flex flex-col relative min-h-0">
@@ -71,7 +68,9 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
             }}
           />
         ) : (
-          <LineageTreeView />
+          <LineageTreeView
+            onBackToGrid={() => handleViewModeChange('grid')}
+          />
         )}
       </main>
 

@@ -4,16 +4,12 @@ import {
   RefreshCw,
   Sliders,
   Languages,
-  Grid,
-  GitBranch,
 } from 'lucide-react';
 import { useNominaStore } from '../../store/useNominaStore';
 import { normalizeEntityCategory } from '../../types/domain';
 import { cn } from '../../utils/cn';
 
 export interface GeneratorControlsProps {
-  viewMode?: 'grid' | 'tree';
-  onViewModeChange?: (mode: 'grid' | 'tree') => void;
   className?: string;
 }
 
@@ -28,8 +24,6 @@ const SUBTYPES_BY_CATEGORY: Record<string, string[]> = {
 };
 
 export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
-  viewMode = 'grid',
-  onViewModeChange,
   className,
 }) => {
   const batchCount = useNominaStore((s) => s.batchCount);
@@ -302,40 +296,6 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               title="Dual Display: Exonym (Endonym) format"
             >
               Dual
-            </button>
-          </div>
-
-          {/* View Mode Switcher: Batch Grid vs Lineage Tree */}
-          <div className="flex items-center bg-charcoal-950/60 p-1 rounded-lg border border-charcoal-700/60">
-            <button
-              type="button"
-              data-testid="view-mode-grid"
-              onClick={() => onViewModeChange?.('grid')}
-              className={cn(
-                'flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors',
-                viewMode === 'grid'
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
-                  : 'text-slate-400 hover:text-slate-200'
-              )}
-              title="Batch Grid View"
-            >
-              <Grid className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Grid</span>
-            </button>
-            <button
-              type="button"
-              data-testid="view-mode-tree"
-              onClick={() => onViewModeChange?.('tree')}
-              className={cn(
-                'flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors',
-                viewMode === 'tree'
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(208,185,51,0.2)]'
-                  : 'text-slate-400 hover:text-slate-200'
-              )}
-              title="Interactive Lineage Tree View"
-            >
-              <GitBranch className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Tree</span>
             </button>
           </div>
         </div>
