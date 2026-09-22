@@ -210,7 +210,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({ className }) =
             data-testid="empty-tree-state"
             className="flex flex-col items-center justify-center min-h-[380px] p-8 text-center rounded-2xl border-2 border-dashed border-charcoal-800 bg-charcoal-900/30 max-w-xl mx-auto my-8"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-500/20 to-amber-500/5 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-4 shadow-[0_0_20px_rgba(208,185,51,0.1)]">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-500/20 to-gold-300/10 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-4 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.1)]">
               <GitBranch className="w-8 h-8" />
             </div>
 

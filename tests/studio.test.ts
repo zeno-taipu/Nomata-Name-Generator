@@ -181,7 +181,7 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
         React.createElement(EntityNodeCard, { entity: pinnedEntity })
       );
       expect(pinnedHtml).toContain('Unpin from World Bible');
-      expect(pinnedHtml).toContain('fill-amber-400');
+      expect(pinnedHtml).toContain('fill-gold-400');
     });
 
     it('renders children count badge if entity has hierarchical children', () => {

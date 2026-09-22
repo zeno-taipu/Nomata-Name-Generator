@@ -74,12 +74,12 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               className={cn(
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors',
                 allPinned
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-                  : 'bg-charcoal-900 border-charcoal-700/80 text-slate-300 hover:text-amber-400 hover:border-amber-500/30'
+                  ? 'bg-gold-500/15 border-gold-500/40 text-gold-400'
+                  : 'bg-charcoal-900 border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/30'
               )}
               title="Pin all entities in current batch to World Bible"
             >
-              <Pin className={cn('w-3.5 h-3.5', allPinned && 'fill-amber-400')} />
+              <Pin className={cn('w-3.5 h-3.5', allPinned && 'fill-gold-400 text-gold-400')} />
               <span>{allPinned ? 'All Pinned' : 'Pin All'}</span>
             </button>
 
@@ -117,7 +117,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
             data-testid="empty-batch-state"
             className="flex flex-col items-center justify-center min-h-[380px] p-8 text-center rounded-2xl border-2 border-dashed border-charcoal-800 bg-charcoal-900/30 max-w-xl mx-auto my-8"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-500/20 to-amber-500/5 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-4 shadow-[0_0_20px_rgba(208,185,51,0.1)]">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-500/20 to-gold-300/10 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-4 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.1)]">
               <Sparkles className="w-8 h-8" />
             </div>
 
@@ -136,7 +136,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               data-testid="empty-generate-button"
               disabled={isGenerating}
               onClick={() => generateBatch()}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-gold-400 to-amber-500 hover:from-gold-300 hover:to-amber-400 text-charcoal-950 shadow-[0_0_15px_rgba(208,185,51,0.25)] hover:shadow-[0_0_25px_rgba(208,185,51,0.35)] transition-all active:scale-[0.98]"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-gold-400 to-gold-300 hover:from-gold-300 hover:to-gold-200 text-charcoal-950 shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.25)] hover:shadow-[0_0_25px_rgba(var(--color-accent-rgb),0.35)] transition-all active:scale-[0.98]"
             >
               <Sparkles className="w-4 h-4" />
               <span>Generate First Batch</span>

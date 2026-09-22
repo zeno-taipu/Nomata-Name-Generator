@@ -33,7 +33,7 @@ export const StyleTab: React.FC = () => {
             type="button"
             data-testid="reset-theme-button"
             onClick={() => resetThemeSettings()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-amber-400 bg-charcoal-850 hover:bg-charcoal-800 border border-charcoal-700 hover:border-amber-500/40 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-gold-400 bg-charcoal-850 hover:bg-charcoal-800 border border-charcoal-700 hover:border-gold-500/40 transition-colors shadow-sm"
             title="Reset all colors, backgrounds, opacity, and typography to defaults"
           >
             <RotateCcw className="w-3.5 h-3.5" />

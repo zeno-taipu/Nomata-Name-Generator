@@ -230,15 +230,15 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           className={cn(
             'p-1.5 rounded-lg border transition-colors shrink-0',
             entity.pinned
-              ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-              : 'border-transparent text-slate-400 hover:text-amber-400 hover:bg-charcoal-800'
+              ? 'bg-gold-500/20 border-gold-500/40 text-gold-400'
+              : 'border-transparent text-slate-400 hover:text-gold-400 hover:bg-charcoal-800'
           )}
           title={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
         >
           <Pin
             className={cn(
               'w-4 h-4',
-              entity.pinned ? 'fill-amber-400 text-amber-400' : 'text-slate-400'
+              entity.pinned ? 'fill-gold-400 text-gold-400' : 'text-slate-400'
             )}
           />
         </button>
@@ -257,7 +257,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {showDual && (
             <span
               data-testid="entity-dual-display"
-              className="text-xs text-gold-400/80 font-mono tracking-tight"
+              className="text-xs text-gold-300 font-mono tracking-tight"
             >
               {`(${entity.originalName})`}
             </span>
@@ -268,7 +268,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         {(entity.originalTitle || entity.epithet) && (
           <p
             data-testid="entity-epithet"
-            className="text-gold-400/70 italic mt-0.5 truncate theme-subtitle-font"
+            className="text-gold-300/90 italic mt-0.5 truncate theme-subtitle-font"
           >
             {entity.originalTitle || entity.epithet}
           </p>

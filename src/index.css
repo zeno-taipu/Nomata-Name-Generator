@@ -4,24 +4,24 @@
 
 :root {
   --color-accent: #d0b933;
-  --color-accent-rgb: 208 185 51;
+  --color-accent-rgb: 208, 185, 51;
   --color-accent-secondary: #ece29c;
-  --color-accent-secondary-rgb: 236 226 156;
+  --color-accent-secondary-rgb: 236, 226, 156;
   --color-border: #22232a;
-  --color-border-rgb: 34 35 42;
+  --color-border-rgb: 34, 35, 42;
   --color-text-primary: #f1f5f9;
-  --color-text-primary-rgb: 241 245 249;
+  --color-text-primary-rgb: 241, 245, 249;
   --color-text-muted: #94a3b8;
-  --color-text-muted-rgb: 148 163 184;
+  --color-text-muted-rgb: 148, 163, 184;
 
   --bg-app: #0c0d0e;
-  --bg-app-rgb: 12 13 14;
+  --bg-app-rgb: 12, 13, 14;
   --bg-panel: #121316;
-  --bg-panel-rgb: 18 19 22;
+  --bg-panel-rgb: 18, 19, 22;
   --bg-header: #0c0d0e;
-  --bg-header-rgb: 12 13 14;
+  --bg-header-rgb: 12, 13, 14;
   --bg-card: #18191e;
-  --bg-card-rgb: 24 25 30;
+  --bg-card-rgb: 24, 25, 30;
   --bg-card-computed: rgba(24, 25, 30, 0.9);
   --card-opacity: 0.9;
   --card-blur: 8px;

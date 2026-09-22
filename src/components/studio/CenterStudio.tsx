@@ -100,7 +100,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
             data-testid="stats-pinned-count"
             className="flex items-center gap-1.5"
           >
-            <Pin className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <Pin className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
             <span>
               Bible Pinned:{' '}
               <strong className="text-slate-200 font-mono font-medium">
