@@ -96,10 +96,10 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
             data-testid="stats-batch-count"
             className="flex items-center gap-1.5"
           >
-            <Layers className="w-3.5 h-3.5 text-gold-400" />
+            <Layers className="w-3.5 h-3.5 theme-text-accent" />
             <span>
               Batch:{' '}
-              <strong className="text-slate-200 font-mono font-medium">
+              <strong className="theme-text-accent font-mono font-medium">
                 {generatedBatch.length}
               </strong>
             </span>
@@ -109,10 +109,10 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
             data-testid="stats-pinned-count"
             className="flex items-center gap-1.5"
           >
-            <Pin className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
+            <Pin className="w-3.5 h-3.5 theme-text-accent fill-current" />
             <span>
               Collections:{' '}
-              <strong className="text-slate-200 font-mono font-medium">
+              <strong className="theme-text-accent font-mono font-medium">
                 {pinnedEntities.length}
               </strong>
             </span>
@@ -124,7 +124,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
           data-testid="stats-engine-summary"
           className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400"
         >
-          <span className="capitalize font-medium text-gold-400">
+          <span className="capitalize font-medium theme-text-accent">
             {activeCategory}
           </span>
           <span>&bull;</span>
@@ -139,7 +139,7 @@ export const CenterStudio: React.FC<CenterStudioProps> = ({
           <span
             className={cn(
               'font-mono font-semibold',
-              anglicize ? 'text-gold-400' : 'text-slate-400'
+              anglicize ? 'theme-text-accent' : 'text-slate-400'
             )}
           >
             {`EN:${anglicize ? 'ON' : 'OFF'}`}

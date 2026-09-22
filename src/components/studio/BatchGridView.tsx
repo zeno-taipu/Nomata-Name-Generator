@@ -132,13 +132,13 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
       >
         {/* Left: Generated Entities Title & Count */}
         <div className="flex items-center gap-2 shrink-0">
-          <Layers className="w-4 h-4 text-gold-400" />
+          <Layers className="w-4 h-4 theme-text-accent" />
           <h2 className="text-sm font-semibold tracking-wide text-slate-200 font-serif">
             Generated Entities
           </h2>
           <span
             data-testid="batch-count-badge"
-            className="text-xs font-mono px-2 py-0.5 rounded-full bg-charcoal-800 border border-charcoal-700 text-gold-400 font-semibold"
+            className="text-xs font-mono px-2 py-0.5 rounded-full pill-accent font-semibold"
           >
             {generatedBatch.length}
           </span>
@@ -155,7 +155,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
             data-testid-alias="grid-category-indicator"
             className="flex items-center gap-1.5 font-medium text-slate-200"
           >
-            <CategoryIcon size={14} className="text-gold-400" />
+            <CategoryIcon size={14} className="theme-text-accent" />
             <span className="hidden sm:inline">{catMeta.label}</span>
           </div>
 
@@ -170,7 +170,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               data-testid-alias="header-target-subtype-select"
               value={targetSubtype}
               onChange={(e) => setEngineConfig({ targetSubtype: e.target.value })}
-              className="bg-charcoal-800/90 text-xs text-gold-400 border border-charcoal-700/80 rounded-md px-2 py-0.5 focus:outline-none focus:border-gold-500/50 cursor-pointer font-medium hover:border-gold-500/30 transition-colors"
+              className="bg-charcoal-800/90 text-xs theme-text-accent border border-charcoal-700/80 rounded-md px-2 py-0.5 focus:outline-none focus:theme-border-accent cursor-pointer font-medium hover:theme-border-accent transition-colors"
               title="Filter generation to a specific subtype or 'auto'"
             >
               {availableSubtypes.map((sub) => (
@@ -191,7 +191,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
             title={`Active Cultures: ${cultureNames.join(', ')}`}
           >
             <span className="text-slate-500 hidden xl:inline">Culture:</span>
-            <span className="text-gold-400/90 font-medium truncate max-w-[130px]">
+            <span className="theme-text-accent font-medium truncate max-w-[130px]">
               {cultureDisplay}
             </span>
           </div>
@@ -210,13 +210,13 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               className={cn(
                 'p-1 rounded-md border transition-colors relative flex items-center justify-center',
                 isAnglicizeOpen
-                  ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
-                  : 'bg-charcoal-800/80 text-slate-300 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40'
+                  ? 'pill-accent shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
+                  : 'bg-charcoal-800/80 text-slate-300 border-charcoal-700 hover:theme-text-accent hover:theme-border-accent'
               )}
             >
-              <Languages size={13} className="text-gold-400" />
+              <Languages size={13} className="theme-text-accent" />
               {(isBatchAnglicized || isCollectionsAnglicized || anglicize) && (
-                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full theme-bg-accent animate-pulse" />
               )}
             </button>
 
@@ -231,7 +231,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                 {/* Modal Header */}
                 <div className="flex items-center justify-between pb-2.5 border-b border-charcoal-800 mb-3">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <Languages className="w-4 h-4 text-gold-400" />
+                    <Languages className="w-4 h-4 theme-text-accent" />
                     <span>Anglicization Options</span>
                   </div>
                   <button
@@ -268,7 +268,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                           className={cn(
                             'py-1 text-xs rounded border text-center transition-colors font-medium',
                             isActive
-                              ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                              ? 'pill-accent font-semibold shadow-sm'
                               : 'bg-charcoal-800 border-charcoal-700 text-slate-400 hover:text-slate-200 hover:bg-charcoal-750'
                           )}
                         >
@@ -291,7 +291,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                     className={cn(
                       'px-2.5 py-0.5 text-xs font-mono rounded border transition-colors',
                       exonymDualDisplay
-                        ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                        ? 'pill-accent font-semibold'
                         : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
                     )}
                   >
@@ -301,7 +301,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
 
                 {/* Individual Card Helper Note */}
                 <p className="mt-3 text-[11px] text-slate-400 leading-relaxed bg-charcoal-950/60 p-2 rounded-lg border border-charcoal-800">
-                  Click the <Languages className="w-3 h-3 text-gold-400 inline mx-0.5 -mt-0.5" /> icon on any card to anglicize or revert individually.
+                  Click the <Languages className="w-3 h-3 theme-text-accent inline mx-0.5 -mt-0.5" /> icon on any card to anglicize or revert individually.
                 </p>
 
                 {/* Togglable Global Actions */}
@@ -318,7 +318,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                       className={cn(
                         'flex-1 flex items-center justify-between px-2.5 py-1.5 text-xs rounded border transition-all font-medium',
                         isCollectionsAnglicized
-                          ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                          ? 'pill-accent shadow-sm'
                           : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200 hover:bg-charcoal-750'
                       )}
                       title={
@@ -332,7 +332,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                         className={cn(
                           'text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold',
                           isCollectionsAnglicized
-                            ? 'bg-gold-500/30 text-gold-200 border border-gold-500/40'
+                            ? 'theme-bg-accent text-charcoal-950 font-bold'
                             : 'bg-charcoal-900 text-slate-500 border border-charcoal-750'
                         )}
                       >
@@ -349,7 +349,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                       className={cn(
                         'flex-1 flex items-center justify-between px-2.5 py-1.5 text-xs rounded border transition-all font-medium',
                         isBatchAnglicized
-                          ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                          ? 'pill-accent shadow-sm'
                           : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200 hover:bg-charcoal-750'
                       )}
                       title={
@@ -363,7 +363,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                         className={cn(
                           'text-[10px] font-mono px-1.5 py-0.2 rounded font-semibold',
                           isBatchAnglicized
-                            ? 'bg-gold-500/30 text-gold-200 border border-gold-500/40'
+                            ? 'theme-bg-accent text-charcoal-950 font-bold'
                             : 'bg-charcoal-900 text-slate-500 border border-charcoal-750'
                         )}
                       >
@@ -388,12 +388,12 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               className={cn(
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors',
                 allPinned
-                  ? 'bg-gold-500/15 border-gold-500/40 text-gold-400'
-                  : 'bg-charcoal-900 border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/30'
+                  ? 'pill-accent'
+                  : 'bg-charcoal-900 border-charcoal-700/80 text-slate-300 hover:theme-text-accent hover:theme-border-accent'
               )}
               title="Pin all entities in current batch to World Bible"
             >
-              <Pin className={cn('w-3.5 h-3.5', allPinned && 'fill-gold-400 text-gold-400')} />
+              <Pin className={cn('w-3.5 h-3.5', allPinned && 'theme-text-accent fill-current')} />
               <span>{allPinned ? 'All Pinned' : 'Pin All'}</span>
             </button>
 
@@ -402,7 +402,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
               type="button"
               data-testid="reroll-all-button"
               onClick={handleReRollAll}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-charcoal-900 border border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/30 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-charcoal-900 border border-charcoal-700/80 text-slate-300 hover:theme-text-accent hover:theme-border-accent transition-colors"
               title="Re-roll all entities in current batch"
             >
               <RefreshCw className="w-3.5 h-3.5" />

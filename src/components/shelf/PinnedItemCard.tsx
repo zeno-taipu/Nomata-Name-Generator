@@ -104,8 +104,8 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
         'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none',
         'theme-card-surface border',
         isActive
-          ? 'border-gold-500/60 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-850'
-          : 'border-charcoal-700/70 hover:border-gold-500/30 hover:shadow-md',
+          ? 'theme-ring-accent border-[var(--color-accent)] bg-charcoal-850'
+          : 'border-charcoal-700/70 theme-card-hover',
         isCompact ? 'p-2.5 gap-1.5' : 'p-3.5 gap-2.5',
         className
       )}
@@ -214,7 +214,7 @@ export const PinnedItemCard: React.FC<PinnedItemCardProps> = ({
         <div className="flex items-baseline gap-1.5 flex-wrap">
           <h4
             data-testid="pinned-item-name"
-            className="text-sm font-semibold tracking-wide text-slate-100 font-serif truncate theme-entity-font"
+            className="text-sm font-semibold tracking-wide text-slate-100 font-serif truncate theme-entity-font theme-card-title-hover"
             title={entity.name}
           >
             {entity.name}

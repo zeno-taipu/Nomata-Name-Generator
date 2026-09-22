@@ -66,7 +66,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           className={cn(
             'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 shadow-md',
             isGenerating
-              ? 'bg-gold-500/40 text-charcoal-950 cursor-not-allowed'
+              ? 'opacity-50 btn-accent-primary cursor-not-allowed'
               : 'btn-accent-primary'
           )}
         >
@@ -99,7 +99,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           className={cn(
             'flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg font-semibold text-xs tracking-wide transition-all duration-200 select-none',
             isGenerating
-              ? 'bg-gold-500/40 text-charcoal-950 cursor-not-allowed'
+              ? 'opacity-50 btn-accent-primary cursor-not-allowed'
               : 'btn-accent-primary'
           )}
           title="Generate names based on current parameters (⌘⏎)"
@@ -126,8 +126,8 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           className={cn(
             'p-2 rounded-lg border transition-colors flex items-center justify-center',
             isOptionsOpen
-              ? 'bg-gold-500/20 text-gold-400 border-gold-500/50 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
-              : 'bg-charcoal-900 text-slate-300 border-charcoal-700 hover:text-gold-400 hover:border-gold-500/40 hover:bg-charcoal-850'
+              ? 'pill-accent'
+              : 'bg-charcoal-900 text-slate-300 border-charcoal-700 hover:theme-text-accent hover:border-[var(--color-accent)] hover:bg-charcoal-850'
           )}
         >
           {isOptionsOpen ? (
@@ -148,7 +148,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-medium text-slate-400">
               <span>Batch Count:</span>
-              <span className="font-mono text-gold-400 font-semibold">{batchCount}</span>
+              <span className="font-mono theme-text-accent font-semibold">{batchCount}</span>
             </div>
             <div className="flex items-center gap-1 bg-charcoal-900 p-1 rounded-lg border border-charcoal-750 justify-between">
               {BATCH_PILLS.map((count) => {
@@ -162,7 +162,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
                     className={cn(
                       'flex-1 py-1 text-xs font-mono font-medium rounded transition-colors text-center',
                       isActive
-                        ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-sm'
+                        ? 'pill-accent font-semibold shadow-sm'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
                     )}
                   >
@@ -177,10 +177,10 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] text-slate-400">
               <span className="flex items-center gap-1">
-                <Sliders className="w-3 h-3 text-gold-400" />
+                <Sliders className="w-3 h-3 theme-text-accent" />
                 <span>Temperature:</span>
               </span>
-              <span className="font-mono text-gold-400 font-semibold bg-gold-500/10 px-1.5 py-0.2 rounded border border-gold-500/30">
+              <span className="font-mono theme-text-accent font-semibold pill-accent px-1.5 py-0.2 rounded">
                 {temperature.toFixed(2)}
               </span>
             </div>
@@ -194,7 +194,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
               onChange={(e) =>
                 setEngineConfig({ temperature: parseFloat(e.target.value) })
               }
-              className="w-full h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-gold-400 focus:outline-none"
+              className="w-full h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent)] focus:outline-none"
               aria-label="Temperature slider (Fidelity vs Innovation)"
             />
             <div className="flex justify-between text-[10px] text-slate-500 font-mono">
@@ -214,7 +214,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
                 className={cn(
                   'py-1 text-xs font-medium rounded transition-colors text-center',
                   markovOrder === 2
-                    ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-sm'
+                    ? 'pill-accent font-semibold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 )}
               >
@@ -227,7 +227,7 @@ export const GeneratorDrawer: React.FC<GeneratorDrawerProps> = ({
                 className={cn(
                   'py-1 text-xs font-medium rounded transition-colors text-center',
                   markovOrder === 3
-                    ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-sm'
+                    ? 'pill-accent font-semibold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 )}
               >

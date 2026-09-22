@@ -81,7 +81,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
             className={cn(
               'relative group flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-200 select-none shadow-sm',
               isGenerating
-                ? 'bg-gold-500/50 text-charcoal-950 cursor-not-allowed'
+                ? 'opacity-50 btn-accent-primary cursor-not-allowed'
                 : 'btn-accent-primary'
             )}
             title="Generate names based on current parameters (⌘ + Enter)"
@@ -113,7 +113,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
                   className={cn(
                     'px-2.5 py-1 text-xs font-mono font-medium rounded transition-colors',
                     isActive
-                      ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
+                      ? 'bg-gold-500/20 text-gold-400 pill-accent font-semibold shadow-sm'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
                   )}
                 >
@@ -132,7 +132,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               data-testid="target-subtype-select"
               value={targetSubtype}
               onChange={(e) => setEngineConfig({ targetSubtype: e.target.value })}
-              className="bg-charcoal-900 text-xs text-gold-400 border border-charcoal-700/80 rounded px-2 py-0.5 focus:outline-none focus:border-gold-500/50 cursor-pointer font-medium"
+              className="bg-charcoal-900 text-xs theme-text-accent border border-charcoal-700/80 rounded px-2 py-0.5 focus:outline-none focus:theme-border-accent cursor-pointer font-medium"
               title="Filter generation to a specific subtype or 'auto'"
               aria-label="Target Subtype"
             >
@@ -155,10 +155,10 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
             <div className="flex flex-col">
               <div className="flex items-center justify-between gap-2 text-[10px] text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Sliders className="w-3 h-3 text-gold-400" />
+                  <Sliders className="w-3 h-3 theme-text-accent" />
                   Temp:
                 </span>
-                <span className="font-mono text-gold-400 font-semibold">
+                <span className="font-mono theme-text-accent font-semibold">
                   {temperature.toFixed(2)}
                 </span>
               </div>
@@ -174,7 +174,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
                   onChange={(e) =>
                     setEngineConfig({ temperature: parseFloat(e.target.value) })
                   }
-                  className="w-20 sm:w-24 h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-gold-400 focus:outline-none"
+                  className="w-20 sm:w-24 h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent)] focus:outline-none"
                   aria-label="Temperature slider (Fidelity vs Innovation)"
                 />
                 <span className="text-[9px] text-slate-400 hidden xl:inline">Innovation</span>
@@ -194,7 +194,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               className={cn(
                 'px-2 py-1 rounded font-medium text-xs transition-colors',
                 markovOrder === 2
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
+                  ? 'pill-accent font-semibold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               )}
             >
@@ -207,7 +207,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               className={cn(
                 'px-2 py-1 rounded font-medium text-xs transition-colors',
                 markovOrder === 3
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40 shadow-[0_0_8px_rgba(var(--color-accent-rgb),0.25)]'
+                  ? 'pill-accent font-semibold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               )}
             >
@@ -225,7 +225,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               className={cn(
                 'flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors',
                 anglicize
-                  ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40'
+                  ? 'pill-accent'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
               )}
               title="Toggle Anglicization (Englishification)"
@@ -235,7 +235,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
               <span
                 className={cn(
                   'w-1.5 h-1.5 rounded-full ml-0.5',
-                  anglicize ? 'bg-gold-400 animate-pulse' : 'bg-slate-400'
+                  anglicize ? 'theme-bg-accent animate-pulse' : 'bg-slate-400'
                 )}
               />
             </button>
@@ -261,7 +261,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
                       'px-1.5 py-0.5 text-[11px] rounded transition-colors',
                       !anglicize && 'opacity-40 cursor-not-allowed',
                       isModeActive && anglicize
-                        ? 'bg-gold-500/20 text-gold-300 font-semibold'
+                        ? 'pill-accent font-semibold'
                         : 'text-slate-400 hover:text-slate-200'
                     )}
                     title={
@@ -290,7 +290,7 @@ export const GeneratorControls: React.FC<GeneratorControlsProps> = ({
                 'ml-1 px-1.5 py-0.5 text-[10px] font-mono rounded border transition-colors',
                 !anglicize && 'opacity-40 cursor-not-allowed',
                 exonymDualDisplay && anglicize
-                  ? 'bg-gold-500/10 text-gold-300 border-gold-500/40'
+                  ? 'pill-accent font-semibold'
                   : 'text-slate-400 border-charcoal-700/60 hover:text-slate-200'
               )}
               title="Dual Display: Exonym (Endonym) format"

@@ -110,7 +110,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
         {depth > 0 && (
           <div
             data-testid="tree-connector"
-            className="absolute -left-8 top-7 w-8 h-0.5 bg-gold-500/40"
+            className="absolute -left-8 top-7 w-8 h-0.5 theme-tree-connector"
           />
         )}
 
@@ -122,7 +122,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
               className={cn(
                 'text-[10px] font-mono px-2 py-0.5 rounded border uppercase tracking-wider',
                 depth === 0
-                  ? 'bg-gold-500/15 border-gold-500/40 text-gold-400 font-semibold'
+                  ? 'pill-accent font-semibold'
                   : 'bg-charcoal-800 border-charcoal-700 text-slate-400'
               )}
             >
@@ -131,7 +131,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
 
             {depth > 0 && (
               <span className="flex items-center gap-1 text-[11px] text-slate-400 font-mono">
-                <CornerDownRight className="w-3 h-3 text-gold-500/50" />
+                <CornerDownRight className="w-3 h-3 theme-text-accent opacity-60" />
                 <span>subordinate of {node.parentId ? 'lineage' : 'root'}</span>
               </span>
             )}
@@ -145,7 +145,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             onSelect={(ent) => setActiveEntityId(ent.id)}
             className={cn(
               'w-full shadow-md',
-              isTarget && 'ring-2 ring-gold-400/50 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.25)]'
+              isTarget && 'theme-ring-accent'
             )}
           />
         </div>
@@ -154,7 +154,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
         {node.children && node.children.length > 0 && (
           <div
             data-testid={`children-container-${node.id}`}
-            className="border-l-2 border-gold-500/30 pl-8 ml-8 space-y-4 mt-3 relative"
+            className="theme-tree-line border-l-2 border-gold-500/30 pl-8 ml-8 space-y-4 mt-3 relative"
           >
             {node.children.map((child) => renderTreeNode(child, depth + 1))}
           </div>
@@ -179,15 +179,15 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
               aria-label="Back to Card Grid View"
               title="Back to Card Grid View"
               onClick={onBackToGrid}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:text-gold-400 bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700 hover:border-gold-500/40 transition-colors shadow-sm select-none"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:theme-text-accent bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700 hover:theme-border-accent transition-colors shadow-sm select-none"
             >
-              <ChevronLeft className="w-4 h-4 text-gold-400" />
+              <ChevronLeft className="w-4 h-4 theme-text-accent" />
               <span>Grid</span>
             </button>
           )}
 
           <div className="flex items-center gap-2">
-            <Network className="w-4 h-4 text-gold-400" />
+            <Network className="w-4 h-4 theme-text-accent" />
             <h2 className="text-sm font-semibold tracking-wide text-slate-200">
               Interactive Lineage Tree
             </h2>
@@ -204,7 +204,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
               type="button"
               data-testid="breadcrumb-all"
               onClick={() => setActiveEntityId(null)}
-              className="text-slate-400 hover:text-gold-400 transition-colors"
+              className="text-slate-400 hover:theme-text-accent transition-colors"
             >
               All Trees
             </button>
@@ -216,15 +216,15 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                   type="button"
                   data-testid={`breadcrumb-${ancestor.id}`}
                   onClick={() => setActiveEntityId(ancestor.id)}
-                  className="text-slate-400 hover:text-gold-400 font-serif truncate max-w-[120px]"
+                  className="text-slate-400 hover:theme-text-accent font-serif truncate max-w-[120px]"
                 >
                   {ancestor.name}
                 </button>
               </React.Fragment>
             ))}
 
-            <ChevronRight className="w-3 h-3 text-gold-400" />
-            <span className="text-gold-400 font-serif font-semibold truncate max-w-[140px]">
+            <ChevronRight className="w-3 h-3 theme-text-accent" />
+            <span className="theme-text-accent font-serif font-semibold truncate max-w-[140px]">
               {focusedResult.entity.name}
             </span>
 
@@ -264,12 +264,12 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             className={cn(
               'flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-charcoal-900/90 border shadow-lg backdrop-blur-md transition-all',
               isTempOpen
-                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-800'
-                : 'border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/50 hover:bg-charcoal-800'
+                ? 'pill-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)]'
+                : 'border-charcoal-700/80 text-slate-300 hover:theme-text-accent hover:theme-border-accent hover:bg-charcoal-800'
             )}
           >
-            <Sliders className="w-4 h-4 text-gold-400" />
-            <span className="text-[9px] font-mono font-semibold text-gold-400 -mt-0.5">
+            <Sliders className="w-4 h-4 theme-text-accent" />
+            <span className="text-[9px] font-mono font-semibold theme-text-accent -mt-0.5">
               {temperature.toFixed(1)}
             </span>
           </button>
@@ -287,10 +287,10 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             {/* Header */}
             <div className="flex items-center justify-between pb-2 border-b border-charcoal-800 mb-3">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                <Sliders className="w-3.5 h-3.5 text-gold-400" />
+                <Sliders className="w-3.5 h-3.5 theme-text-accent" />
                 <span>Temperature & Innovation</span>
               </div>
-              <span className="font-mono text-xs font-bold text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/30">
+              <span className="font-mono text-xs font-bold pill-accent px-2 py-0.5 rounded">
                 {temperature.toFixed(2)}
               </span>
             </div>
@@ -307,7 +307,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                 onChange={(e) =>
                   setEngineConfig({ temperature: parseFloat(e.target.value) })
                 }
-                className="w-full h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-gold-400 focus:outline-none"
+                className="w-full h-1.5 bg-charcoal-800 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent)] focus:outline-none"
                 aria-label="Temperature slider"
               />
               <div className="flex justify-between text-[10px] text-slate-400 font-mono">
@@ -332,7 +332,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                   className={cn(
                     'px-2 py-0.5 text-[10px] rounded font-mono transition-colors',
                     Math.abs(temperature - preset.val) < 0.05
-                      ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40'
+                      ? 'pill-accent font-semibold'
                       : 'bg-charcoal-800 text-slate-400 hover:text-slate-200'
                   )}
                 >
@@ -360,15 +360,15 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             className={cn(
               'relative flex items-center justify-center w-10 h-10 rounded-xl bg-charcoal-900/90 border shadow-lg backdrop-blur-md transition-all',
               isAnglicizeOpen || anglicize
-                ? 'border-gold-500/80 text-gold-400 shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-800'
-                : 'border-charcoal-700/80 text-slate-300 hover:text-gold-400 hover:border-gold-500/50 hover:bg-charcoal-800'
+                ? 'pill-accent shadow-[0_0_12px_rgba(var(--color-accent-rgb),0.25)]'
+                : 'border-charcoal-700/80 text-slate-300 hover:theme-text-accent hover:theme-border-accent hover:bg-charcoal-800'
             )}
           >
-            <Languages className="w-4 h-4 text-gold-400" />
+            <Languages className="w-4 h-4 theme-text-accent" />
             <span
               className={cn(
                 'absolute top-1.5 right-1.5 w-2 h-2 rounded-full transition-colors',
-                anglicize ? 'bg-gold-400 animate-pulse' : 'bg-charcoal-600'
+                anglicize ? 'theme-bg-accent animate-pulse' : 'bg-charcoal-600'
               )}
             />
           </button>
@@ -386,7 +386,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             {/* Header & Global Anglicize Toggle */}
             <div className="flex items-center justify-between pb-2 border-b border-charcoal-800 mb-3">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                <Languages className="w-3.5 h-3.5 text-gold-400" />
+                <Languages className="w-3.5 h-3.5 theme-text-accent" />
                 <span>Anglicization Options</span>
               </div>
               <button
@@ -396,7 +396,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                 className={cn(
                   'px-2 py-0.5 rounded text-[11px] font-medium border transition-colors',
                   anglicize
-                    ? 'bg-gold-500/20 text-gold-400 border-gold-500/40'
+                    ? 'pill-accent font-semibold'
                     : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
                 )}
                 title="Global Anglicize all cards in view"
@@ -426,7 +426,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                       className={cn(
                         'py-1 text-xs rounded border text-center transition-colors font-medium',
                         isActive
-                          ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                          ? 'pill-accent font-semibold shadow-sm'
                           : 'bg-charcoal-800/80 border-charcoal-700/60 text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
                       )}
                     >
@@ -449,7 +449,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
                 className={cn(
                   'px-2 py-0.5 text-xs font-mono rounded border transition-colors',
                   exonymDualDisplay
-                    ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                    ? 'pill-accent font-semibold'
                     : 'bg-charcoal-800 text-slate-400 border-charcoal-700 hover:text-slate-200'
                 )}
               >
@@ -458,8 +458,8 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             </div>
 
             {/* Helper Note */}
-            <p className="mt-2.5 text-[10px] text-slate-400 leading-tight bg-charcoal-950/60 p-1.5 rounded border border-charcoal-800">
-              Click the <Languages className="w-3 h-3 text-gold-400 inline mx-0.5 -mt-0.5" /> icon on any card to anglicize individually.
+            <p className="mt-3 text-[11px] text-slate-400 leading-relaxed bg-charcoal-950/60 p-2 rounded-lg border border-charcoal-800">
+              Click the <Languages className="w-3 h-3 theme-text-accent inline mx-0.5 -mt-0.5" /> icon on any node card to anglicize or revert individually.
             </p>
           </div>
         </div>
@@ -472,7 +472,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
             data-testid="empty-tree-state"
             className="flex flex-col items-center justify-center min-h-[380px] p-8 text-center rounded-2xl border-2 border-dashed border-charcoal-800 bg-charcoal-900/30 max-w-xl mx-auto my-8"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-500/20 to-gold-300/10 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-4 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.1)]">
+            <div className="w-16 h-16 rounded-2xl pill-accent flex items-center justify-center theme-text-accent mb-4 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.2)]">
               <GitBranch className="w-8 h-8" />
             </div>
 
@@ -482,7 +482,7 @@ export const LineageTreeView: React.FC<LineageTreeViewProps> = ({
 
             <p className="text-sm text-slate-400 max-w-md leading-relaxed mb-4">
               Generate a batch of entities in the Grid view and click{' '}
-              <strong className="text-gold-400">+ Branch</strong> on any entity
+              <strong className="theme-text-accent">+ Branch</strong> on any entity
               to construct multi-tier geographic, urban, or dynasty lineages.
             </p>
           </div>

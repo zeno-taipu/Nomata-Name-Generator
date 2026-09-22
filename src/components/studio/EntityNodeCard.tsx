@@ -195,11 +195,11 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         }
       }}
       className={cn(
-        'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none focus-visible:ring-1 focus-visible:ring-gold-500/50',
-        'theme-card-surface border',
+        'group relative flex flex-col justify-between rounded-xl transition-all duration-200 text-left select-none outline-none focus-visible:ring-1 focus-visible:ring-accent',
+        'theme-card-surface border theme-card-hover',
         isSelected
-          ? 'border-gold-500/60 shadow-[0_0_15px_rgba(var(--color-accent-rgb),0.25)] bg-charcoal-850'
-          : 'border-charcoal-700/70 hover:border-gold-500/30 hover:shadow-lg',
+          ? 'theme-card-selected'
+          : 'border-charcoal-700/70 hover:theme-border-accent hover:shadow-lg',
         isCompact ? 'p-3' : 'p-4',
         className
       )}
@@ -281,7 +281,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         <div className="flex items-baseline gap-2 flex-wrap">
           <h3
             data-testid="entity-name"
-            className="font-bold tracking-wide group-hover:text-gold-300 transition-colors theme-entity-font"
+            className="font-bold tracking-wide transition-colors theme-entity-font theme-card-title-hover"
           >
             {entity.name}
           </h3>
@@ -289,7 +289,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           {showDual && (
             <span
               data-testid="entity-dual-display"
-              className="text-xs text-gold-300 font-mono tracking-tight"
+              className="text-xs theme-text-accent-secondary font-mono tracking-tight"
             >
               {`(${entity.originalName})`}
             </span>
@@ -300,7 +300,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         {(entity.originalTitle || entity.epithet) && (
           <p
             data-testid="entity-epithet"
-            className="text-gold-300/90 italic mt-0.5 truncate theme-subtitle-font"
+            className="theme-text-accent-secondary opacity-90 italic mt-0.5 truncate theme-subtitle-font"
           >
             {entity.originalTitle || entity.epithet}
           </p>
@@ -359,7 +359,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
                       setIsBranchMenuOpen(!isBranchMenuOpen);
                     }
                   }}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-l-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-l-md text-xs font-medium theme-card-btn-accent border transition-colors"
                   title={activeSubtype ? `Create another ${activeSubtype}` : 'Branch hierarchical child or subdivision'}
                 >
                   <GitBranch className="w-3.5 h-3.5" />
@@ -377,7 +377,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
                     e.stopPropagation();
                     setIsBranchMenuOpen(!isBranchMenuOpen);
                   }}
-                  className="px-1.5 py-1 rounded-r-md text-xs text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-l-0 border-gold-500/30 transition-colors flex items-center justify-center self-stretch"
+                  className="px-1.5 py-1 rounded-r-md text-xs theme-card-btn-accent border border-l-0 transition-colors flex items-center justify-center self-stretch"
                   title="Choose subdivision type"
                 >
                   <ChevronDown className="w-3 h-3 opacity-75" />
@@ -388,7 +388,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
                   <div
                     data-testid="branch-dropdown"
                     role="menu"
-                    className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border border-gold-500/40 shadow-2xl py-1 z-30 backdrop-blur-md"
+                    className="absolute left-0 bottom-full mb-1.5 w-52 rounded-lg bg-charcoal-900 border theme-border-accent shadow-2xl py-1 z-30 backdrop-blur-md"
                   >
                     <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-charcoal-750">
                       Available Lineages
@@ -398,10 +398,10 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
                       role="menuitem"
                       data-testid="branch-option-auto"
                       onClick={(e) => handleBranchSubtype('auto', e)}
-                      className="w-full text-left px-3 py-1.5 text-xs text-gold-400 hover:bg-gold-500/15 flex items-center justify-between transition-colors"
+                      className="w-full text-left px-3 py-1.5 text-xs theme-text-accent hover:bg-charcoal-800 flex items-center justify-between transition-colors"
                     >
                       <span>Auto Subordinate</span>
-                      <Sparkles className="w-3 h-3 text-gold-400" />
+                      <Sparkles className="w-3 h-3 theme-text-accent" />
                     </button>
                     {availableSubtypes.map((st) => (
                       <button
@@ -413,12 +413,12 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
                         className={cn(
                           'w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between',
                           activeSubtype === st
-                            ? 'bg-gold-500/20 text-gold-300 font-semibold'
-                            : 'text-slate-300 hover:bg-charcoal-800 hover:text-gold-300'
+                            ? 'pill-accent font-semibold'
+                            : 'text-slate-300 hover:bg-charcoal-800 hover:theme-text-accent'
                         )}
                       >
                         <span>{st}</span>
-                        {activeSubtype === st && <Check className="w-3 h-3 text-gold-400" />}
+                        {activeSubtype === st && <Check className="w-3 h-3 theme-text-accent" />}
                       </button>
                     ))}
                   </div>
@@ -432,7 +432,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
                 aria-label={`Create another ${effectiveBranchTarget}`}
                 title={`Create another ${effectiveBranchTarget}`}
                 onClick={handleRepeatBranch}
-                className="flex items-center justify-center p-1.5 rounded-md text-xs font-medium text-gold-400 hover:text-gold-300 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 transition-colors"
+                className="flex items-center justify-center p-1.5 rounded-md text-xs font-medium theme-card-btn-accent border transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -450,11 +450,11 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
             data-testid="reroll-button"
             aria-label="Re-roll name while maintaining hierarchy"
             onClick={handleReRoll}
-            className="p-1.5 rounded-md hover:bg-charcoal-800 hover:text-gold-400 transition-colors"
+            className="p-1.5 rounded-md hover:bg-charcoal-800 hover:theme-text-accent transition-colors"
             title="Re-roll name while maintaining hierarchy"
           >
             <RefreshCw
-              className={cn('w-3.5 h-3.5', isReRolling && 'animate-spin text-gold-400')}
+              className={cn('w-3.5 h-3.5', isReRolling && 'animate-spin theme-text-accent')}
             />
           </button>
 
@@ -467,8 +467,8 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
             className={cn(
               'p-1.5 rounded-md border transition-colors',
               isAnglicized
-                ? 'bg-gold-500/15 border-gold-500/40 text-gold-400'
-                : 'border-transparent hover:bg-charcoal-800 hover:text-gold-400'
+                ? 'pill-accent'
+                : 'border-transparent hover:bg-charcoal-800 hover:theme-text-accent'
             )}
             title={
               isAnglicized
@@ -485,7 +485,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
             data-testid="copy-button"
             aria-label="Copy name to clipboard"
             onClick={handleCopy}
-            className="p-1.5 rounded-md hover:bg-charcoal-800 hover:text-gold-400 transition-colors"
+            className="p-1.5 rounded-md hover:bg-charcoal-800 hover:theme-text-accent transition-colors"
             title="Copy name to clipboard"
           >
             {copied ? (

@@ -117,21 +117,21 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
               aria-label="Back to Card Grid View"
               title="Back to Card Grid View"
               onClick={onBackToGrid}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:text-gold-400 bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700 hover:border-gold-500/40 transition-colors shadow-sm select-none"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:theme-text-accent bg-charcoal-900 hover:bg-charcoal-800 border border-charcoal-700 hover:theme-border-accent transition-colors shadow-sm select-none"
             >
-              <ChevronLeft className="w-4 h-4 text-gold-400" />
+              <ChevronLeft className="w-4 h-4 theme-text-accent" />
               <span>Grid</span>
             </button>
           )}
 
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-gold-400" />
+            <BookOpen className="w-4 h-4 theme-text-accent" />
             <h2 className="text-sm font-semibold tracking-wide text-slate-100 font-serif">
               Collections
             </h2>
             <span
               data-testid="collections-count-badge"
-              className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full bg-gold-500/15 border border-gold-500/40 text-gold-400"
+              className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full pill-accent"
             >
               {pinnedEntities.length}
             </span>
@@ -211,7 +211,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search collections by name, culture, root, or meaning..."
             aria-label="Search Collections"
-            className="w-full pl-9 pr-8 py-1.5 text-xs bg-charcoal-900 border border-charcoal-750 focus:border-gold-500/50 rounded-lg text-slate-200 placeholder-slate-500 outline-none transition-colors"
+            className="w-full pl-9 pr-8 py-1.5 text-xs bg-charcoal-900 border border-charcoal-750 focus:theme-border-accent rounded-lg text-slate-200 placeholder-slate-500 outline-none transition-colors"
           />
           {searchQuery && (
             <button
@@ -243,7 +243,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
               className={cn(
                 'px-2.5 py-1 text-xs font-medium rounded-md whitespace-nowrap transition-all border',
                 categoryFilter === tab.id
-                  ? 'bg-gold-500/20 text-gold-300 border-gold-500/50 shadow-sm'
+                  ? 'pill-accent font-semibold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800 border-transparent'
               )}
             >
@@ -261,7 +261,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
             data-testid="collections-empty-state"
             className="flex flex-col items-center justify-center min-h-[380px] p-8 text-center rounded-2xl border-2 border-dashed border-charcoal-800 bg-charcoal-900/30 max-w-xl mx-auto my-8"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-500/20 to-gold-300/10 border border-gold-500/30 flex items-center justify-center text-gold-400 mb-4 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.1)]">
+            <div className="w-16 h-16 rounded-2xl pill-accent flex items-center justify-center theme-text-accent mb-4 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.15)]">
               <Pin className="w-8 h-8" />
             </div>
 
@@ -305,7 +305,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                 setSearchQuery('');
                 setCategoryFilter('all');
               }}
-              className="mt-4 px-3 py-1.5 text-xs text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 rounded-lg transition-colors font-medium"
+              className="mt-4 px-3 py-1.5 text-xs pill-accent rounded-lg transition-colors font-medium"
             >
               Reset Filters
             </button>

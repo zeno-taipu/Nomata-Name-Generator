@@ -287,7 +287,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
                     onChange={(e) =>
                       handleWeightChange(culture.id, parseFloat(e.target.value))
                     }
-                    className="w-full h-1.5 bg-charcoal-700 rounded-lg appearance-none cursor-pointer accent-gold-500"
+                    className="w-full h-1.5 bg-charcoal-700 rounded-lg appearance-none cursor-pointer accent-[var(--color-accent)]"
                     aria-label={`${culture.name} weight`}
                   />
                   <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
@@ -316,7 +316,7 @@ export const CultureSelector: React.FC<CultureSelectorProps> = ({
                     {culture.phonetic_rules?.vowels && (
                       <div>
                         <span className="text-slate-400">Vowels: </span>
-                        <span className="font-mono text-gold-400">
+                        <span className="font-mono theme-text-accent">
                           {culture.phonetic_rules.vowels.join(' ')}
                         </span>
                       </div>

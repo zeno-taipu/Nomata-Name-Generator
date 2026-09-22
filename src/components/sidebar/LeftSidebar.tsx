@@ -76,7 +76,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   Custom Lexicon
                 </span>
                 {customItemsCount > 0 && (
-                  <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/30">
+                  <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded-full pill-accent">
                     {`${customItemsCount} active`}
                   </span>
                 )}
@@ -86,14 +86,14 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 type="button"
                 data-testid="open-custom-vocab-button"
                 onClick={() => setIsVocabModalOpen(true)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-charcoal-850 hover:bg-charcoal-800 border border-charcoal-700/80 hover:border-gold-500/40 text-slate-200 transition-all duration-200 group"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-charcoal-850 hover:bg-charcoal-800 border border-charcoal-700/80 hover:border-[rgba(var(--color-accent-rgb),0.5)] text-slate-200 transition-all duration-200 group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-1 rounded bg-gold-500/10 text-gold-400 group-hover:scale-110 transition-transform">
+                  <div className="p-1 rounded pill-accent group-hover:scale-110 transition-transform">
                     <BookOpen className="w-3.5 h-3.5" />
                   </div>
                   <div className="text-left min-w-0">
-                    <div className="text-xs font-medium text-slate-200 group-hover:text-gold-300 transition-colors">
+                    <div className="text-xs font-medium text-slate-200 group-hover:theme-text-accent transition-colors">
                       Custom Vocabulary
                     </div>
                     <div className="text-[10px] text-slate-400 truncate">
@@ -102,7 +102,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   </div>
                 </div>
 
-                <Sliders className="w-3.5 h-3.5 text-slate-400 group-hover:text-gold-400 transition-colors" />
+                <Sliders className="w-3.5 h-3.5 text-slate-400 group-hover:theme-text-accent transition-colors" />
               </button>
             </div>
           ) : (
@@ -115,13 +115,13 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 className={cn(
                   'w-10 h-10 rounded-lg flex items-center justify-center transition-colors relative',
                   customItemsCount > 0
-                    ? 'bg-gold-500/20 text-gold-400 border border-gold-500/40'
+                    ? 'pill-accent'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800'
                 )}
               >
                 <BookOpen className="w-4 h-4" />
                 {customItemsCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-gold-400 shadow-[0_0_6px_rgba(var(--color-accent-rgb),0.8)]" />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full theme-bg-accent shadow-[0_0_6px_rgba(var(--color-accent-rgb),0.8)]" />
                 )}
               </button>
             </div>
@@ -132,8 +132,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         {!isCollapsed && (
           <div className="px-4 py-3 border-t border-charcoal-750/80 bg-charcoal-950/50 flex items-center justify-between text-[11px] text-slate-400">
             <div className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-gold-400" />
-              <span>
+              <Layers className="w-3.5 h-3.5 theme-text-accent" />
+              <span className="theme-text-accent font-medium">
                 {activeCultureIds.length === 1
                   ? '1 Active Tradition'
                   : `${activeCultureIds.length} Blended Cultures`}

@@ -216,4 +216,53 @@
   border-color: rgba(var(--color-accent-rgb), 0.6) !important;
 }
 
+/* Dynamic Card Hover & Title Accent */
+.theme-card-hover {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-card-hover:hover {
+  border-color: rgba(var(--color-accent-rgb), 0.5) !important;
+  box-shadow: 0 4px 20px rgba(var(--color-accent-rgb), 0.18) !important;
+}
+
+.theme-card-hover:hover .theme-card-title-hover {
+  color: var(--color-accent-secondary) !important;
+}
+
+/* Dynamic Selected Card in Tree / Focus */
+.theme-card-selected {
+  border-color: rgba(var(--color-accent-rgb), 0.7) !important;
+  box-shadow: 0 0 18px rgba(var(--color-accent-rgb), 0.3) !important;
+  background-color: rgba(var(--bg-card-rgb), 0.95) !important;
+}
+
+/* Tree Lineage Connectors & Focus Rings */
+.theme-tree-connector {
+  background-color: var(--color-accent) !important;
+  opacity: 0.5 !important;
+}
+
+.theme-tree-line {
+  border-color: rgba(var(--color-accent-rgb), 0.45) !important;
+}
+
+.theme-ring-accent {
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.6), 0 0 20px rgba(var(--color-accent-rgb), 0.25) !important;
+}
+
+/* Tree & Studio Action Button Accents */
+.theme-card-btn-accent {
+  background-color: rgba(var(--color-accent-rgb), 0.12) !important;
+  border-color: rgba(var(--color-accent-rgb), 0.4) !important;
+  color: var(--color-accent) !important;
+  transition: all 0.15s ease;
+}
+
+.theme-card-btn-accent:hover {
+  background-color: rgba(var(--color-accent-rgb), 0.24) !important;
+  border-color: rgba(var(--color-accent-rgb), 0.65) !important;
+  color: var(--color-accent-secondary) !important;
+}
+
 

@@ -148,7 +148,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
               onClick={handleToggle}
               aria-label="Expand World Bible"
               title="Expand World Bible"
-              className="p-2.5 rounded-xl bg-gold-500/10 text-gold-400 border border-gold-500/30 hover:bg-gold-500/20 transition-colors"
+              className="p-2.5 rounded-xl pill-accent transition-colors"
             >
               <BookOpen size={18} />
             </button>
@@ -157,7 +157,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
             <div
               data-testid="collapsed-pinned-count"
               title={`${pinnedEntities.length} pinned entities`}
-              className="flex items-center justify-center w-7 h-7 rounded-full bg-charcoal-800 border border-charcoal-700 text-xs font-mono font-semibold text-gold-400"
+              className="flex items-center justify-center w-7 h-7 rounded-full bg-charcoal-800 border border-charcoal-700 text-xs font-mono font-semibold theme-text-accent"
             >
               {pinnedEntities.length}
             </div>
@@ -169,7 +169,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
               onClick={() => setExportModalOpen(true)}
               aria-label="Open Export Hub"
               title="Open Export Hub"
-              className="p-2 rounded-lg text-slate-400 hover:text-gold-400 hover:bg-charcoal-800 border border-transparent hover:border-charcoal-700 transition-colors"
+              className="p-2 rounded-lg text-slate-400 hover:theme-text-accent hover:bg-charcoal-800 border border-transparent hover:border-charcoal-700 transition-colors"
             >
               <Download size={16} />
             </button>
@@ -180,7 +180,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
             {/* Header: Title, Count, Export, Clear */}
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-charcoal-800 bg-charcoal-950/40">
               <div className="flex items-center gap-2">
-                <BookOpen className="text-gold-400" size={17} />
+                <BookOpen className="theme-text-accent" size={17} />
                 <h3
                   id="right-shelf-title"
                   className="font-serif font-medium text-sm text-slate-100 tracking-wide"
@@ -189,7 +189,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                 </h3>
                 <span
                   data-testid="pinned-count-badge"
-                  className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400"
+                  className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded-full pill-accent"
                 >
                   {pinnedEntities.length}
                 </span>
@@ -203,7 +203,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                   aria-label="Export Collections"
                   title="Export entities or save project bible"
                   onClick={() => setExportModalOpen(true)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium pill-accent-btn rounded-lg transition-colors"
                 >
                   <Download size={13} />
                   <span>Export</span>
@@ -264,7 +264,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search pinned lore..."
                   aria-label="Search pinned lore"
-                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-charcoal-950 border border-charcoal-800 focus:border-gold-500/50 rounded-lg text-slate-200 placeholder-slate-500 outline-none transition-colors"
+                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-charcoal-950 border border-charcoal-800 focus:theme-border-accent rounded-lg text-slate-200 placeholder-slate-500 outline-none transition-colors"
                 />
                 {searchQuery && (
                   <button
@@ -296,7 +296,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                     className={cn(
                       'px-2 py-0.5 text-[11px] font-medium rounded-md whitespace-nowrap transition-all border',
                       categoryFilter === tab.id
-                        ? 'bg-gold-500/20 text-gold-300 border-gold-500/40 shadow-sm'
+                        ? 'pill-accent font-semibold shadow-sm'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-charcoal-800 border-transparent'
                     )}
                   >
@@ -318,7 +318,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                   className="flex flex-col items-center justify-center h-64 text-center px-4 space-y-3"
                 >
                   <div className="p-3.5 rounded-2xl bg-charcoal-800/80 border border-charcoal-700/70 text-slate-500">
-                    <Pin size={24} className="text-gold-400/80" />
+                    <Pin size={24} className="theme-text-accent opacity-80" />
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-slate-300 font-serif">
@@ -351,7 +351,7 @@ export const RightShelf: React.FC<RightShelfProps> = ({
                       setSearchQuery('');
                       setCategoryFilter('all');
                     }}
-                    className="px-2.5 py-1 text-xs text-gold-400 bg-gold-500/10 hover:bg-gold-500/20 border border-gold-500/30 rounded-md transition-colors"
+                    className="px-2.5 py-1 text-xs pill-accent-btn rounded-md transition-colors"
                   >
                     Reset Filters
                   </button>
