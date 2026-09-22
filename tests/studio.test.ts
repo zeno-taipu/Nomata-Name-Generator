@@ -210,6 +210,22 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('1');
     });
 
+    it('displays persistent subtype name on branch button and repeat button creates that subtype', () => {
+      const entityWithSelection: LoreEntity = {
+        ...mockEntity,
+        lastBranchSubtype: 'City Ward',
+      };
+
+      const html = renderToString(
+        React.createElement(EntityNodeCard, { entity: entityWithSelection })
+      );
+
+      expect(html).toContain('+ City Ward');
+      expect(html).toContain('data-testid="branch-button"');
+      expect(html).toContain('data-testid="branch-repeat-button"');
+      expect(html).toContain('Create another City Ward');
+    });
+
     it('executes store actions: pin, re-roll, branch, and toggle Anglicize', () => {
       useNominaStore.setState({ generatedBatch: [mockEntity] });
 

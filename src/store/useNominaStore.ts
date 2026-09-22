@@ -63,6 +63,7 @@ export interface NominaState {
   setActiveEntityId: (id: string | null) => void;
   generateBatch: () => LoreEntity[];
   branchEntity: (parentId: string, childSubtype?: string, count?: number) => LoreEntity[];
+  setEntityBranchSubtype: (entityId: string, subtype: string) => void;
   reRollEntity: (entityId: string) => LoreEntity | undefined;
   toggleAnglicizeEntity: (entityId: string) => LoreEntity | undefined;
   togglePinEntity: (entity: LoreEntity) => void;
@@ -542,6 +543,10 @@ const useRawNominaStore = create<NominaState>()(
 
         const updater = (p: LoreEntity): LoreEntity => ({
           ...p,
+          lastBranchSubtype:
+            childSubtype !== 'auto'
+              ? childSubtype
+              : p.lastBranchSubtype || (newChildren[0]?.subtype ?? p.lastBranchSubtype),
           children: [...(p.children || []), ...newChildren],
         });
 
@@ -554,6 +559,20 @@ const useRawNominaStore = create<NominaState>()(
         });
 
         return newChildren;
+      },
+
+      setEntityBranchSubtype: (entityId, subtype) => {
+        const updater = (ent: LoreEntity): LoreEntity => ({
+          ...ent,
+          lastBranchSubtype: subtype,
+        });
+        const state = get();
+        const batchRes = updateEntityInTree(state.generatedBatch, entityId, updater);
+        const pinnedRes = updateEntityInTree(state.pinnedEntities, entityId, updater);
+        set({
+          generatedBatch: batchRes.list,
+          pinnedEntities: pinnedRes.list,
+        });
       },
 
       reRollEntity: (entityId) => {
