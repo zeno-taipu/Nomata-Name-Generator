@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Sparkles,
   Pin,
@@ -17,10 +17,11 @@ import {
 import type { LoreEntity } from '../../types/domain';
 import { normalizeEntityCategory } from '../../types/domain';
 import { getCultureById } from '../../data/cultures';
-import { SUBTYPES_BY_CATEGORY } from '../sidebar/GeneratorDrawer';
+import { getCategorySubtypes } from '../../config/entitySubtypes';
 import { useNominaStore } from '../../store/useNominaStore';
 import { EntityNodeCard } from './EntityNodeCard';
 import { cn } from '../../utils/cn';
+import { Dialog } from '../Dialog';
 
 export interface BatchGridViewProps {
   onInspectTree?: (entity: LoreEntity) => void;
@@ -59,35 +60,12 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
 
   const [isAnglicizeOpen, setIsAnglicizeOpen] = useState<boolean>(false);
-  const anglicizeRef = useRef<HTMLDivElement>(null);
-
-  // Close Anglicize modal on outside click or Escape key
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (anglicizeRef.current && !anglicizeRef.current.contains(e.target as Node)) {
-        setIsAnglicizeOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsAnglicizeOpen(false);
-      }
-    };
-    if (isAnglicizeOpen) {
-      document.addEventListener('mousedown', handleOutsideClick);
-      document.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isAnglicizeOpen]);
 
   // Derived category & subtype lookups
   const normalizedCat = normalizeEntityCategory(activeCategory);
   const catMeta = CATEGORY_META[normalizedCat] || { label: activeCategory, icon: Layers };
   const CategoryIcon = catMeta.icon;
-  const availableSubtypes = SUBTYPES_BY_CATEGORY[normalizedCat] || ['auto'];
+  const availableSubtypes = getCategorySubtypes(activeCategory);
 
   // Active cultures display string
   const cultureNames = activeCultureIds
@@ -199,7 +177,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
           <span className="text-charcoal-700 select-none">•</span>
 
           {/* Anglicize Icon Button & Togglable Popover Modal */}
-          <div className="relative" ref={anglicizeRef}>
+          <div className="relative">
             <button
               type="button"
               data-testid="header-anglicize-btn"
@@ -222,9 +200,12 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
 
             {/* Anglicize Options Modal */}
             {isAnglicizeOpen && (
-              <div
+              <Dialog
                 data-testid="header-anglicize-modal"
                 data-testid-alias="grid-anglicize-modal"
+                aria-label="Anglicization Options"
+                onClose={() => setIsAnglicizeOpen(false)}
+                dismissOnOutside
                 className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-72 p-4 rounded-xl bg-charcoal-900 border border-charcoal-700 shadow-2xl backdrop-blur-md z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150"
                 style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--color-border)' }}
               >
@@ -372,7 +353,7 @@ export const BatchGridView: React.FC<BatchGridViewProps> = ({
                     </button>
                   </div>
                 </div>
-              </div>
+              </Dialog>
             )}
           </div>
         </div>

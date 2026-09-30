@@ -366,6 +366,13 @@ const TITLE_EPITHET_MAP: Record<string, string> = {
   'sheikh': 'Elder',
 };
 
+function titleMapForCulture(cultureId?: string): Record<string, string> {
+  // Slavic Ban is an office, not the Gaelic colour epithet bán.
+  return cultureId === 'danubian_slavic'
+    ? { ...TITLE_EPITHET_MAP, ban: 'Governor' }
+    : TITLE_EPITHET_MAP;
+}
+
 /**
  * Words and English cognates that must be protected from phonetic mutation (e.g. J -> Y, double-l).
  */
@@ -374,7 +381,7 @@ const PROTECTED_ENGLISH_WORDS = new Set([
   'Fitz', 'The', 'the', 'Of', 'of', 'Fort', 'Castle', 'Brave', 'Valiant', 'Great',
   'Elder', 'Good', 'Fair', 'Holy', 'Terrible', 'Prince', 'Duke', 'Baron', 'Emperor',
   'King', 'Lord', 'Wise', 'Red', 'Younger', 'Black', 'Bluetooth', 'Hardruler',
-  'Earl', 'Savior', 'Victorious', 'Sovereign',
+  'Earl', 'Savior', 'Victorious', 'Sovereign', 'Governor',
   // Common English names with J or double consonants
   'John', 'James', 'Joseph', 'Jack', 'Jacob', 'Jason', 'Jane', 'Joan', 'Julian', 'Justin',
   'William', 'Nicholas', 'Arthur', 'Peter', 'Walter', 'Alexander', 'Andrew', 'David',
@@ -416,7 +423,7 @@ export class AnglicizationEngine {
 
     let processed = name;
     let anglicizedRoot = originalRoot;
-    let anglicizedTitle = originalTitle ? this.anglicizeTitle(originalTitle) : undefined;
+    let anglicizedTitle = originalTitle ? this.anglicizeTitle(originalTitle, cultureId) : undefined;
 
     // Apply pipeline stages
     switch (mode) {
@@ -486,8 +493,14 @@ export class AnglicizationEngine {
   anglicizeEntity(entity: LoreEntity, options?: AnglicizeOptions): LoreEntity {
     const baseName = entity.originalName ?? entity.name;
     const baseRoot = entity.originalRoot ?? entity.rootName ?? entity.name;
-    const baseTitle = entity.originalTitle ?? entity.epithet;
-    const origEpithet = (entity.metadata?._originalEpithet as string | undefined) ?? entity.epithet;
+    const hasSavedEpithet = Object.prototype.hasOwnProperty.call(entity.metadata ?? {}, '_originalEpithet');
+    const origEpithet = hasSavedEpithet
+      ? (entity.metadata!._originalEpithet as string | null | undefined) ?? undefined
+      : entity.epithet;
+    const epithetPresent = hasSavedEpithet
+      ? entity.metadata!._originalEpithetPresent !== false
+      : Object.prototype.hasOwnProperty.call(entity, 'epithet');
+    const baseTitle = entity.originalTitle ?? origEpithet;
 
     const opts: AnglicizeOptions = {
       ...options,
@@ -506,10 +519,11 @@ export class AnglicizationEngine {
       originalName: baseName,
       originalRoot: baseRoot,
       originalTitle: entity.originalTitle,
-      epithet: result.anglicizedTitle ?? entity.epithet,
+      epithet: result.anglicizedTitle ?? origEpithet,
       metadata: {
         ...entity.metadata,
-        _originalEpithet: origEpithet,
+        _originalEpithet: origEpithet ?? null,
+        _originalEpithetPresent: epithetPresent,
       },
       anglicization: result.overlay,
     };
@@ -532,13 +546,20 @@ export class AnglicizationEngine {
           exonymDualDisplay: false,
         };
 
-    const origEpithet = (entity.metadata?._originalEpithet as string | undefined) ?? entity.epithet;
+    const hasSavedEpithet = Object.prototype.hasOwnProperty.call(entity.metadata ?? {}, '_originalEpithet');
+    const origEpithet = hasSavedEpithet
+      ? (entity.metadata!._originalEpithet as string | null | undefined) ?? undefined
+      : entity.epithet;
+    const epithetPresent = hasSavedEpithet
+      ? entity.metadata!._originalEpithetPresent !== false
+      : Object.prototype.hasOwnProperty.call(entity, 'epithet');
     const cleanMetadata = entity.metadata ? { ...entity.metadata } : undefined;
     if (cleanMetadata && '_originalEpithet' in cleanMetadata) {
       delete cleanMetadata._originalEpithet;
+      delete cleanMetadata._originalEpithetPresent;
     }
 
-    return {
+    const reverted = {
       ...entity,
       name: entity.originalName ?? entity.name,
       rootName: entity.originalRoot ?? entity.rootName,
@@ -549,6 +570,8 @@ export class AnglicizationEngine {
       metadata: cleanMetadata,
       anglicization: revertedOverlay,
     };
+    if (!epithetPresent) delete reverted.epithet;
+    return reverted;
   }
 
   /**
@@ -757,7 +780,7 @@ export class AnglicizationEngine {
     });
 
     // 3. Check for Title / Epithet within the name or passed explicitly
-    for (const [foreignTitle, englishTitle] of Object.entries(TITLE_EPITHET_MAP)) {
+    for (const [foreignTitle, englishTitle] of Object.entries(titleMapForCulture(cultureId))) {
       const titleRegex = new RegExp(`\\b${foreignTitle}\\b`, 'gi');
       if (titleRegex.test(current)) {
         current = current.replace(titleRegex, englishTitle);
@@ -797,7 +820,7 @@ export class AnglicizationEngine {
       root = this.stage2SuffixLocalization(root, cultureId, category);
     }
 
-    const title = detectedTitle ? this.anglicizeTitle(detectedTitle) : undefined;
+    const title = detectedTitle ? this.anglicizeTitle(detectedTitle, cultureId) : undefined;
 
     return {
       name: this.sanitizeArticles(current),
@@ -821,14 +844,16 @@ export class AnglicizationEngine {
   /**
    * Translates a title or epithet to its archaic English equivalent.
    */
-  private anglicizeTitle(title: string): string {
+  private anglicizeTitle(title: string, cultureId?: string): string {
     const lower = title.toLowerCase().trim();
-    if (TITLE_EPITHET_MAP[lower]) {
-      return this.sanitizeArticles(TITLE_EPITHET_MAP[lower]);
+    const titleMap = titleMapForCulture(cultureId);
+    if (titleMap[lower]) {
+      return this.sanitizeArticles(titleMap[lower]);
     }
-    for (const [foreign, english] of Object.entries(TITLE_EPITHET_MAP)) {
-      if (lower.includes(foreign)) {
-        return this.sanitizeArticles(lower.replace(foreign, english));
+    for (const [foreign, english] of Object.entries(titleMap)) {
+      const pattern = new RegExp(`(^|[^\\p{L}])${foreign}(?=$|[^\\p{L}])`, 'giu');
+      if (pattern.test(title)) {
+        return this.sanitizeArticles(title.replace(pattern, (_match, prefix: string) => prefix + english));
       }
     }
     return this.sanitizeArticles(title);

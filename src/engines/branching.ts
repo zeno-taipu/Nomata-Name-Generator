@@ -13,11 +13,13 @@
 import { RecursiveGrammarEngine } from './grammar';
 import { MarkovNameGenerator, type MarkovSampleOptions } from './markov';
 import { AnglicizationEngine } from './anglicize';
+import { cacheModel } from './modelCache';
 import { getCultureById, cultures } from '../data/cultures';
 import {
   LoreEntity,
   EntityCategory,
   GeographicFeatureType,
+  Gender,
   CultureProfile,
   normalizeEntityCategory,
 } from '../types/domain';
@@ -53,6 +55,7 @@ export interface BranchOptions {
   anglicize?: boolean;
   anglicizeMode?: 'phonetic' | 'suffix' | 'full';
   culture?: CultureProfile;
+  gender?: Gender;
   randomFn?: () => number;
   customVariables?: Record<string, string | number | string[]>;
 }
@@ -616,18 +619,24 @@ export class LineageBranchingEngine {
     const tier = (parent.metadata?.tier as number) ?? undefined;
     const normCat = parent.category ? normalizeEntityCategory(parent.category) : undefined;
 
+    // Explicit non-geographic categories win over incidental subtype words.
+    if (normCat && normCat !== 'geography') return normCat;
+    // A recorded geographic tier wins over feature/subtype heuristics.
+    if (tier === 1) return 'geography_tier1';
+    if (tier === 2) return 'geography_tier2';
+    if (tier === 3) return 'geography_tier3';
+    if (tier === 4) return 'geography_tier4';
+
     // 1. Faction checks (explicit category 'faction' OR subtype contains legion/order/guild/etc.)
     if (
-      normCat === 'faction' ||
-      /(faction|legion|order|guild|cult|cabal|brotherhood|enclave|covenant)/.test(rawSubtype)
+      (!normCat && /\b(faction|legion|order|guild|cult|cabal|brotherhood|enclave|covenant)\b/.test(rawSubtype))
     ) {
       return 'faction';
     }
 
     // 2. Artifact / Relic checks (explicit category 'artifact' OR subtype contains relic/weapon/etc.)
     if (
-      normCat === 'artifact' ||
-      /(artifact|relic|weapon|grimoire|tome|sword|blade|bow|shield|heirloom|regalia)/.test(rawSubtype)
+      (!normCat && /\b(artifact|relic|weapon|grimoire|tome|sword|blade|bow|shield|heirloom|regalia)\b/.test(rawSubtype))
     ) {
       return 'artifact';
     }
@@ -635,7 +644,7 @@ export class LineageBranchingEngine {
     // 3. Geographic hierarchy
     if (
       tier === 1 ||
-      (normCat === 'geography' && !tier && !parent.featureSubtype && !/(river|mountain|wild|cave|forest)/.test(rawSubtype)) ||
+      (normCat === 'geography' && !tier && !parent.featureSubtype && !/(river|mountain|wild|cave|forest|wetland|marsh|fen|grove|wood|lake|basin|ridge|peak|pass)/.test(rawSubtype)) ||
       /(macro region|continent|realm|province|territory)/.test(rawSubtype)
     ) {
       return 'geography_tier1';
@@ -664,7 +673,6 @@ export class LineageBranchingEngine {
 
     // 4. Settlement checks
     if (
-      normCat === 'settlement' ||
       /(settlement|metropolis|city|fortress|town|village|haven|stronghold|keep|outpost|bastion)/.test(rawSubtype)
     ) {
       return 'settlement';
@@ -672,7 +680,6 @@ export class LineageBranchingEngine {
 
     // 5. Character checks
     if (
-      normCat === 'character' ||
       /(noble|officer|king|queen|prince|lord|lady|warrior|knight|voivode|knyaz|general|commander)/.test(rawSubtype)
     ) {
       return 'character';
@@ -801,9 +808,9 @@ export class LineageBranchingEngine {
     const culture = options?.culture ?? getCultureById(cultureId) ?? cultures[cultureId];
 
     // Build parent context with robust fallbacks for grammar engine
-    const parentRoot = parent.rootName ?? parent.originalRoot ?? parent.name;
-    const parentOriginalRoot = parent.originalRoot ?? parent.rootName ?? parent.originalName ?? parent.name;
-    const parentName = parent.name;
+    const parentRoot = parent.originalRoot ?? parent.originalName ?? parent.rootName ?? parent.name;
+    const parentOriginalRoot = parentRoot;
+    const parentName = parent.originalName ?? parent.name;
     const parentOriginalName = parent.originalName ?? parent.name;
 
     const parentContext = {
@@ -829,11 +836,11 @@ export class LineageBranchingEngine {
       const temperature = options?.temperature ?? this.defaultTemperature;
 
       const getOrTrain = (key: string, seeds: string[]): MarkovNameGenerator => {
-        const cacheKey = `${cultureId}:${key}:${order}:${temperature}`;
+        const cacheKey = JSON.stringify([key, order, temperature, seeds]);
         let gen = this.markovCache.get(cacheKey);
         if (!gen) {
           gen = new TemperatureMarkovGenerator(seeds, order, temperature);
-          this.markovCache.set(cacheKey, gen);
+          cacheModel(this.markovCache, cacheKey, gen);
         }
         return gen;
       };
@@ -841,7 +848,8 @@ export class LineageBranchingEngine {
       if (culture.seeds) {
         const mascSeeds = culture.seeds.given_names_masculine || [];
         const femSeeds = culture.seeds.given_names_feminine || [];
-        const allPersonSeeds = [...mascSeeds, ...femSeeds];
+        const allPersonSeeds = options?.gender === 'masculine' ? mascSeeds
+          : options?.gender === 'feminine' ? femSeeds : [...mascSeeds, ...femSeeds];
 
         if (mascSeeds.length > 0) {
           const mascGen = getOrTrain('masculine', mascSeeds);
@@ -897,6 +905,7 @@ export class LineageBranchingEngine {
         parent: parentContext,
         markovGenerators,
         customVariables: options?.customVariables,
+        gender: options?.gender,
         randomFn: options?.randomFn ?? this.randomFn,
       });
 
@@ -909,6 +918,7 @@ export class LineageBranchingEngine {
               parent: parentContext,
               markovGenerators,
               customVariables: options?.customVariables,
+              gender: options?.gender,
               randomFn: options?.randomFn ?? this.randomFn,
             });
             if (!usedNames.has(altResolved)) {

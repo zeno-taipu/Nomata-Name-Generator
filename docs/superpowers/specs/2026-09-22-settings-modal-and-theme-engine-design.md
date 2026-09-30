@@ -17,7 +17,7 @@ The user requires a dedicated **Settings** cog in the desktop header that opens 
 ## 2. User Interface & Workflow
 
 ### 2.1 Navigation & Trigger
-- **Header Placement**: In [`AppHeader.tsx`](file:///Users/victor.sorescu/Desktop/Nomata%20-%20Name%20Generator%20/src/components/header/AppHeader.tsx), place a `Settings` cog button (`header-settings-btn`) in the top-right toolbar between the Export Hub trigger and the Right Shelf collapse toggle.
+- **Header Placement**: In [`AppHeader.tsx`](../../../src/components/header/AppHeader.tsx), place a `Settings` cog button (`header-settings-btn`) in the top-right toolbar between the Export Hub trigger and the Right Shelf collapse toggle.
 - **Keyboard Shortcut**: `Cmd+,` (macOS) / `Ctrl+,` (Windows/Linux) triggers the settings modal.
 - **Accessibility**: Modal conforms to WAI-ARIA dialog pattern (`role="dialog"`, `aria-modal="true"`, focus trap, `Escape` key to dismiss, and outside backdrop click to close).
 
@@ -92,7 +92,7 @@ One-click presets:
 
 ## 6. Technical Architecture & Implementation
 
-### 6.1 State Management ([`useNominaStore.ts`](file:///Users/victor.sorescu/Desktop/Nomata%20-%20Name%20Generator%20/src/store/useNominaStore.ts))
+### 6.1 State Management ([`useNominaStore.ts`](../../../src/store/useNominaStore.ts))
 Define `ThemeSettings`:
 ```typescript
 export interface ThemeSettings {

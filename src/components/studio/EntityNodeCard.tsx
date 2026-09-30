@@ -17,6 +17,7 @@ import { useNominaStore } from '../../store/useNominaStore';
 import { getCultureById } from '../../data/cultures';
 import { LineageBranchingEngine } from '../../engines/branching';
 import { cn } from '../../utils/cn';
+import { copyTextToClipboard } from '../../utils/clipboard';
 
 export interface EntityNodeCardProps {
   entity: LoreEntity;
@@ -40,6 +41,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   className,
 }) => {
   const [copied, setCopied] = useState<boolean>(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState<boolean>(false);
   const [isReRolling, setIsReRolling] = useState<boolean>(false);
   const branchMenuRef = useRef<HTMLDivElement>(null);
@@ -58,6 +60,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
   const setEntityBranchSubtype = useNominaStore((s) => s.setEntityBranchSubtype);
   const toggleAnglicizeEntity = useNominaStore((s) => s.toggleAnglicizeEntity);
   const togglePinEntity = useNominaStore((s) => s.togglePinEntity);
+  const isPinned = useNominaStore((s) => s.pinnedEntities.some((pinned) => pinned.id === entity.id));
   const deleteEntity = useNominaStore((s) => s.deleteEntity);
   const setActiveEntityId = useNominaStore((s) => s.setActiveEntityId);
   const exonymDualDisplay = useNominaStore((s) => s.exonymDualDisplay);
@@ -113,16 +116,16 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
       ? `${entity.name} (${entity.originalName})`
       : entity.name;
 
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
-      }
-    } catch {
-      // Fallback or ignore in unsupported environments
-    }
-    setCopied(true);
+    setCopied(false);
+    setCopyError(null);
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-    copyTimerRef.current = setTimeout(() => setCopied(false), 1800);
+    try {
+      await copyTextToClipboard(textToCopy);
+      setCopied(true);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      setCopyError((error as Error).message);
+    }
   };
 
   // Re-roll handler
@@ -189,6 +192,7 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
       aria-label={`Entity card: ${entity.name}, ${entity.subtype || entity.category}`}
       onClick={() => onSelect?.(entity)}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           onSelect?.(entity);
@@ -204,6 +208,8 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
         className
       )}
     >
+      {copyError && <p role="alert" className="text-xs text-red-300 mb-2">{copyError}</p>}
+      {copied && <span role="status" className="sr-only">Copied to clipboard</span>}
       {/* Top Header: Subtype, Culture Tag & Quick Actions */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
@@ -256,20 +262,20 @@ const EntityNodeCardComponent: React.FC<EntityNodeCardProps> = ({
           <button
             type="button"
             data-testid="pin-button"
-            aria-label={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
+            aria-label={isPinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
             onClick={handleTogglePin}
             className={cn(
               'p-1.5 rounded-lg border transition-colors shrink-0',
-              entity.pinned
+              isPinned
                 ? 'pill-accent'
                 : 'border-transparent text-slate-400 hover:theme-text-accent hover:bg-charcoal-800'
             )}
-            title={entity.pinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
+            title={isPinned ? 'Unpin from World Bible' : 'Pin to World Bible'}
           >
             <Pin
               className={cn(
                 'w-4 h-4',
-                entity.pinned ? 'fill-current fill-gold-400 theme-text-accent' : 'text-slate-400'
+                isPinned ? 'fill-current fill-gold-400 theme-text-accent' : 'text-slate-400'
               )}
             />
           </button>

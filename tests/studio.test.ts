@@ -176,18 +176,25 @@ describe('Center Studio Components & Interactive Lineage Tree', () => {
       expect(html).toContain('[Noh-vee-grahd]');
     });
 
-    it('renders pinned indicator correctly when entity is pinned or unpinned', () => {
+    it('renders pin membership from the store rather than stale entity flags', () => {
       const unpinnedHtml = renderToString(
         React.createElement(EntityNodeCard, { entity: mockEntity })
       );
       expect(unpinnedHtml).toContain('Pin to World Bible');
 
-      const pinnedEntity = { ...mockEntity, pinned: true };
+      useNominaStore.getState().togglePinEntity(mockEntity);
       const pinnedHtml = renderToString(
-        React.createElement(EntityNodeCard, { entity: pinnedEntity })
+        React.createElement(EntityNodeCard, { entity: mockEntity })
       );
       expect(pinnedHtml).toContain('Unpin from World Bible');
       expect(pinnedHtml).toContain('fill-gold-400');
+
+      useNominaStore.getState().clearPinned();
+      const staleHtml = renderToString(
+        React.createElement(EntityNodeCard, { entity: { ...mockEntity, pinned: true } })
+      );
+      expect(staleHtml).toContain('Pin to World Bible');
+      expect(staleHtml).not.toContain('Unpin from World Bible');
     });
 
     it('renders children count badge if entity has hierarchical children', () => {

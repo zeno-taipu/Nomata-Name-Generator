@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { LineageBranchingEngine } from '../src/engines/branching';
 import { LoreEntity } from '../src/types/domain';
+import { AnglicizationEngine } from '../src/engines/anglicize';
+import { cultures } from '../src/data/cultures';
+import { MarkovNameGenerator } from '../src/engines/markov';
 
 describe('LineageBranchingEngine', () => {
   const branching = new LineageBranchingEngine();
@@ -60,7 +63,7 @@ describe('LineageBranchingEngine', () => {
         originalName: 'The Iron Circle',
         rootName: 'Iron',
         originalRoot: 'Iron',
-        category: 'character',
+        category: 'faction',
         cultureId: 'celtic_gaelic',
         metadata: { subtype: 'Military Legion' },
       };
@@ -71,6 +74,81 @@ describe('LineageBranchingEngine', () => {
       expect(subtypes).toContain('Initiate Rank');
       expect(subtypes).toContain('Envoy');
       expect(subtypes).toContain('Faction Relic');
+    });
+
+    describe('Branching regression boundaries', () => {
+      const parent: LoreEntity = {
+        id: 'canonical', name: 'Jan', originalName: 'Jan', originalRoot: 'Jan',
+        rootName: 'Jan', category: 'settlement', cultureId: 'danubian_slavic',
+      };
+      it('builds canonical children and descendants from originals, independent of display overlays', () => {
+        const overlay = new AnglicizationEngine();
+        const displayed = overlay.anglicizeEntity(parent, { mode: 'full' });
+        expect(displayed.name).not.toBe(parent.name);
+        const engine = new LineageBranchingEngine({ randomFn: () => 0 });
+        const [plain] = engine.branchChildren(displayed, 'City Ward', 1, { anglicize: false });
+        const [translated] = engine.branchChildren(displayed, 'City Ward', 1, { anglicize: true });
+        expect(plain.name).toBe('Jan Ward');
+        expect(plain.originalName).toBe('Jan Ward');
+        expect(plain.rootName).toBe('Jan');
+        expect(translated.originalName).toBe(plain.originalName);
+        expect(translated.originalRoot).toBe('Jan');
+        expect(overlay.revert(translated).name).toBe('Jan Ward');
+        const [descendant] = engine.branchChildren(translated, 'High Gate', 1, { anglicize: false });
+        expect(descendant.originalName).toBe('Gate of Jan');
+        const [shrine] = engine.branchChildren(displayed, 'Shrine', 1, { anglicize: false });
+        expect(shrine.originalName).toBe('Shrine of Jan');
+      });
+
+      it('prioritizes explicit categories and geographic tiers over incidental subtype text', () => {
+        const engine = new LineageBranchingEngine();
+        for (const subtype of ['Local Guildhall', 'Riverfront Settlement', 'Order Town']) {
+          expect(engine.getAvailableBranchSubtypes({ ...parent, subtype })).toContain('City Ward');
+        }
+        expect(engine.getAvailableBranchSubtypes({
+          ...parent, category: 'character', subtype: 'Military Legion',
+        })).toContain('Heir');
+        expect(engine.getAvailableBranchSubtypes({
+          ...parent, category: 'geography', subtype: 'Border Wetlands',
+        })).toContain('Grove');
+        expect(engine.getAvailableBranchSubtypes({
+          ...parent, category: 'geography', subtype: 'River', featureSubtype: 'hydrology', metadata: { tier: 2 },
+        })).toContain('Mountain Pass');
+      });
+
+      it('keys cached models by actual seeds, multiplicity, gender pool and order and bounds retention', () => {
+        const engine = new LineageBranchingEngine({ randomFn: () => 0 });
+        const culture = structuredClone(cultures.danubian_slavic);
+        culture.seeds.given_names_masculine = ['Amber'];
+        culture.seeds.given_names_feminine = ['Elora'];
+        const generate = (gender: 'masculine' | 'feminine', markovOrder = 2) =>
+          engine.branchChildren(parent, 'Household Guard', 1, { culture, gender, markovOrder })[0].name;
+        expect(generate('masculine')).toBe('Amber, Guard of Jan');
+        expect(generate('feminine')).toBe('Elora, Guard of Jan');
+        culture.seeds.given_names_masculine = ['Orina', 'Orina'];
+        expect(generate('masculine', 3)).toBe('Orina, Guard of Jan');
+        const cache = (engine as unknown as { markovCache: Map<string, MarkovNameGenerator> }).markovCache;
+        expect([...cache.values()].some((model) => model.order === 3 && model.transitions.get('^^^')?.get('o') === 2)).toBe(true);
+        for (let i = 0; i < 80; i++) {
+          culture.seeds.given_names_masculine = [`Amber${i}`];
+          generate('masculine');
+        }
+        expect(cache.size).toBeLessThanOrEqual(64);
+      });
+
+      it('passes seeded RNG through branch templates and Markov sampling, including warmed caches', () => {
+        const rng = () => {
+          let state = 123;
+          return () => ((state = (state * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+        };
+        const engine = new LineageBranchingEngine();
+        const first = engine.branchChildren(parent, 'Household Guard', 9, { randomFn: rng() });
+        const second = engine.branchChildren(parent, 'Household Guard', 9, { randomFn: rng() });
+        expect(first.map((child) => child.name)).toEqual(second.map((child) => child.name));
+        const other = new LineageBranchingEngine({ randomFn: rng() });
+        expect(other.branchChildren(parent, 'Household Guard', 9).map((child) => child.name))
+          .toEqual(first.map((child) => child.name));
+      });
     });
   });
 

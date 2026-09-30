@@ -9,15 +9,18 @@
  * across all categories.
  */
 
-import { CultureProfile, EntityCategory } from '../types/domain';
-import { CustomVocabularyState } from '../store/useNominaStore';
+import { CultureProfile, EntityCategory, Gender, GeographicFeatureType, normalizeEntityCategory } from '../types/domain';
+import type { CustomVocabularyState } from '../store/useNominaStore';
 
 export interface DerivedLexicon {
   givenNames: string[];
   surnames: string[];
+  /** Bare stems for further compounding; settlementNames holds complete names. */
   settlementRoots: string[];
   settlementNames: string[];
   stems: string[];
+  /** Complete geographic phrases, separate from stems used with suffixes. */
+  geographicNames: string[];
   prefixes: string[];
   suffixes: string[];
   honorifics: string[];
@@ -296,9 +299,10 @@ export function deriveVariationsFromRoots(
   return {
     givenNames: Array.from(new Set(givenNames)),
     surnames: Array.from(new Set(surnames)),
-    settlementRoots: Array.from(new Set(settlementRoots)),
-    settlementNames: Array.from(new Set(settlementNames)),
-    stems: Array.from(new Set(stems)),
+    settlementRoots: uniqueRoots,
+    settlementNames: Array.from(new Set([...settlementNames, ...settlementRoots])),
+    stems: uniqueRoots,
+    geographicNames: Array.from(new Set(stems)),
     prefixes: [],
     suffixes: [],
     honorifics: [],
@@ -315,7 +319,8 @@ export function deriveVariationsFromRoots(
 export function prepareCustomGenerationContext(
   primaryCulture: CultureProfile,
   customVocabulary: CustomVocabularyState | undefined,
-  category: EntityCategory
+  category: EntityCategory,
+  options?: { gender?: Gender; featureSubtype?: GeographicFeatureType }
 ): {
   augmentedCulture: CultureProfile;
   customVariables: Record<string, string | number | string[]>;
@@ -323,6 +328,17 @@ export function prepareCustomGenerationContext(
   templates: string[];
 } {
   const cs = customVocabulary?.customSeeds;
+  category = normalizeEntityCategory(category);
+  const cleanPool = (values?: string[]) => (values ?? []).map((value) => value.trim()).filter(Boolean);
+  const masculine = cleanPool(cs?.given_names_masculine);
+  const feminine = cleanPool(cs?.given_names_feminine);
+  const surnames = cleanPool(cs?.surnames);
+  const settlementStems = cleanPool(cs?.settlement_roots).map(cleanRoot);
+  const geoStems = {
+    orogeny: cleanPool(cs?.orogeny_stems),
+    hydrology: cleanPool(cs?.hydrology_stems),
+    wilds: cleanPool(cs?.wilds_stems),
+  };
 
   // Extract raw user seed roots
   const rawRoots: string[] = [
@@ -339,17 +355,21 @@ export function prepareCustomGenerationContext(
 
   // Derive morphological variations
   const derived = deriveVariationsFromRoots(uniqueRawRoots, primaryCulture.id);
+  // Derive within the supplied type; never turn a river stem into a given name.
+  const masculineNames = [...deriveVariationsFromRoots(masculine, primaryCulture.id).givenNames, ...masculine];
+  const feminineNames = [...deriveVariationsFromRoots(feminine, primaryCulture.id).givenNames, ...feminine];
+  const settlementNames = deriveVariationsFromRoots(settlementStems, primaryCulture.id).settlementNames;
 
   // Clean and format prefixes and suffixes
-  const formattedPrefixes = (customVocabulary?.customPrefixes || [])
+  const formattedPrefixes = [...(customVocabulary?.customPrefixes ?? []), ...(cs?.prefixes ?? [])]
     .map(formatPrefix)
     .filter((p) => p.length > 0);
 
-  const formattedSuffixes = (customVocabulary?.customSuffixes || [])
+  const formattedSuffixes = [...(customVocabulary?.customSuffixes ?? []), ...(cs?.suffixes ?? [])]
     .map(formatSuffix)
     .filter((s) => s.length > 0);
 
-  const customHonorifics = (customVocabulary?.honorifics || []).map((h) => h.trim()).filter((h) => h.length > 0);
+  const customHonorifics = cleanPool([...(customVocabulary?.honorifics ?? []), ...(cs?.honorific_titles ?? [])]);
   const customEpithets = (cs?.epithets || []).map((e) => e.trim()).filter((e) => e.length > 0);
 
   // Build custom variables dictionary
@@ -375,61 +395,52 @@ export function prepareCustomGenerationContext(
     customVariables['epithets'] = customEpithets;
   }
 
-  // Inject derived variations into tokens (never regurgitating raw root!)
-  if (derived.givenNames.length > 0) {
-    customVariables['given'] = derived.givenNames;
-    customVariables['given_names_masculine'] = derived.givenNames;
-    customVariables['given_names_feminine'] = derived.givenNames;
+  if (masculineNames.length) customVariables.given_names_masculine = masculineNames;
+  if (feminineNames.length) customVariables.given_names_feminine = feminineNames;
+  if (surnames.length) {
+    customVariables.surname = surnames;
+    customVariables.surnames = surnames;
+  }
+  if (settlementStems.length) {
+    customVariables.root = settlementStems;
+    customVariables.settlement_root = settlementStems;
+    customVariables.settlement_roots = settlementStems;
+    customVariables.settlement = settlementNames;
+    customVariables.settlement_name = settlementNames;
+  }
+  for (const [feature, stems] of Object.entries(geoStems)) {
+    if (stems.length) {
+      customVariables[feature] = stems;
+      customVariables[`${feature}.stems`] = stems;
+      customVariables[`geographic_lexicon.${feature}.stems`] = stems;
+    }
   }
 
-  if (derived.surnames.length > 0) {
-    customVariables['surname'] = derived.surnames;
-    customVariables['surnames'] = derived.surnames;
-  }
-
-  if (derived.settlementRoots.length > 0) {
-    customVariables['root'] = derived.settlementRoots;
-    customVariables['settlement'] = derived.settlementRoots;
-    customVariables['settlement_roots'] = derived.settlementRoots;
-  }
-
-  if (derived.stems.length > 0) {
-    customVariables['stem'] = derived.stems;
-    customVariables['orogeny'] = derived.stems;
-    customVariables['hydrology'] = derived.stems;
-    customVariables['wilds'] = derived.stems;
-  }
-
-  if (uniqueRawRoots.length > 0) {
-    const cleaned = uniqueRawRoots.map(cleanRoot).filter((r) => r.length > 0);
-    customVariables['root_stem'] = cleaned;
-    customVariables['raw_root'] = cleaned;
-  }
-
-  // Weighted seeds for Markov training
-  const weightedSeeds: string[] = [
-    ...derived.givenNames,
-    ...derived.settlementRoots,
-    ...derived.surnames,
-    ...derived.settlementNames,
-  ];
+  const selectedGeoStems = options?.featureSubtype
+    ? geoStems[options.featureSubtype]
+    : Object.values(geoStems).flat();
+  const selectedGivenNames = options?.gender === 'masculine' ? masculineNames
+    : options?.gender === 'feminine' ? feminineNames : [...masculineNames, ...feminineNames];
+  const weightedSeeds = category === 'character' ? [...selectedGivenNames, ...surnames]
+    : category === 'settlement' ? settlementNames
+    : category === 'geography' ? selectedGeoStems : uniqueRawRoots;
 
   // Build augmented culture profile
   const augmentedCulture: CultureProfile = {
     ...primaryCulture,
     seeds: {
       ...primaryCulture.seeds,
-      given_names_masculine: derived.givenNames.length > 0
-        ? [...derived.givenNames, ...primaryCulture.seeds.given_names_masculine]
+      given_names_masculine: masculineNames.length > 0
+        ? [...masculineNames, ...primaryCulture.seeds.given_names_masculine]
         : primaryCulture.seeds.given_names_masculine,
-      given_names_feminine: derived.givenNames.length > 0
-        ? [...derived.givenNames, ...primaryCulture.seeds.given_names_feminine]
+      given_names_feminine: feminineNames.length > 0
+        ? [...feminineNames, ...primaryCulture.seeds.given_names_feminine]
         : primaryCulture.seeds.given_names_feminine,
-      settlement_roots: derived.settlementRoots.length > 0
-        ? [...derived.settlementRoots, ...primaryCulture.seeds.settlement_roots]
+      settlement_roots: settlementStems.length > 0
+        ? [...settlementStems, ...primaryCulture.seeds.settlement_roots]
         : primaryCulture.seeds.settlement_roots,
-      surnames: derived.surnames.length > 0
-        ? [...derived.surnames, ...primaryCulture.seeds.surnames]
+      surnames: surnames.length > 0
+        ? [...surnames, ...primaryCulture.seeds.surnames]
         : primaryCulture.seeds.surnames,
       prefixes: formattedPrefixes.length > 0
         ? [...formattedPrefixes, ...(primaryCulture.seeds.prefixes || [])]
@@ -448,8 +459,8 @@ export function prepareCustomGenerationContext(
       ...primaryCulture.geographic_lexicon,
       orogeny: {
         ...primaryCulture.geographic_lexicon.orogeny,
-        stems: derived.stems.length > 0
-          ? [...derived.stems, ...primaryCulture.geographic_lexicon.orogeny.stems]
+        stems: geoStems.orogeny.length > 0
+          ? [...geoStems.orogeny, ...primaryCulture.geographic_lexicon.orogeny.stems]
           : primaryCulture.geographic_lexicon.orogeny.stems,
         suffixes: formattedSuffixes.length > 0
           ? [...formattedSuffixes, ...primaryCulture.geographic_lexicon.orogeny.suffixes]
@@ -457,8 +468,8 @@ export function prepareCustomGenerationContext(
       },
       hydrology: {
         ...primaryCulture.geographic_lexicon.hydrology,
-        stems: derived.stems.length > 0
-          ? [...derived.stems, ...primaryCulture.geographic_lexicon.hydrology.stems]
+        stems: geoStems.hydrology.length > 0
+          ? [...geoStems.hydrology, ...primaryCulture.geographic_lexicon.hydrology.stems]
           : primaryCulture.geographic_lexicon.hydrology.stems,
         suffixes: formattedSuffixes.length > 0
           ? [...formattedSuffixes, ...primaryCulture.geographic_lexicon.hydrology.suffixes]
@@ -466,8 +477,8 @@ export function prepareCustomGenerationContext(
       },
       wilds: {
         ...primaryCulture.geographic_lexicon.wilds,
-        stems: derived.stems.length > 0
-          ? [...derived.stems, ...primaryCulture.geographic_lexicon.wilds.stems]
+        stems: geoStems.wilds.length > 0
+          ? [...geoStems.wilds, ...primaryCulture.geographic_lexicon.wilds.stems]
           : primaryCulture.geographic_lexicon.wilds.stems,
         suffixes: formattedSuffixes.length > 0
           ? [...formattedSuffixes, ...primaryCulture.geographic_lexicon.wilds.suffixes]
@@ -476,12 +487,25 @@ export function prepareCustomGenerationContext(
     },
   };
 
+  // Affix-only configurations still need an actual stem, not an unresolved token.
+  const rootStems = category === 'geography'
+    ? (selectedGeoStems.length ? selectedGeoStems : options?.featureSubtype
+      ? primaryCulture.geographic_lexicon[options.featureSubtype].stems
+      : Object.values(primaryCulture.geographic_lexicon).flatMap((pool) => pool.stems))
+    : settlementStems.length ? settlementStems : primaryCulture.seeds.settlement_roots;
+  if (category === 'geography' && options?.featureSubtype) {
+    customVariables.stem = rootStems;
+  }
+  // Defer the geographic alias until grammar has the per-entity feature subtype.
+  customVariables.root_stem = category === 'geography' ? '{stem}' : rootStems;
+  customVariables.raw_root = customVariables.root_stem;
+
   // Build candidate templates tailored to active custom vocabulary
   let templates: string[] = [];
 
   const hasPrefixes = formattedPrefixes.length > 0;
   const hasSuffixes = formattedSuffixes.length > 0;
-  const hasRoots = uniqueRawRoots.length > 0;
+  const hasRoots = category === 'geography' ? selectedGeoStems.length > 0 : settlementStems.length > 0;
   const hasHonorifics = customHonorifics.length > 0;
   const hasEpithets = customEpithets.length > 0;
 
@@ -521,6 +545,9 @@ export function prepareCustomGenerationContext(
     }
   } else if (category === 'settlement') {
     templates = [...(augmentedCulture.grammar_templates?.settlement_name || ['{root}'])];
+    if (settlementNames.length) {
+      templates = templates.map((template) => template === '{root}' ? '{settlement_name}' : template);
+    }
     if (hasPrefixes && hasRoots) {
       templates = [
         '{prefix}{root_stem}',
@@ -555,7 +582,9 @@ export function prepareCustomGenerationContext(
       ];
     }
   } else if (category === 'geography') {
-    const cultureGeoTemplates = [
+    const cultureGeoTemplates = options?.featureSubtype
+      ? augmentedCulture.grammar_templates[`${options.featureSubtype}_name`]
+      : [
       ...(augmentedCulture.grammar_templates?.orogeny_name || []),
       ...(augmentedCulture.grammar_templates?.hydrology_name || []),
       ...(augmentedCulture.grammar_templates?.wilds_name || []),
@@ -565,9 +594,6 @@ export function prepareCustomGenerationContext(
     if (hasRoots) {
       templates = [
         '{stem}',
-        'Mount {root_stem}',
-        '{root_stem} River',
-        '{root_stem} Valley',
         ...templates,
       ];
     }

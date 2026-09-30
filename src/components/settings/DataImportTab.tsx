@@ -3,7 +3,6 @@ import {
   Database,
   Upload,
   FileText,
-  CheckCircle,
   Info,
   ShieldCheck,
 } from 'lucide-react';
@@ -18,7 +17,7 @@ export const DataImportTab: React.FC = () => {
 
   const handleSimulateSelect = (filename: string) => {
     setSelectedFile(filename);
-    setStageStatus(`Staged "${filename}" for pipeline parsing.`);
+    setStageStatus(`Preview only: "${filename}" is not read, parsed, saved, or used in generation.`);
   };
 
   return (
@@ -30,13 +29,13 @@ export const DataImportTab: React.FC = () => {
           <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
             <span>Seed Database & Corpus Ingestion Hub</span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/40">
-              Pipeline Ready
+              Planned · Preview only
             </span>
           </h3>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Ingest custom anthroponymic and toponymic datasets into Nomata. You will be able to supply
-            raw text corpora, CSV wordlists, or JSON lexicons to augment the Markov chain models and
-            recursive grammar engines.
+            Corpus ingestion is not implemented. This preview stages a filename and example
+            target options only; no file content is read or saved and generation is unchanged.
+            Use Custom Vocabulary for supported seed overrides, or Export Hub to import a project.
           </p>
         </div>
       </div>
@@ -44,7 +43,7 @@ export const DataImportTab: React.FC = () => {
       {/* File Dropzone */}
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 block">
-          Ingest Seed Corpus File
+          Filename staging preview
         </label>
         <div
           data-testid="seed-dropzone"
@@ -71,10 +70,10 @@ export const DataImportTab: React.FC = () => {
             <Upload className="w-6 h-6" />
           </div>
           <p className="text-sm font-medium text-slate-200 mb-1">
-            Drag & drop dataset or click to browse
+            Drop a file to preview its filename only
           </p>
           <p className="text-xs text-slate-400 mb-4">
-            Supports JSON (`.json`), Comma-Separated Values (`.csv`), or plain text wordlists (`.txt`)
+            Planned formats: JSON (.json), CSV (.csv), and text (.txt). Import is not available.
           </p>
 
           <div className="flex flex-wrap justify-center gap-2">
@@ -85,7 +84,7 @@ export const DataImportTab: React.FC = () => {
               className="px-3 py-1.5 rounded-lg text-xs font-medium bg-charcoal-900 border border-charcoal-700 text-slate-300 hover:text-gold-400 hover:border-gold-500/40 transition-colors"
             >
               <FileText className="w-3.5 h-3.5 inline mr-1 text-gold-400" />
-              Load Sample JSON
+              Preview Sample JSON Filename
             </button>
             <button
               type="button"
@@ -94,7 +93,7 @@ export const DataImportTab: React.FC = () => {
               className="px-3 py-1.5 rounded-lg text-xs font-medium bg-charcoal-900 border border-charcoal-700 text-slate-300 hover:text-gold-400 hover:border-gold-500/40 transition-colors"
             >
               <FileText className="w-3.5 h-3.5 inline mr-1 text-gold-400" />
-              Load Sample CSV
+              Preview Sample CSV Filename
             </button>
           </div>
 
@@ -103,8 +102,8 @@ export const DataImportTab: React.FC = () => {
               data-testid="staged-file-indicator"
               className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gold-500/15 border border-gold-500/30 text-gold-300 text-xs font-medium"
             >
-              <CheckCircle className="w-4 h-4 text-gold-400" />
-              <span>Staged: {selectedFile}</span>
+              <Info className="w-4 h-4 text-gold-400" />
+              <span>Preview filename: {selectedFile} (not imported)</span>
             </div>
           )}
         </div>
@@ -113,11 +112,12 @@ export const DataImportTab: React.FC = () => {
       {/* Target Parameters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-charcoal-850 p-3.5 rounded-lg border border-charcoal-750 space-y-1.5">
-          <label className="text-xs font-medium text-slate-300 block">
-            Target Cultural Tradition
+          <label htmlFor="preview-target-culture" className="text-xs font-medium text-slate-300 block">
+            Preview Target Cultural Tradition
           </label>
           <select
             data-testid="select-target-culture"
+            id="preview-target-culture"
             value={targetCulture}
             onChange={(e) => setTargetCulture(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-charcoal-900 border border-charcoal-700 rounded-lg text-slate-200 outline-none focus:border-gold-500/50"
@@ -130,16 +130,17 @@ export const DataImportTab: React.FC = () => {
             <option value="levantine_semitic">Levantine Semitic</option>
           </select>
           <p className="text-[11px] text-slate-400">
-            Assign the imported seeds to augment an existing tradition or seed a new one.
+            Preview only. This selection does not modify any culture or seed data.
           </p>
         </div>
 
         <div className="bg-charcoal-850 p-3.5 rounded-lg border border-charcoal-750 space-y-1.5">
-          <label className="text-xs font-medium text-slate-300 block">
-            Target Domain Category
+          <label htmlFor="preview-target-category" className="text-xs font-medium text-slate-300 block">
+            Preview Target Domain Category
           </label>
           <select
             data-testid="select-target-category"
+            id="preview-target-category"
             value={targetCategory}
             onChange={(e) => setTargetCategory(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-charcoal-900 border border-charcoal-700 rounded-lg text-slate-200 outline-none focus:border-gold-500/50"
@@ -151,7 +152,7 @@ export const DataImportTab: React.FC = () => {
             <option value="artifact">Artifacts, Relics & Weapons</option>
           </select>
           <p className="text-[11px] text-slate-400">
-            Specify where the incoming vocabulary will be utilized in the generator.
+            Preview only. This selection does not affect the generator.
           </p>
         </div>
       </div>
@@ -185,7 +186,7 @@ export const DataImportTab: React.FC = () => {
       </div>
 
       {stageStatus && (
-        <div className="p-3 rounded-lg bg-charcoal-850 border border-gold-500/30 text-xs text-gold-300 flex items-center gap-2">
+        <div role="status" className="p-3 rounded-lg bg-charcoal-850 border border-gold-500/30 text-xs text-gold-300 flex items-center gap-2">
           <Info className="w-4 h-4 text-gold-400 shrink-0" />
           <span>{stageStatus}</span>
         </div>

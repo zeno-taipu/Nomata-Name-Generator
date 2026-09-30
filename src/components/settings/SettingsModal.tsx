@@ -3,6 +3,7 @@ import { Settings, Palette, Database, X } from 'lucide-react';
 import { StyleTab } from './StyleTab';
 import { DataImportTab } from './DataImportTab';
 import { cn } from '../../utils/cn';
+import { Dialog } from '../Dialog';
 
 export type SettingsTabId = 'import' | 'style' | 'presets';
 
@@ -28,34 +29,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   }, [isOpen, initialTab]);
 
-  // Handle Escape key to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
 
   return (
-    <div
+    <Dialog
       data-testid="settings-modal-backdrop"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm animate-fade-in"
-      onClick={onClose}
+      onClose={onClose}
+      aria-label="Settings and Appearance"
     >
       <div
         data-testid="settings-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Settings and Appearance"
         className="relative flex flex-col w-full max-w-3xl max-h-[90vh] rounded-2xl bg-charcoal-900 border border-charcoal-700/90 shadow-2xl overflow-hidden animate-scale-in select-none"
         onClick={(e) => e.stopPropagation()}
       >
@@ -70,7 +54,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 Settings & Appearance
               </h2>
               <p className="text-[11px] text-slate-400">
-                Seed database ingestion, colors, theme presets & typography
+                Corpus import preview, colors, theme presets & typography
               </p>
             </div>
           </div>
@@ -140,6 +124,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 };

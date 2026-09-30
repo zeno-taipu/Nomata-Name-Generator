@@ -129,6 +129,7 @@ export interface CultureProfile {
   historical_era: string;
   region: string;
   description: string;
+  /** Descriptive cultural metadata, not generation constraints or historical guarantees. */
   phonetic_rules?: {
     vowels?: string[];
     consonants?: string[];

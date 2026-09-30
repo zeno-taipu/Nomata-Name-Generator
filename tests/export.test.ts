@@ -221,5 +221,32 @@ describe('Export Utilities', () => {
       expect(() => importFromProjectBible('{"version": "1.0.0"}')).toThrow(/must be an array/i);
       expect(() => importFromProjectBible('{"version": "1.0.0", "entities": []}')).toThrow(/missing or invalid "settings"/i);
     });
+
+    it('rejects invalid nested entities instead of passing them into the store', () => {
+      const json = JSON.stringify({
+        ...sampleBible,
+        entities: [{ ...sampleParent, children: [{ ...sampleCity, anglicization: { enabled: 'true' } }] }],
+      });
+      expect(() => importFromProjectBible(json)).toThrow('entities[0].children[0].anglicization.enabled');
+    });
+
+    it('uses the shared validator for versions, settings, vocabulary and pinned references', () => {
+      for (const [change, path] of [
+        [{ version: '9.0.0' }, 'version'],
+        [{ settings: { ...sampleBible.settings, anglicize: 'false' } }, 'settings.anglicize'],
+        [{ settings: { ...sampleBible.settings, temperature: 10 } }, 'settings.temperature'],
+        [{ customVocabulary: { customSeeds: { epithets: [false] } } }, 'customVocabulary.customSeeds.epithets[0]'],
+        [{ pinnedEntityIds: ['missing'] }, 'pinnedEntityIds[0]'],
+      ] as const) {
+        expect(() => importFromProjectBible(JSON.stringify({ ...sampleBible, ...change }))).toThrow(path);
+      }
+    });
+
+    it('rejects non-finite JSON numeric overflow and unsafe nested property names', () => {
+      const overflow = exportToProjectBible(sampleBible).replace('"temperature": 0.75', '"temperature": 1e400');
+      expect(() => importFromProjectBible(overflow)).toThrow('settings.temperature');
+      const malicious = exportToProjectBible(sampleBible).replace('"rootName": "Boleslav"', '"metadata": {"__proto__": {}}');
+      expect(() => importFromProjectBible(malicious)).toThrow('entities[0].metadata.__proto__');
+    });
   });
 });

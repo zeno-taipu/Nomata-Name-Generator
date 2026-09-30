@@ -4,6 +4,7 @@ import celticGaelicJson from './celtic_gaelic.json';
 import nordicScandianJson from './nordic_scandian.json';
 import grecoAegeanJson from './greco_aegean.json';
 import levantineSemiticJson from './levantine_semitic.json';
+export { validateCultureProfile } from './validate';
 
 export const cultures: Record<string, CultureProfile> = {
   danubian_slavic: danubianSlavicJson as CultureProfile,

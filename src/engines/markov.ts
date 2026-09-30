@@ -8,6 +8,7 @@
 
 export interface MarkovOptions {
   order?: number;
+  randomFn?: () => number;
 }
 
 export interface MarkovSampleOptions {
@@ -17,6 +18,7 @@ export interface MarkovSampleOptions {
   max_length?: number;
   temperature?: number;
   maxAttempts?: number;
+  randomFn?: () => number;
 }
 
 export interface WeightedSeeds {
@@ -24,13 +26,17 @@ export interface WeightedSeeds {
   weight: number;
 }
 
+export class MarkovGenerationError extends Error {}
+
 export class MarkovNameGenerator {
   readonly order: number;
   readonly transitions: Map<string, Map<string, number>> = new Map();
   private seeds: string[] = [];
+  private readonly randomFn: () => number;
 
   constructor(seeds?: string[], options?: MarkovOptions) {
     this.order = Math.max(1, Math.floor(options?.order ?? 2));
+    this.randomFn = options?.randomFn ?? Math.random;
     if (seeds && seeds.length > 0) {
       this.train(seeds);
     }
@@ -128,7 +134,7 @@ export class MarkovNameGenerator {
    * Sample the next character using temperature-scaled softmax:
    * P_T(c) = P(c)^(1/T) / sum(P(c')^(1/T))
    */
-  private sampleNextChar(nextMap: Map<string, number>, temperature: number): string {
+  private sampleNextChar(nextMap: Map<string, number>, temperature: number, randomFn: () => number): string {
     const entries = Array.from(nextMap.entries());
     if (entries.length === 1) {
       return entries[0][0];
@@ -159,7 +165,7 @@ export class MarkovNameGenerator {
       return bestChar;
     }
 
-    const r = Math.random() * sumScaled;
+    const r = randomFn() * sumScaled;
     let cumulative = 0;
     for (const entry of scaledEntries) {
       cumulative += entry.scaledProb;
@@ -174,7 +180,7 @@ export class MarkovNameGenerator {
   /**
    * Sample a single candidate sequence of characters until '$' is reached
    */
-  private sampleCandidate(temperature: number, maxLength: number): string | null {
+  private sampleCandidate(temperature: number, maxLength: number, randomFn: () => number): string | null {
     let currentGram = '^'.repeat(this.order);
     let result = '';
 
@@ -184,7 +190,7 @@ export class MarkovNameGenerator {
         return null;
       }
 
-      const nextChar = this.sampleNextChar(nextMap, temperature);
+      const nextChar = this.sampleNextChar(nextMap, temperature, randomFn);
       if (nextChar === '$') {
         return result;
       }
@@ -212,19 +218,20 @@ export class MarkovNameGenerator {
    */
   generate(options?: MarkovSampleOptions): string {
     if (this.transitions.size === 0) {
-      throw new Error('Markov chain model has not been trained with any seeds');
+      throw new MarkovGenerationError('Markov chain model has not been trained with any seeds');
     }
 
     const minLength = options?.minLength ?? options?.min_length ?? 4;
     const maxLength = options?.maxLength ?? options?.max_length ?? 12;
     const temperature = options?.temperature ?? 0.7;
     const maxAttempts = options?.maxAttempts ?? 100;
+    const randomFn = options?.randomFn ?? this.randomFn;
 
     const effMin = Math.min(minLength, maxLength);
     const effMax = Math.max(minLength, maxLength);
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const candidate = this.sampleCandidate(temperature, effMax);
+      const candidate = this.sampleCandidate(temperature, effMax, randomFn);
       if (
         candidate !== null &&
         candidate.length >= effMin &&
@@ -240,10 +247,10 @@ export class MarkovNameGenerator {
       (s) => s.length >= effMin && s.length <= effMax && this.validatePhonotactics(s)
     );
     if (matchingSeeds.length > 0) {
-      const randomSeed = matchingSeeds[Math.floor(Math.random() * matchingSeeds.length)];
+      const randomSeed = matchingSeeds[Math.floor(randomFn() * matchingSeeds.length)];
       return this.formatName(randomSeed);
     }
 
-    throw new Error('Failed to generate a valid name within constraints');
+    throw new MarkovGenerationError('Failed to generate a valid name within constraints');
   }
 }
